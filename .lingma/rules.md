@@ -1,5 +1,8 @@
 # Project Context: every-shift-quarkus
 
+## Communication Rules
+- All responses and documentation should be provided in Korean (한국어).
+
 ## Project Overview
 This is a Quarkus-based Java application named "every-shift-quarkus". It's a RESTful web service built using Quarkus, the "Supersonic Subatomic Java Framework". The project appears to be a starter template that has been customized for shift management functionality, though currently it contains only the default Quarkus greeting endpoint.
 **Project Details:**
@@ -8,8 +11,6 @@ This is a Quarkus-based Java application named "every-shift-quarkus". It's a RES
 - **Build Tool:** Maven
 - **Architecture:** REST API
 - **Purpose:** Shift management system (in development)
-## Communication Rules
-- All responses and documentation should be provided in Korean (한국어).
 ## Folder Structure
 ```
 every-shift-quarkus/
