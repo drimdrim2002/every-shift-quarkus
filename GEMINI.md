@@ -1,55 +1,74 @@
 # Project Context: every-shift-quarkus
 
 ## Communication Rules
-- **Language:** All responses and documentation should be provided in **Korean (한국어)**, as specified in `QWEN.md`.
+- **Language:** 모든 응답과 문서는 **한국어**로 제공되어야 합니다.
 
-## Overview
-`every-shift-quarkus` is a Java application built with the **Quarkus** framework ("Supersonic Subatomic Java"). It is configured as a RESTful web service. The project is currently in a starter state (based on the default Quarkus `getting-started` archetype) but aims to be a shift management system.
+## 1. 프로젝트 개요
+This project is a shift (work schedule) management and automatic generation system based on the **Quarkus** framework. It adopts a **dual-mode** architecture where a single application image operates as either a **REST API server** or a **Cloud Run Job (background worker)** depending on the `APP_MODE` environment variable.
 
-**Tech Stack:**
-*   **Language:** Java 21
-*   **Framework:** Quarkus 3.26.2
-*   **Build Tool:** Maven (Wrapper included: `./mvnw`)
-*   **Containerization:** Docker (files in `src/main/docker/`)
+## 2. Tech Stack
+- **Language:** Java 21
+- **Framework:** Quarkus 3.15.1
+- **Build Tool:** Maven (including Maven Wrapper)
+- **Container Build:** Jib (`quarkus-container-image-jib`)
+- **Cloud Platform:** Google Cloud Platform (Cloud Run Service & Jobs)
+- **Key Libraries:**
+    - `quarkus-rest-jackson`: JSON processing and REST API
+    - `google-auth-library-oauth2-http`: Google Cloud API authentication
+    - `quarkus-arc`: Dependency Injection (CDI)
 
-## Key Files & Directories
-*   `pom.xml`: Project dependencies and build configuration. Key dependencies include `quarkus-arc`, `quarkus-rest`, and `quarkus-junit5`.
-*   `src/main/java/org/acme/GreetingResource.java`: Sample REST resource file showing JAX-RS usage (`@Path`, `@GET`).
-*   `src/test/java/org/acme/`: Integration (`GreetingResourceIT.java`) and unit tests (`GreetingResourceTest.java`).
-*   `QWEN.md` & `.lingma/rules.md`: Project-specific context files. **Note:** `QWEN.md` specifies a preference for Korean language in documentation and responses.
-*   `src/main/docker/`: Dockerfiles for JVM, Native, and Legacy JAR builds.
+## 3. Architecture and Operation
+This application performs one of two roles based on the `APP_MODE` environment variable.
 
-## Building and Running
+### A. API Mode (`APP_MODE=API`)
+- **Role:** Receives user requests and delegates heavy computation tasks (solver) to a Cloud Run Job.
+- **Entry Point:** `org.acme.api.SolverTriggerResource`
+- **Key Endpoint:**
+    - `POST /api/trigger`: Calls the Google Cloud API to execute `hello-world-job`.
 
-### Development Mode
-Run the application in dev mode (enables live coding):
+### B. Job Mode (`APP_MODE=JOB`)
+- **Role:** A batch job that executes the actual shift generation algorithm (solver).
+- **Entry Point:** `org.acme.ApplicationMain` (inferred, or Quarkus Lifecycle Observer) -> `org.acme.solver.SolverRunner`
+- **Logic:** `SolverRunner` processes JSON input to perform meta-heuristic algorithms (currently a placeholder).
+
+## 4. Key Files and Directories
+- **`pom.xml`**: Project dependencies and build configuration. Includes Jib container image build settings.
+- **`deploy.sh`**: The complete deployment script.
+    1. Maven packaging and image build/push.
+    2. Deployment of Cloud Run Job (`hello-world-job`).
+    3. Deployment of Cloud Run Service (`every-shift-api-service`).
+- **`src/main/java/org/acme/api/SolverTriggerResource.java`**: REST API controller that triggers the Job execution.
+- **`src/main/java/org/acme/solver/SolverRunner.java`**: Class where the core solver logic will be implemented.
+- **`src/main/resources/application.properties`**:
+    - `app.mode`: Application mode setting (default: API).
+    - `quarkus.container-image.image`: Docker image path setting.
+
+## 5. Build and Run Guide
+
+### Development Mode (Live Coding)
+Run with the following command for local development:
 ```bash
-./mvnw compile quarkus:dev
+./mvnw quarkus:dev
 ```
-*   **Dev UI:** [http://localhost:8080/q/dev/](http://localhost:8080/q/dev/)
-*   **App Endpoint:** [http://localhost:8080/hello](http://localhost:8080/hello)
+- Dev UI: [http://localhost:8080/q/dev/](http://localhost:8080/q/dev/)
 
-### Packaging
-Package the application:
+### Packaging and Deployment
+The `deploy.sh` script can be used to perform everything from build to deployment in one go.
+```bash
+./deploy.sh
+```
+This script performs the following tasks:
+1. Builds with `./mvnw clean package -DskipTests`.
+2. Pushes the image to Google Artifact Registry via Jib.
+3. Updates the Job and Service using `gcloud` commands.
+
+### Manual Build
 ```bash
 ./mvnw package
 ```
-*   Artifacts are produced in `target/quarkus-app/`.
-*   Run with: `java -jar target/quarkus-app/quarkus-run.jar`
+- The artifacts are generated in the `target/quarkus-app/` directory.
 
-### Native Build
-Create a native executable (requires GraalVM or Docker):
-```bash
-./mvnw package -Dnative
-```
-
-### Testing
-Run the test suite:
-```bash
-./mvnw test
-```
-
-## Development Conventions
-*   **Package Structure:** `org.acme` (Default, likely to change as project evolves).
-*   **REST API:** Uses Jakarta REST (JAX-RS) annotations (`@Path`, `@GET`, `@Produces`).
-*   **Testing:** Uses `@QuarkusTest` for integration testing and RestAssured for API verification.
+## 6. Development Conventions
+- **Language:** **Korean** is recommended for source code comments and documentation.
+- **Structure:** Packages are separated by function (e.g., `api`, `solver`).
+- **Logging:** Use `org.slf4j.Logger` for logging key events (Job start/end, errors).
