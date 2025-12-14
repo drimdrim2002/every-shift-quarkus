@@ -15,7 +15,7 @@ This is a Quarkus-based Java application named "every-shift-quarkus". It's a RES
 ```
 every-shift-quarkus/
 ├── .dockerignore
-├── .gitignore
+├── .gitignore/
 ├── mvnw (Maven wrapper)
 ├── mvnw.cmd (Windows Maven wrapper)
 ├── pom.xml (Maven configuration)
