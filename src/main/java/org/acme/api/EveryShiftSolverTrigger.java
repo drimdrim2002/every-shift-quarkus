@@ -1,8 +1,8 @@
 package org.acme.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.auth.oauth2.GoogleCredentials;
-
+import com.google.cloud.tasks.v2.*;
+import com.google.protobuf.ByteString;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -10,15 +10,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.acme.api.dto.PlanningRequest;
+import org.acme.resource.WorkerResource;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
 
 @Path("/api/solve")
 public class EveryShiftSolverTrigger {
@@ -33,62 +32,79 @@ public class EveryShiftSolverTrigger {
     @Inject
     ObjectMapper objectMapper; // JSON 변환을 위해 Jackson ObjectMapper 주입
 
+    // application.properties에서 값을 주입받음
+    @ConfigProperty(name = "gcp.project-id")
+    String projectId;
+
+    @ConfigProperty(name = "gcp.location-id")
+    String locationId;
+
+    @ConfigProperty(name = "gcp.queue-id")
+    String queueId;
+
+    @ConfigProperty(name = "gcp.worker-url")
+    String workerUrl; // https://.../worker/process
+
+    @ConfigProperty(name = "gcp.service-account-email")
+    String serviceAccountEmail;
+
+    @ConfigProperty(name = "app.solver.run-locally", defaultValue = "false")
+    boolean runLocally;
+
+    @Inject
+    WorkerResource workerResource;
+
+    @Inject
+    ManagedExecutor managedExecutor;
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response triggerJob(Map<String, Object> payload) {
-        try {
-            LOG.info("Job 실행 요청을 시작합니다. 파라미터33: " + payload);
+    public Response triggerJob(PlanningRequest requestDto) {
 
-            // 1. 입력받은 JSON Body를 String으로 변환 (Cloud Run 환경변수로 넣기 위함)
-            String inputJsonString = objectMapper.writeValueAsString(payload);
+        if (runLocally) {
+            LOG.info("Running solver locally (Async)...");
+            managedExecutor.execute(() -> {
+                try {
+                    workerResource.processEngineTask(requestDto);
+                } catch (Exception e) {
+                    LOG.error("Local solver execution failed", e);
+                }
+            });
+            return Response.ok("Task submitted successfully (Local Async)").build();
+        }
 
-            // 2. Base64 인코딩 (특수문자 문제 해결)
-            String safePayload = Base64.getEncoder().encodeToString(inputJsonString.getBytes());
+        try (CloudTasksClient client = CloudTasksClient.create()){
 
-            // 3. Google 인증 토큰 생성
-            GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
-                    .createScoped(Collections.singleton("https://www.googleapis.com/auth/cloud-platform"));
-            credentials.refreshIfExpired();
-            String token = credentials.getAccessToken().getTokenValue();
+            // 1. Queue 경로 설정/
+            String queuePath = QueueName.of(projectId, locationId, queueId).toString();
 
-            // 5. Job 실행 요청 Body 구성 (Args로 전달)
-            // 인자 1: --input-data
-            // 인자 2: (Base64로 된 엄청 긴 문자열)
-            List<String> argsList = List.of("--input-data", safePayload);
 
-            Map<String, Object> containerOverride = Map.of("args", argsList);
-            Map<String, Object> overrides = Map.of("containerOverrides", List.of(containerOverride));
-            Map<String, Object> googleApiBody = Map.of("overrides", overrides);
+            // 2. DTO -> JSON String 직렬화
+            String jsonPayload = objectMapper.writeValueAsString(requestDto);
+            LOG.info(jsonPayload);
 
-            String requestBody = objectMapper.writeValueAsString(googleApiBody);
+            // 3. Task 생성 (HTTP Request 형태 정의)
+            Task.Builder taskBuilder = Task.newBuilder()
+                    .setHttpRequest(HttpRequest.newBuilder()
+                            .setBody(ByteString.copyFrom(jsonPayload, StandardCharsets.UTF_8))
+                            .setUrl(workerUrl)
+                            .setHttpMethod(HttpMethod.POST)
+                            .putHeaders("Content-Type", "application/json")
+                            // Cloud Run 간 인증을 위해 OIDC 토큰 필수
+                            .setOidcToken(OidcToken.newBuilder()
+                                    .setServiceAccountEmail(serviceAccountEmail)
+                                    .build())
+                            .build());
 
-            // 2. Cloud Run Job 실행 API 호출
-            String url = String.format("https://run.googleapis.com/v2/projects/%s/locations/%s/jobs/%s:run",
-                    PROJECT_ID, REGION, JOB_NAME);
+            // 4. 큐에 전송
+            client.createTask(queuePath, taskBuilder.build());
 
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Authorization", "Bearer " + token)
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
+            return Response.ok("Task submitted successfully").build();
 
-            HttpResponse<String> apiResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (apiResponse.statusCode() == 200 || apiResponse.statusCode() == 202) {
-                LOG.info("Job 실행 요청 성공: " + apiResponse.body());
-                return Response.ok("Job Started: " + apiResponse.body()).build();
-            } else {
-                LOG.error("Job 실행 요청 실패: " + apiResponse.statusCode() + " / " + apiResponse.body());
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .entity("Failed to start job: " + apiResponse.body()).build();
-            }
-
-        } catch (IOException | InterruptedException e) {
-            LOG.error("API 호출 중 오류 발생", e);
-            return Response.serverError().entity(e.getMessage()).build();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return Response.serverError().entity("Failed to create task: " + e.getMessage()).build();
         }
     }
 
