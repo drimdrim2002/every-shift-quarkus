@@ -28,9 +28,20 @@ public record PlanningRequest(
     // 1. 조직 도메인
     @RegisterForReflection
     public record OrganizationInfo(
-            String id,
+            Long id,
             String name,
-            String type
+            String type,
+
+            @JsonFormat(pattern = "yyyy-MM-dd") // "2025-11-29" 형태 파싱 명시
+            LocalDate lastHistoricalDate,
+
+            int publishLength,
+
+            @JsonFormat(pattern = "yyyy-MM-dd") // "2025-11-29" 형태 파싱 명시
+            LocalDate firstDraftDate,
+
+            int draftLength
+
     ) {}
 
     // 2. 근무(Shift) 도메인

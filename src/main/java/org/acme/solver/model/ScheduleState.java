@@ -104,4 +104,14 @@ public class ScheduleState {
     public void setLastHistoricDate(LocalDate lastHistoricDate) {
         this.lastHistoricDate = lastHistoricDate;
     }
+
+    String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

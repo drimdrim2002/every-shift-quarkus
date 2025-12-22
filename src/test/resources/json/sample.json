@@ -1,0 +1,720 @@
+{
+  "organization": {
+    "id": 202512233423432,
+    "name": "세브란스병원",
+    "type": "hospital",
+    "lastHistoricalDate": "2025-11-26",
+    "publishLength": 4,
+    "firstDraftDate": "2025-12-01",
+    "draftLength": 31
+  },
+  "shifts": [
+    {
+      "code": "D",
+      "name": "Day",
+      "start_time": "08:00:00",
+      "end_time": "16:00:00"
+    },
+    {
+      "code": "E",
+      "name": "Evening",
+      "start_time": "16:00:00",
+      "end_time": "00:00:00"
+    },
+    {
+      "code": "H",
+      "name": "비번",
+      "start_time": "00:00:00",
+      "end_time": "23:59:00"
+    },
+    {
+      "code": "N",
+      "name": "Night",
+      "start_time": "00:00:00",
+      "end_time": "08:00:00"
+    },
+    {
+      "code": "O",
+      "name": "Off",
+      "start_time": "00:00:00",
+      "end_time": "00:00:00"
+    }
+  ],
+  "employees": [
+    {
+      "employee_id": "3515886c-6359-4919-9c02-682565bb93c7",
+      "name": "고소영",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "c70c37a0-dc7d-4cd5-978c-87f87b80e72d",
+      "name": "권은비",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "3199fc11-99d7-418a-90a0-d73913e2a784",
+      "name": "김고은",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "2fd8b659-1bef-4aa2-b2ba-bbc7b81b0377",
+      "name": "김나빈",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "2fc273b8-f4c1-475e-be2f-445e87a8b53c",
+      "name": "김수연",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "7d491634-f2d3-45bf-a89d-4524af7b65d6",
+      "name": "김예은",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "232db1a0-8dc0-4b70-8fc0-2272ce7f3880",
+      "name": "남보미",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "a33ebb37-fecf-4c5a-b3a9-90b7588dedbe",
+      "name": "남재연",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "cc197ee4-7302-4baf-82ef-08a9fc8e7b29",
+      "name": "남지현",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "abf84b88-a0c8-4605-aa44-3aa9e5bb87a9",
+      "name": "소한지",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "21b89adb-6341-445a-861e-464bbf79a225",
+      "name": "엄세영",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "6c5a2e6a-4c0a-48a1-9380-656e644c35ae",
+      "name": "유은형",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "1482e2ee-4e0c-4792-ba8d-0bbd4f371824",
+      "name": "이다혜Q",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "bc393ec3-72cf-44b9-b999-8fbe02702191",
+      "name": "이민아",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "97adefb6-e12c-4aae-9dbd-8af86cb0b832",
+      "name": "이민지",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "78800803-e249-40df-98e6-e8c0a252941e",
+      "name": "이소현",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "6abd9055-8655-44ed-92c4-fdb054278a83",
+      "name": "정다래Q",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "a0083dbe-ca67-4d21-b84d-67918bb7bb99",
+      "name": "정유나Q",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    },
+    {
+      "employee_id": "0a77cb37-d7b9-4a22-800a-1509d5f68d1f",
+      "name": "최진실Q",
+      "available_shifts": [
+        "D",
+        "E",
+        "N",
+        "H"
+      ]
+    }
+  ],
+  "assignments": [
+    {
+      "employee_id": "abf84b88-a0c8-4605-aa44-3aa9e5bb87a9",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "abf84b88-a0c8-4605-aa44-3aa9e5bb87a9",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "abf84b88-a0c8-4605-aa44-3aa9e5bb87a9",
+      "shift_id": "ce7d25fd-3f2f-4267-9075-1bf658359052",
+      "date": "2025-12-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "abf84b88-a0c8-4605-aa44-3aa9e5bb87a9",
+      "shift_id": "ce7d25fd-3f2f-4267-9075-1bf658359052",
+      "date": "2025-12-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "abf84b88-a0c8-4605-aa44-3aa9e5bb87a9",
+      "shift_id": "ce7d25fd-3f2f-4267-9075-1bf658359052",
+      "date": "2025-12-31",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fd8b659-1bef-4aa2-b2ba-bbc7b81b0377",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fd8b659-1bef-4aa2-b2ba-bbc7b81b0377",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fd8b659-1bef-4aa2-b2ba-bbc7b81b0377",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fd8b659-1bef-4aa2-b2ba-bbc7b81b0377",
+      "shift_id": "ce7d25fd-3f2f-4267-9075-1bf658359052",
+      "date": "2025-12-16",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fd8b659-1bef-4aa2-b2ba-bbc7b81b0377",
+      "shift_id": "ce7d25fd-3f2f-4267-9075-1bf658359052",
+      "date": "2025-12-17",
+      "is_locked": false
+    },
+    {
+      "employee_id": "6abd9055-8655-44ed-92c4-fdb054278a83",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "6abd9055-8655-44ed-92c4-fdb054278a83",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "6abd9055-8655-44ed-92c4-fdb054278a83",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "c70c37a0-dc7d-4cd5-978c-87f87b80e72d",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "c70c37a0-dc7d-4cd5-978c-87f87b80e72d",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "6c5a2e6a-4c0a-48a1-9380-656e644c35ae",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "6c5a2e6a-4c0a-48a1-9380-656e644c35ae",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "97adefb6-e12c-4aae-9dbd-8af86cb0b832",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "97adefb6-e12c-4aae-9dbd-8af86cb0b832",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "cc197ee4-7302-4baf-82ef-08a9fc8e7b29",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "cc197ee4-7302-4baf-82ef-08a9fc8e7b29",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "232db1a0-8dc0-4b70-8fc0-2272ce7f3880",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "232db1a0-8dc0-4b70-8fc0-2272ce7f3880",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "bc393ec3-72cf-44b9-b999-8fbe02702191",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "78800803-e249-40df-98e6-e8c0a252941e",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "78800803-e249-40df-98e6-e8c0a252941e",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "3515886c-6359-4919-9c02-682565bb93c7",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "3515886c-6359-4919-9c02-682565bb93c7",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "1482e2ee-4e0c-4792-ba8d-0bbd4f371824",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "1482e2ee-4e0c-4792-ba8d-0bbd4f371824",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "1482e2ee-4e0c-4792-ba8d-0bbd4f371824",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "21b89adb-6341-445a-861e-464bbf79a225",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "21b89adb-6341-445a-861e-464bbf79a225",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "21b89adb-6341-445a-861e-464bbf79a225",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fc273b8-f4c1-475e-be2f-445e87a8b53c",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fc273b8-f4c1-475e-be2f-445e87a8b53c",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "2fc273b8-f4c1-475e-be2f-445e87a8b53c",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "0a77cb37-d7b9-4a22-800a-1509d5f68d1f",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "a0083dbe-ca67-4d21-b84d-67918bb7bb99",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-27",
+      "is_locked": false
+    },
+    {
+      "employee_id": "a0083dbe-ca67-4d21-b84d-67918bb7bb99",
+      "shift_id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "7d491634-f2d3-45bf-a89d-4524af7b65d6",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-29",
+      "is_locked": false
+    },
+    {
+      "employee_id": "7d491634-f2d3-45bf-a89d-4524af7b65d6",
+      "shift_id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+      "date": "2025-11-30",
+      "is_locked": false
+    },
+    {
+      "employee_id": "a33ebb37-fecf-4c5a-b3a9-90b7588dedbe",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-28",
+      "is_locked": false
+    },
+    {
+      "employee_id": "a33ebb37-fecf-4c5a-b3a9-90b7588dedbe",
+      "shift_id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+      "date": "2025-11-30",
+      "is_locked": false
+    }
+  ],
+  "requirements": {
+    "2025-12-01": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-02": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-03": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-04": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-05": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-06": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-07": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-08": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-09": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-10": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-11": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-12": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-13": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-14": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-15": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-16": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-17": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-18": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-19": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-20": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-21": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-22": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-23": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-24": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-25": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-26": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-27": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-28": {
+      "D": 3,
+      "E": 3,
+      "N": 3,
+      "O": 0,
+      "total": 9
+    },
+    "2025-12-29": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-30": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    },
+    "2025-12-31": {
+      "D": 3,
+      "E": 4,
+      "N": 3,
+      "O": 0,
+      "total": 10
+    }
+  }
+}
