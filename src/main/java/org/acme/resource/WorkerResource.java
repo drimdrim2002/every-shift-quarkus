@@ -21,9 +21,11 @@ public class WorkerResource {
         // solverService.solve(requestDto);
 
         // 날짜별 요구사항 확인 예시
-        requestDto.requirements().forEach((date, reqMap) -> {
-            Log.info("날짜: " + date + ", 필요 인원: " + reqMap.get("total"));
-        });
+        if (requestDto.requirements() != null) {
+            requestDto.requirements().forEach((date, counts) -> {
+                Log.info("날짜: " + date + ", 요구사항 수: " + counts.size());
+            });
+        }
 
         Log.info("작업 완료");
 

@@ -12,7 +12,7 @@ import java.time.LocalTime;
 public class ScheduleState {
 
     @Id
-    Long tenantId;
+    String tenantId;
 
     Integer publishLength; // In number of days
 
@@ -65,11 +65,11 @@ public class ScheduleState {
     // Getters and setters
     // ************************************************************************
 
-    public Long getTenantId() {
+    public String getTenantId() {
         return tenantId;
     }
 
-    public void setTenantId(Long tenantId) {
+    public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
 

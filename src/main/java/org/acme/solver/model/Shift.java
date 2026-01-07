@@ -26,6 +26,8 @@ public class Shift {
     @ManyToOne
     Employee employee;
 
+    boolean pinned;
+
     public Shift() {
     }
 
@@ -34,16 +36,21 @@ public class Shift {
     }
 
     public Shift(LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee) {
-        this(null, start, end, location, requiredSkill, employee);
+        this(null, start, end, location, requiredSkill, employee, false);
     }
 
     public Shift(Long id, LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee) {
+        this(id, start, end, location, requiredSkill, employee, false);
+    }
+
+    public Shift(Long id, LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee, boolean pinned) {
         this.id = id;
         this.start = start;
         this.end = end;
         this.location = location;
         this.requiredSkill = requiredSkill;
         this.employee = employee;
+        this.pinned = pinned;
     }
 
     public Long getId() {
@@ -92,6 +99,14 @@ public class Shift {
 
     public void setEmployee(Employee employee) {
         this.employee = employee;
+    }
+
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
     }
 
     @Override
