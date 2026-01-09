@@ -1,11 +1,10 @@
-package solver.util;
+package org.acme.solver.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.acme.api.dto.PlanningRequest;
 import org.acme.solver.model.EmployeeSchedule;
-import org.acme.solver.util.DtoConverter;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
