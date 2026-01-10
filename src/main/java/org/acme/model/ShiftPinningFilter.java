@@ -1,4 +1,4 @@
-package org.acme.solver.model;
+package org.acme.model;
 
 import org.optaplanner.core.api.domain.entity.PinningFilter;
 

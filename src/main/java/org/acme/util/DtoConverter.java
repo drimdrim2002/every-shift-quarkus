@@ -1,8 +1,8 @@
-package org.acme.solver.util;
+package org.acme.util;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.api.dto.PlanningRequest;
-import org.acme.solver.model.*;
+import org.acme.model.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

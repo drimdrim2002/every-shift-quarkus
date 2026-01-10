@@ -1,15 +1,14 @@
 package org.acme.resource;
 
-import io.quarkus.logging.Log;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import org.acme.api.dto.PlanningRequest;
 import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
-import org.acme.solver.model.EmployeeSchedule;
-import org.acme.solver.model.Shift;
-import org.acme.solver.util.DtoConverter;
+import org.acme.model.EmployeeSchedule;
+import org.acme.model.Shift;
+import org.acme.util.DtoConverter;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;

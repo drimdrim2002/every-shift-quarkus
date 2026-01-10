@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.acme.api.dto.PlanningRequest;
-import org.acme.solver.model.Availability;
-import org.acme.solver.model.AvailabilityType;
-import org.acme.solver.model.EmployeeSchedule;
-import org.acme.solver.model.Shift;
+import org.acme.model.Availability;
+import org.acme.model.AvailabilityType;
+import org.acme.model.EmployeeSchedule;
+import org.acme.model.Shift;
+import org.acme.util.DtoConverter;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

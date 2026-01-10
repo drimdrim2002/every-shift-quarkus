@@ -1,4 +1,4 @@
-package org.acme.solver.model;
+package org.acme.model;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;

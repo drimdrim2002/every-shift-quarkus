@@ -1,4 +1,4 @@
-package org.acme.solver.model;
+package org.acme.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;

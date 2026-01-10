@@ -1,4 +1,4 @@
-package org.acme.solver.model;
+package org.acme.model;
 
 public enum AvailabilityType {
     DESIRED,

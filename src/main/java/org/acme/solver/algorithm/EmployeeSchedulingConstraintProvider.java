@@ -1,9 +1,9 @@
 package org.acme.solver.algorithm;
 
 
-import org.acme.solver.model.Availability;
-import org.acme.solver.model.AvailabilityType;
-import org.acme.solver.model.Shift;
+import org.acme.model.Availability;
+import org.acme.model.AvailabilityType;
+import org.acme.model.Shift;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
