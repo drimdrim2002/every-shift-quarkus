@@ -9,13 +9,16 @@ import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
 import org.acme.util.DtoConverter;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
+import org.optaplanner.core.config.solver.EnvironmentMode;
 import org.optaplanner.core.config.solver.SolverConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,18 @@ import java.util.stream.Collectors;
 public class WorkerResource {
 
     private static final Logger log = LoggerFactory.getLogger(WorkerResource.class);
+
+    @ConfigProperty(name = "solver.termination.spent-limit")
+    long spentLimit;
+
+    @ConfigProperty(name = "solver.move-thread-count")
+    String moveThreadCount;
+
+    @ConfigProperty(name = "solver.environment-mode")
+    EnvironmentMode environmentMode;
+
+    @ConfigProperty(name = "solver.random-seed")
+    long randomSeed;
 
     @POST
     @Path("/process")
@@ -39,7 +54,10 @@ public class WorkerResource {
                 .withSolutionClass(EmployeeSchedule.class)
                 .withEntityClasses(Shift.class)
                 .withConstraintProviderClass(EmployeeSchedulingConstraintProvider.class)
-                .withTerminationSpentLimit(java.time.Duration.ofSeconds(10)));
+                .withTerminationSpentLimit(Duration.ofSeconds(spentLimit))
+                .withMoveThreadCount(moveThreadCount)
+                .withEnvironmentMode(environmentMode)
+                .withRandomSeed(randomSeed));
 
 
         Solver<EmployeeSchedule> employeeScheduleSolver = solverFactory.buildSolver();
@@ -49,17 +67,6 @@ public class WorkerResource {
         HardSoftScore score = bestSolution.getScore();
         log.info("Score: {}", score);
         printSchedule(bestSolution);
-
-
-        // solverService.solve(requestDto);
-
-
-        // 날짜별 요구사항 확인 예시
-        if (requestDto.requirements() != null) {
-            requestDto.requirements().forEach((date, counts) -> {
-                log.info("날짜: {}, 요구사항 수: {}", date, counts.size());
-            });
-        }
 
         log.info("작업 완료");
 
