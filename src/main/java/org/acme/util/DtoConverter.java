@@ -266,7 +266,9 @@ public class DtoConverter {
     private static Map<String, Employee> mapEmployees(List<PlanningRequest.EmployeeInfo> employees) {
         Map<String, Employee> map = new HashMap<>();
         for (PlanningRequest.EmployeeInfo e : employees) {
-            map.put(e.employeeId(), new Employee(e.employeeId(), e.name(), e.availableShifts(), e.skillSet()));
+            Set<String> skills = new HashSet<>(e.skillSet());
+            skills.add("ALL");
+            map.put(e.employeeId(), new Employee(e.employeeId(), e.name(), e.availableShifts(), skills));
         }
         return map;
     }

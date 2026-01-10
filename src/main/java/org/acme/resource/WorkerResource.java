@@ -1,24 +1,18 @@
 package org.acme.resource;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import org.acme.api.dto.PlanningRequest;
-import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
-import org.acme.util.DtoConverter;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.acme.solver.SolverRunner;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
-import org.optaplanner.core.api.solver.Solver;
-import org.optaplanner.core.api.solver.SolverFactory;
-import org.optaplanner.core.config.solver.EnvironmentMode;
-import org.optaplanner.core.config.solver.SolverConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -29,17 +23,8 @@ public class WorkerResource {
 
     private static final Logger log = LoggerFactory.getLogger(WorkerResource.class);
 
-    @ConfigProperty(name = "solver.termination.spent-limit")
-    long spentLimit;
-
-    @ConfigProperty(name = "solver.move-thread-count")
-    String moveThreadCount;
-
-    @ConfigProperty(name = "solver.environment-mode")
-    EnvironmentMode environmentMode;
-
-    @ConfigProperty(name = "solver.random-seed")
-    long randomSeed;
+    @Inject
+    SolverRunner solverRunner;
 
     @POST
     @Path("/process")
@@ -48,21 +33,7 @@ public class WorkerResource {
 
         log.info("작업 시작: {}", requestDto.organization().name());
 
-        EmployeeSchedule problem = DtoConverter.toEmployeeSchedule(requestDto);
-
-        SolverFactory<EmployeeSchedule> solverFactory = SolverFactory.create(new SolverConfig()
-                .withSolutionClass(EmployeeSchedule.class)
-                .withEntityClasses(Shift.class)
-                .withConstraintProviderClass(EmployeeSchedulingConstraintProvider.class)
-                .withTerminationSpentLimit(Duration.ofSeconds(spentLimit))
-                .withMoveThreadCount(moveThreadCount)
-                .withEnvironmentMode(environmentMode)
-                .withRandomSeed(randomSeed));
-
-
-        Solver<EmployeeSchedule> employeeScheduleSolver = solverFactory.buildSolver();
-
-        EmployeeSchedule bestSolution = employeeScheduleSolver.solve(problem);
+        EmployeeSchedule bestSolution = solverRunner.solve(requestDto);
 
         HardSoftScore score = bestSolution.getScore();
         log.info("Score: {}", score);
