@@ -19,7 +19,12 @@ import java.util.Set;
 public record PlanningRequest(
         OrganizationInfo organization,
         List<EmployeeInfo> employees,
-        List<AssignmentInfo> assignments,
+
+        // 12월 1일 이전: 확정된 과거 데이터
+        List<AssignmentInfo> history,
+
+        // 12월 1일 이후: 근무 요청 및 희망 사항
+        List<AssignmentInfo> requests,
 
         // 기존 Map<LocalDate, Map<String, Integer>> 구조에서 확장성 있는 List 구조로 변경
         Map<String, Map<String, Integer>> requirements

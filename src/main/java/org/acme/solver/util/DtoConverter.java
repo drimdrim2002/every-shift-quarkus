@@ -2,158 +2,272 @@ package org.acme.solver.util;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.api.dto.PlanningRequest;
-import org.acme.solver.model.Employee;
-import org.acme.solver.model.EmployeeSchedule;
-import org.acme.solver.model.ScheduleState;
-import org.acme.solver.model.Shift;
+import org.acme.solver.model.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class DtoConverter {
 
-    public EmployeeSchedule toEmployeeSchedule(PlanningRequest planningRequest) {
-
-        List<PlanningRequest.EmployeeInfo> employees = planningRequest.employees();
-        Map<String, Employee> employeeMap = getEmployees(employees);
-
-        ScheduleState scheduleState = getScheduleState(planningRequest.organization());
-
-        List<PlanningRequest.ShiftInfo> shifts = planningRequest.organization().shifts();
-        Map<String, PlanningRequest.ShiftInfo> shiftCodeMap = new HashMap<>();
-        Map<String, PlanningRequest.ShiftInfo> shiftIdMap = new HashMap<>();
+    public EmployeeSchedule toEmployeeSchedule(PlanningRequest request) {
+        // 1. Prepare Reference Data
+        Map<String, Employee> employeeMap = mapEmployees(request.employees());
+        ScheduleState scheduleState = mapScheduleState(request.organization());
         
-        for (PlanningRequest.ShiftInfo shift : shifts) {
-            shiftCodeMap.put(shift.code(), shift);
-            shiftIdMap.put(shift.id(), shift);
-        }
+        Map<String, PlanningRequest.ShiftInfo> shiftInfoByCode = request.organization().shifts().stream()
+                .collect(Collectors.toMap(PlanningRequest.ShiftInfo::code, Function.identity()));
+        Map<String, PlanningRequest.ShiftInfo> shiftInfoById = request.organization().shifts().stream()
+                .collect(Collectors.toMap(PlanningRequest.ShiftInfo::id, Function.identity()));
 
-        List<Shift> shiftList = new ArrayList<>();
-        // Map<LocalDate, Map<ShiftId, Deque<Shift>>>
-        // 날짜별, Shift ID별로 생성된 Shift 객체들을 관리하여 Assignment 매핑 시 사용
-        Map<LocalDate, Map<String, Deque<Shift>>> shiftLookup = new HashMap<>();
+        List<Shift> finalShiftList = new ArrayList<>();
+        List<Availability> availabilityList = new ArrayList<>();
 
-        // 1. Requirements(요구사항)을 기반으로 빈 Shift 슬롯 생성
-        if (planningRequest.requirements() != null) {
-            for (Map.Entry<String, Map<String, Integer>> dateEntry : planningRequest.requirements().entrySet()) {
-                LocalDate date = LocalDate.parse(dateEntry.getKey());
-                Map<String, Integer> reqs = dateEntry.getValue();
+        // 2. Phase 1: Create Placeholder Shifts from Requirements
+        // Returns a lookup structure [Date -> ShiftId -> Queue<Shift>] to match assignments later
+        Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup = 
+            createShiftsFromRequirements(request, shiftInfoByCode, request.organization().name(), finalShiftList);
 
-                for (Map.Entry<String, Integer> req : reqs.entrySet()) {
-                    String shiftCode = req.getKey();
-                    
-                    // "total" 같은 메타 데이터는 건너뜀
-                    if ("total".equalsIgnoreCase(shiftCode)) continue;
+        // 3. Phase 2: Apply Historic Assignments (Pinned Shifts)
+        // Returns a tracking map of [Date -> Set<EmployeeId>] for gap detection
+        Map<LocalDate, Set<String>> historyMap = 
+            applyHistory(request, employeeMap, shiftInfoById, shiftSlotLookup, request.organization().name(), finalShiftList);
 
-                    int count = req.getValue();
-                    PlanningRequest.ShiftInfo info = shiftCodeMap.get(shiftCode);
-                    if (info == null) {
-                        // 정의되지 않은 Shift Code는 무시
-                        continue;
-                    }
+        // 4. Phase 3: Fill Historic Gaps
+        // Ensures all employees have records in the historic period (Context Continuity)
+        fillHistoricGaps(scheduleState, employeeMap, shiftInfoByCode, historyMap, request.organization().name(), finalShiftList);
 
-                    for (int i = 0; i < count; i++) {
-                        Shift shift = createShift(date, info, planningRequest.organization().name());
-                        shiftList.add(shift);
+        // 5. Phase 4: Process Future Requests (Availability or Pinned Shifts)
+        applyRequests(request, employeeMap, shiftInfoById, shiftSlotLookup, request.organization().name(), finalShiftList, availabilityList);
 
-                        // Lookup 맵에 추가
-                        shiftLookup.computeIfAbsent(date, d -> new HashMap<>())
-                                   .computeIfAbsent(info.id(), id -> new ArrayDeque<>())
-                                   .add(shift);
-                    }
+        // 6. Construct Final Schedule
+        EmployeeSchedule schedule = new EmployeeSchedule();
+        schedule.setEmployeeList(new ArrayList<>(employeeMap.values()));
+        schedule.setScheduleState(scheduleState);
+        schedule.setShiftList(finalShiftList);
+        schedule.setAvailabilityList(availabilityList);
+        return schedule;
+    }
+
+    // --- Phase 1: Requirements ---
+    private Map<LocalDate, Map<String, Deque<Shift>>> createShiftsFromRequirements(
+            PlanningRequest request,
+            Map<String, PlanningRequest.ShiftInfo> shiftInfoByCode,
+            String defaultLocation,
+            List<Shift> shiftList
+    ) {
+        Map<LocalDate, Map<String, Deque<Shift>>> lookup = new HashMap<>();
+
+        if (request.requirements() == null) return lookup;
+
+        for (Map.Entry<String, Map<String, Integer>> dateEntry : request.requirements().entrySet()) {
+            LocalDate date = LocalDate.parse(dateEntry.getKey());
+            Map<String, Integer> reqs = dateEntry.getValue();
+
+            for (Map.Entry<String, Integer> req : reqs.entrySet()) {
+                String shiftCode = req.getKey();
+                if ("total".equalsIgnoreCase(shiftCode)) continue;
+
+                PlanningRequest.ShiftInfo info = shiftInfoByCode.get(shiftCode);
+                if (info == null) continue;
+
+                int count = req.getValue();
+                for (int i = 0; i < count; i++) {
+                    Shift shift = createShift(date, info, defaultLocation);
+                    shiftList.add(shift);
+
+                    lookup.computeIfAbsent(date, d -> new HashMap<>())
+                          .computeIfAbsent(info.id(), id -> new ArrayDeque<>())
+                          .add(shift);
                 }
             }
         }
+        return lookup;
+    }
 
-        // 2. Assignments(기배정) 정보를 Shift 슬롯에 매핑
-        if (planningRequest.assignments() != null) {
-            for (PlanningRequest.AssignmentInfo assignment : planningRequest.assignments()) {
-                LocalDate date = assignment.date();
-                String shiftId = assignment.shiftId();
-                String empId = assignment.employeeId();
-                boolean isLocked = assignment.isLocked();
+    // --- Phase 2: History (Pinned Shifts) ---
+    private Map<LocalDate, Set<String>> applyHistory(
+            PlanningRequest request,
+            Map<String, Employee> employeeMap,
+            Map<String, PlanningRequest.ShiftInfo> shiftInfoById,
+            Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup,
+            String defaultLocation,
+            List<Shift> shiftList
+    ) {
+        Map<LocalDate, Set<String>> historyMap = new HashMap<>();
 
-                Shift targetShift = null;
+        if (request.history() == null) return historyMap;
 
-                // 생성된 Shift 중 가용한 슬롯 찾기
-                Map<String, Deque<Shift>> dateShifts = shiftLookup.get(date);
-                if (dateShifts != null) {
-                    Deque<Shift> deque = dateShifts.get(shiftId);
-                    if (deque != null && !deque.isEmpty()) {
-                        // 큐에서 하나 꺼내서 사용 (중복 할당 방지)
-                        targetShift = deque.poll();
-                    }
+        for (PlanningRequest.AssignmentInfo assignment : request.history()) {
+            LocalDate date = assignment.date();
+            String shiftId = assignment.shiftId();
+            String empId = assignment.employeeId();
+
+            // Track that this employee has a record on this date
+            historyMap.computeIfAbsent(date, k -> new HashSet<>()).add(empId);
+
+            // History is always pinned and must result in a Shift
+            Shift targetShift = findOrCreateShiftForAssignment(date, shiftId, shiftSlotLookup, shiftInfoById, defaultLocation, shiftList);
+
+            if (targetShift != null) {
+                Employee employee = employeeMap.get(empId);
+                if (employee != null) {
+                    targetShift.setEmployee(employee);
+                    targetShift.setPinned(true); // Always pinned for history
                 }
+            }
+        }
+        return historyMap;
+    }
 
-                // 가용 슬롯이 없으면 새로 생성 (요구사항보다 배정이 많은 경우)
-                if (targetShift == null) {
-                    PlanningRequest.ShiftInfo info = shiftIdMap.get(shiftId);
-                    if (info != null) {
-                        targetShift = createShift(date, info, planningRequest.organization().name());
-                        shiftList.add(targetShift);
-                    }
+    // --- Phase 3: Historic Gaps ---
+    private void fillHistoricGaps(
+            ScheduleState scheduleState,
+            Map<String, Employee> employeeMap,
+            Map<String, PlanningRequest.ShiftInfo> shiftInfoByCode,
+            Map<LocalDate, Set<String>> historyMap,
+            String defaultLocation,
+            List<Shift> shiftList
+    ) {
+        LocalDate historyEnd = scheduleState.getLastHistoricDate();
+        if (historyEnd == null) return;
+
+        int bufferDays = scheduleState.getPublishLength() != null ? scheduleState.getPublishLength() : 1;
+        long daysToSubtract = Math.max(0, bufferDays - 1); 
+        LocalDate historyStart = historyEnd.minusDays(daysToSubtract);
+
+        if (historyStart.isAfter(historyEnd)) return;
+
+        PlanningRequest.ShiftInfo offShiftInfo = shiftInfoByCode.get("O");
+        if (offShiftInfo == null) return; 
+
+        for (LocalDate date = historyStart; !date.isAfter(historyEnd); date = date.plusDays(1)) {
+            Set<String> assignedEmpIds = historyMap.getOrDefault(date, Collections.emptySet());
+
+            for (Employee employee : employeeMap.values()) {
+                if (!assignedEmpIds.contains(employee.getId())) {
+                    // Gap detected: Create Pinned OFF Shift
+                    Shift offShift = createShift(date, offShiftInfo, defaultLocation);
+                    offShift.setEmployee(employee);
+                    offShift.setPinned(true);
+                    shiftList.add(offShift);
                 }
+            }
+        }
+    }
 
-                // 직원 할당 및 고정 설정
+    // --- Phase 4: Future Requests ---
+    private void applyRequests(
+            PlanningRequest request,
+            Map<String, Employee> employeeMap,
+            Map<String, PlanningRequest.ShiftInfo> shiftInfoById,
+            Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup,
+            String defaultLocation,
+            List<Shift> shiftList,
+            List<Availability> availabilityList
+    ) {
+        if (request.requests() == null) return;
+
+        for (PlanningRequest.AssignmentInfo req : request.requests()) {
+            LocalDate date = req.date();
+            String shiftId = req.shiftId();
+            String empId = req.employeeId();
+            boolean isLocked = req.isLocked();
+
+            Employee employee = employeeMap.get(empId);
+            if (employee == null) continue;
+
+            PlanningRequest.ShiftInfo info = shiftInfoById.get(shiftId);
+            if (info == null) continue;
+
+            if (isLocked) {
+                // Locked request -> Pinned Shift
+                Shift targetShift = findOrCreateShiftForAssignment(date, shiftId, shiftSlotLookup, shiftInfoById, defaultLocation, shiftList);
                 if (targetShift != null) {
-                    Employee employee = employeeMap.get(empId);
-                    if (employee != null) {
-                        targetShift.setEmployee(employee);
-                        targetShift.setPinned(isLocked);
-                    }
+                    targetShift.setEmployee(employee);
+                    targetShift.setPinned(true);
                 }
+            } else {
+                // Not locked -> Availability
+                // Check if the requested shift is OFF ("O" code assumed or via name, but safer to check properties if available)
+                // Assuming "O" code or "Off" name is standard. The provided JSON has code "O" for Off.
+                Availability availability = getAvailability(info, employee, date);
+                availabilityList.add(availability);
+            }
+        }
+    }
+
+    private static Availability getAvailability(PlanningRequest.ShiftInfo info, Employee employee, LocalDate date) {
+        boolean isOff =
+                "O".equalsIgnoreCase(info.code()) || "Off".equalsIgnoreCase(info.name()) || "H".equalsIgnoreCase(info.name());
+
+        AvailabilityType type = isOff ? AvailabilityType.UNAVAILABLE : AvailabilityType.DESIRED;
+        return new Availability(employee, date, type);
+    }
+
+    // --- Helpers ---
+
+    private Shift findOrCreateShiftForAssignment(
+            LocalDate date,
+            String shiftId,
+            Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup,
+            Map<String, PlanningRequest.ShiftInfo> shiftInfoById,
+            String defaultLocation,
+            List<Shift> shiftList
+    ) {
+        // Try to find an empty slot from requirements
+        Map<String, Deque<Shift>> dateShifts = shiftSlotLookup.get(date);
+        if (dateShifts != null) {
+            Deque<Shift> deque = dateShifts.get(shiftId);
+            if (deque != null && !deque.isEmpty()) {
+                return deque.poll();
             }
         }
 
-        EmployeeSchedule employeeSchedule = new EmployeeSchedule();
-        employeeSchedule.setEmployeeList(new ArrayList<>(employeeMap.values()));
-        employeeSchedule.setScheduleState(scheduleState);
-        employeeSchedule.setShiftList(shiftList);
-
-        return employeeSchedule;
+        // If no slot available, create a new one (Overflow)
+        PlanningRequest.ShiftInfo info = shiftInfoById.get(shiftId);
+        if (info != null) {
+            Shift newShift = createShift(date, info, defaultLocation);
+            shiftList.add(newShift);
+            return newShift;
+        }
+        return null;
     }
 
     private Shift createShift(LocalDate date, PlanningRequest.ShiftInfo info, String defaultLocation) {
         LocalTime startTime = info.startTime();
         LocalTime endTime = info.endTime();
-
         LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
         LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
 
-        // 종료 시간이 시작 시간보다 빠르면 다음 날로 간주 (예: 22:00 ~ 06:00)
         if (endTime.isBefore(startTime)) {
             endDateTime = endDateTime.plusDays(1);
         }
-        
-        // 현재 요구사항에는 skill 정보가 없으므로 "ALL"로 고정
-        String requiredSkill = "ALL";
 
+        String requiredSkill = "ALL"; // Placeholder
         return new Shift(startDateTime, endDateTime, defaultLocation, requiredSkill, null);
     }
 
-    private static ScheduleState getScheduleState(PlanningRequest.OrganizationInfo organizationInfo) {
-        ScheduleState scheduleState = new ScheduleState();
-        scheduleState.setTenantId(organizationInfo.id());
-        scheduleState.setName(organizationInfo.name());
-        scheduleState.setDraftLength(organizationInfo.draftLength());
-        scheduleState.setLastHistoricDate(organizationInfo.lastHistoricalDate());
-        scheduleState.setFirstDraftDate(organizationInfo.firstDraftDate());
-        scheduleState.setPublishLength(organizationInfo.publishLength());
-        return scheduleState;
+    private Map<String, Employee> mapEmployees(List<PlanningRequest.EmployeeInfo> employees) {
+        Map<String, Employee> map = new HashMap<>();
+        for (PlanningRequest.EmployeeInfo e : employees) {
+            map.put(e.employeeId(), new Employee(e.employeeId(), e.name(), e.availableShifts(), e.skillSet()));
+        }
+        return map;
     }
 
-    private static Map<String, Employee> getEmployees(List<PlanningRequest.EmployeeInfo> employees) {
-        HashMap<String, Employee> employeeMap = new HashMap<>();
-        for (PlanningRequest.EmployeeInfo employee : employees) {
-            String employeeId = employee.employeeId();
-            String name = employee.name();
-            Set<String> skillSet = employee.skillSet();
-            Set<String> availableShifts = employee.availableShifts();
-            employeeMap.put(employeeId, new Employee(employeeId, name, availableShifts, skillSet));
-        }
-        return employeeMap;
+    private static ScheduleState mapScheduleState(PlanningRequest.OrganizationInfo info) {
+        ScheduleState state = new ScheduleState();
+        state.setTenantId(info.id());
+        state.setName(info.name());
+        state.setDraftLength(info.draftLength());
+        state.setLastHistoricDate(info.lastHistoricalDate());
+        state.setFirstDraftDate(info.firstDraftDate());
+        state.setPublishLength(info.publishLength());
+        return state;
     }
 }
