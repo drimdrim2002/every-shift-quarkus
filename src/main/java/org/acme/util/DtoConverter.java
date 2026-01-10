@@ -213,7 +213,7 @@ public class DtoConverter {
         boolean isOff =
                 "O".equalsIgnoreCase(info.code()) || "Off".equalsIgnoreCase(info.name()) || "H".equalsIgnoreCase(info.name());
 
-        AvailabilityType type = isOff ? AvailabilityType.UNAVAILABLE : AvailabilityType.DESIRED;
+        AvailabilityType type = isOff ? AvailabilityType.UNDESIRED : AvailabilityType.DESIRED;
         Availability availability = new Availability(employee, date, type);
         availability.setId(availabilityIdGenerator.incrementAndGet());
         return availability;
