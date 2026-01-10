@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class DtoConverter {
 
-    public EmployeeSchedule toEmployeeSchedule(PlanningRequest request) {
+    public static EmployeeSchedule toEmployeeSchedule(PlanningRequest request) {
         // 1. Prepare Reference Data
         Map<String, Employee> employeeMap = mapEmployees(request.employees());
         ScheduleState scheduleState = mapScheduleState(request.organization());
@@ -54,7 +54,7 @@ public class DtoConverter {
     }
 
     // --- Phase 1: Requirements ---
-    private Map<LocalDate, Map<String, Deque<Shift>>> createShiftsFromRequirements(
+    private static Map<LocalDate, Map<String, Deque<Shift>>> createShiftsFromRequirements(
             PlanningRequest request,
             Map<String, PlanningRequest.ShiftInfo> shiftInfoByCode,
             String defaultLocation,
@@ -90,7 +90,7 @@ public class DtoConverter {
     }
 
     // --- Phase 2: History (Pinned Shifts) ---
-    private Map<LocalDate, Set<String>> applyHistory(
+    private static Map<LocalDate, Set<String>> applyHistory(
             PlanningRequest request,
             Map<String, Employee> employeeMap,
             Map<String, PlanningRequest.ShiftInfo> shiftInfoById,
@@ -125,7 +125,7 @@ public class DtoConverter {
     }
 
     // --- Phase 3: Historic Gaps ---
-    private void fillHistoricGaps(
+    private static void fillHistoricGaps(
             ScheduleState scheduleState,
             Map<String, Employee> employeeMap,
             Map<String, PlanningRequest.ShiftInfo> shiftInfoByCode,
@@ -161,7 +161,7 @@ public class DtoConverter {
     }
 
     // --- Phase 4: Future Requests ---
-    private void applyRequests(
+    private static void applyRequests(
             PlanningRequest request,
             Map<String, Employee> employeeMap,
             Map<String, PlanningRequest.ShiftInfo> shiftInfoById,
@@ -211,7 +211,7 @@ public class DtoConverter {
 
     // --- Helpers ---
 
-    private Shift findOrCreateShiftForAssignment(
+    private static Shift findOrCreateShiftForAssignment(
             LocalDate date,
             String shiftId,
             Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup,
@@ -238,7 +238,7 @@ public class DtoConverter {
         return null;
     }
 
-    private Shift createShift(LocalDate date, PlanningRequest.ShiftInfo info, String defaultLocation) {
+    private static Shift createShift(LocalDate date, PlanningRequest.ShiftInfo info, String defaultLocation) {
         LocalTime startTime = info.startTime();
         LocalTime endTime = info.endTime();
         LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
@@ -252,7 +252,7 @@ public class DtoConverter {
         return new Shift(startDateTime, endDateTime, defaultLocation, requiredSkill, null);
     }
 
-    private Map<String, Employee> mapEmployees(List<PlanningRequest.EmployeeInfo> employees) {
+    private static Map<String, Employee> mapEmployees(List<PlanningRequest.EmployeeInfo> employees) {
         Map<String, Employee> map = new HashMap<>();
         for (PlanningRequest.EmployeeInfo e : employees) {
             map.put(e.employeeId(), new Employee(e.employeeId(), e.name(), e.availableShifts(), e.skillSet()));
