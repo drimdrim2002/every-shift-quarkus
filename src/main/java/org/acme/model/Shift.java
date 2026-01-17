@@ -31,20 +31,19 @@ public class Shift {
     public Shift() {
     }
 
-    public Shift(LocalDateTime start, LocalDateTime end, String location, String requiredSkill) {
-        this(start, end, location, requiredSkill, null);
+    String supabaseId;
+
+    public String getSupabaseId() {
+        return supabaseId;
     }
 
-    public Shift(LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee) {
-        this(null, start, end, location, requiredSkill, employee, false);
+    public Shift(Long id, String supabaseId, LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee) {
+        this(id, supabaseId, start, end, location, requiredSkill, employee, false);
     }
 
-    public Shift(Long id, LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee) {
-        this(id, start, end, location, requiredSkill, employee, false);
-    }
-
-    public Shift(Long id, LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee, boolean pinned) {
+    public Shift(Long id, String supabaseId, LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee, boolean pinned) {
         this.id = id;
+        this.supabaseId = supabaseId;
         this.start = start;
         this.end = end;
         this.location = location;

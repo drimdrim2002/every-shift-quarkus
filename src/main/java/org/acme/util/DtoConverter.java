@@ -19,7 +19,7 @@ public class DtoConverter {
         // 1. Prepare Reference Data
         Map<String, Employee> employeeMap = mapEmployees(request.employees());
         ScheduleState scheduleState = mapScheduleState(request.organization());
-        
+
         Map<String, PlanningRequest.ShiftInfo> shiftInfoByCode = request.organization().shifts().stream()
                 .collect(Collectors.toMap(PlanningRequest.ShiftInfo::code, Function.identity()));
         Map<String, PlanningRequest.ShiftInfo> shiftInfoById = request.organization().shifts().stream()
@@ -37,13 +37,13 @@ public class DtoConverter {
 
         // 2. Phase 1: Create Placeholder Shifts from Requirements
         // Returns a lookup structure [Date -> ShiftId -> Queue<Shift>] to match assignments later
-        Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup = 
-            createShiftsFromRequirements(request, shiftInfoByCode, shiftStartDayOffsets, request.organization().name(), finalShiftList, shiftIdGenerator);
+        Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup =
+                createShiftsFromRequirements(request, shiftInfoByCode, shiftStartDayOffsets, request.organization().name(), finalShiftList, shiftIdGenerator);
 
         // 3. Phase 2: Apply Historic Assignments (Pinned Shifts)
         // Returns a tracking map of [Date -> Set<EmployeeId>] for gap detection
-        Map<LocalDate, Set<String>> historyMap = 
-            applyHistory(request, employeeMap, shiftInfoById, shiftStartDayOffsets, shiftSlotLookup, request.organization().name(), finalShiftList, shiftIdGenerator);
+        Map<LocalDate, Set<String>> historyMap =
+                applyHistory(request, employeeMap, shiftInfoById, shiftStartDayOffsets, shiftSlotLookup, request.organization().name(), finalShiftList, shiftIdGenerator);
 
         // 4. Phase 3: Fill Historic Gaps
         // Ensures all employees have records in the historic period (Context Continuity)
@@ -109,8 +109,8 @@ public class DtoConverter {
                     shiftList.add(shift);
 
                     lookup.computeIfAbsent(date, d -> new HashMap<>())
-                          .computeIfAbsent(info.id(), id -> new ArrayDeque<>())
-                          .add(shift);
+                            .computeIfAbsent(info.id(), id -> new ArrayDeque<>())
+                            .add(shift);
                 }
             }
         }
@@ -179,7 +179,7 @@ public class DtoConverter {
         if (fillStart.isAfter(fillEnd)) return;
 
         PlanningRequest.ShiftInfo offShiftInfo = shiftInfoByCode.get("O");
-        if (offShiftInfo == null) return; 
+        if (offShiftInfo == null) return;
 
         for (LocalDate date = fillStart; !date.isAfter(fillEnd); date = date.plusDays(1)) {
             Set<String> assignedEmpIds = historyMap.getOrDefault(date, Collections.emptySet());
@@ -257,17 +257,17 @@ public class DtoConverter {
     }
 
     private static Shift createShift(
-            LocalDate date, 
-            PlanningRequest.ShiftInfo info, 
-            Map<String, Integer> shiftStartDayOffsets, 
-            String defaultLocation, 
+            LocalDate date,
+            PlanningRequest.ShiftInfo info,
+            Map<String, Integer> shiftStartDayOffsets,
+            String defaultLocation,
             AtomicLong shiftIdGenerator
     ) {
         int dayOffset = shiftStartDayOffsets.getOrDefault(info.id(), 0);
-        
+
         LocalTime startTime = info.startTime();
         LocalTime endTime = info.endTime();
-        
+
         LocalDateTime startDateTime = LocalDateTime.of(date.plusDays(dayOffset), startTime);
         LocalDateTime endDateTime = LocalDateTime.of(date.plusDays(dayOffset), endTime);
 
@@ -278,7 +278,9 @@ public class DtoConverter {
         }
 
         String requiredSkill = "ALL"; // Placeholder
-        return new Shift(shiftIdGenerator.incrementAndGet(), startDateTime, endDateTime, defaultLocation, requiredSkill, null);
+        return new Shift(shiftIdGenerator.incrementAndGet(),
+                info.id(),
+                startDateTime, endDateTime, defaultLocation, requiredSkill, null);
     }
 
     private static Map<String, Employee> mapEmployees(List<PlanningRequest.EmployeeInfo> employees) {
