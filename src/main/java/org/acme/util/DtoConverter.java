@@ -215,7 +215,7 @@ public class DtoConverter {
 
     private static Availability getAvailability(PlanningRequest.ShiftInfo info, Employee employee, LocalDate date, AtomicLong availabilityIdGenerator) {
         boolean isOff =
-                "O".equalsIgnoreCase(info.code()) || "Off".equalsIgnoreCase(info.name()) || "H".equalsIgnoreCase(info.name());
+                "O".equalsIgnoreCase(info.code()) || "Off".equalsIgnoreCase(info.name()) || "H".equalsIgnoreCase(info.code());
 
         AvailabilityType type = isOff ? AvailabilityType.UNDESIRED : AvailabilityType.DESIRED;
         Availability availability = new Availability(employee, date, type);

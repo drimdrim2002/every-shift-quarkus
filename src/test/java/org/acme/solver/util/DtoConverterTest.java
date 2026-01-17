@@ -84,13 +84,13 @@ public class DtoConverterTest {
         // Wait, JSON says: employee 3515... shift "ce7d..." (Holiday code "H") on 2025-12-05
         
         // Let's verify counts of UNAVAILABLE vs DESIRED if possible, or just check existence.
-        long desiredCount = availabilities.stream().filter(a -> a.getAvailabilityType() == AvailabilityType.DESIRED).count();
+        long undesirableCount = availabilities.stream().filter(a -> a.getAvailabilityType() == AvailabilityType.UNDESIRED).count();
         long unavailableCount = availabilities.stream().filter(a -> a.getAvailabilityType() == AvailabilityType.UNAVAILABLE).count();
         
-        System.out.println("DESIRED count: " + desiredCount);
+        System.out.println("DESIRED count: " + undesirableCount);
         System.out.println("UNAVAILABLE count: " + unavailableCount);
         
-        assertTrue(desiredCount > 0, "Should have DESIRED availabilities");
+        assertTrue(undesirableCount > 0, "Should have DESIRED availabilities");
         // Check if there are any UNAVAILABLE? 
         // In the JSON provided in previous step, I see mostly "ce7d..." (Holiday), "ce7d..." (Holiday).
         // Is there any "Off" request in "requests" list?
@@ -106,7 +106,7 @@ public class DtoConverterTest {
         boolean hasSpecificDesired = availabilities.stream()
                 .anyMatch(a -> a.getEmployee().getId().equals("abf84b88-a0c8-4605-aa44-3aa9e5bb87a9")
                         && a.getDate().equals(LocalDate.of(2025, 12, 31))
-                        && a.getAvailabilityType() == AvailabilityType.DESIRED);
+                        && a.getAvailabilityType() == AvailabilityType.UNDESIRED);
         
         assertTrue(hasSpecificDesired, "Should have specific DESIRED availability for abf84... on Dec 31");
     }
