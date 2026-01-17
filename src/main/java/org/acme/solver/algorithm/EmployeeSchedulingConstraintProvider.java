@@ -61,15 +61,17 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 .asConstraint("Overlapping shift");
     }
 
+    private static final int MIN_SHIFT_HOURS = 12;
+
     Constraint atLeast12HoursBetweenTwoShifts(ConstraintFactory constraintFactory) {
         return constraintFactory.forEachUniquePair(Shift.class,
                         Joiners.equal(Shift::getEmployee),
                         Joiners.lessThanOrEqual(Shift::getEnd, Shift::getStart))
-                .filter((firstShift, secondShift) -> Duration.between(firstShift.getEnd(), secondShift.getStart()).toHours() < 10)
+                .filter((firstShift, secondShift) -> Duration.between(firstShift.getEnd(), secondShift.getStart()).toHours() < MIN_SHIFT_HOURS)
                 .penalize(HardSoftScore.ONE_HARD,
                         (firstShift, secondShift) -> {
                             int breakLength = (int) Duration.between(firstShift.getEnd(), secondShift.getStart()).toMinutes();
-                            return (12 * 60) - breakLength;
+                            return (MIN_SHIFT_HOURS * 60) - breakLength;
                         })
                 .asConstraint("At least 12 hours between 2 shifts");
     }
