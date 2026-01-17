@@ -133,19 +133,23 @@ public class DtoConverter {
             String defaultLocation,
             List<Shift> shiftList
     ) {
-        LocalDate historyEnd = scheduleState.getLastHistoricDate();
-        if (historyEnd == null) return;
+        LocalDate lastHistoricDate = scheduleState.getLastHistoricDate();
+        LocalDate firstDraftDate = scheduleState.getFirstDraftDate();
+        // Fixed/Published period ends exactly before the draft starts
+        LocalDate fillEnd = (firstDraftDate != null) ? firstDraftDate.minusDays(1) : lastHistoricDate;
 
-        int bufferDays = scheduleState.getPublishLength() != null ? scheduleState.getPublishLength() : 1;
-        long daysToSubtract = Math.max(0, bufferDays - 1); 
-        LocalDate historyStart = historyEnd.minusDays(daysToSubtract);
+        if (fillEnd == null) return;
 
-        if (historyStart.isAfter(historyEnd)) return;
+        LocalDate fillStart = historyMap.keySet().stream()
+                .min(LocalDate::compareTo)
+                .orElse(fillEnd);
+
+        if (fillStart.isAfter(fillEnd)) return;
 
         PlanningRequest.ShiftInfo offShiftInfo = shiftInfoByCode.get("O");
         if (offShiftInfo == null) return; 
 
-        for (LocalDate date = historyStart; !date.isAfter(historyEnd); date = date.plusDays(1)) {
+        for (LocalDate date = fillStart; !date.isAfter(fillEnd); date = date.plusDays(1)) {
             Set<String> assignedEmpIds = historyMap.getOrDefault(date, Collections.emptySet());
 
             for (Employee employee : employeeMap.values()) {
