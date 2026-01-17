@@ -111,6 +111,12 @@ public class Shift {
 
     @Override
     public String toString() {
-        return location + " " + start + "-" + end;
+        return "Shift{" +
+                "id=" + id +
+                ", start=" + start +
+                ", end=" + end +
+                ", employee=" + employee +
+                ", pinned=" + pinned +
+                '}';
     }
 }
