@@ -2,6 +2,8 @@ package org.acme.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.tasks.v2.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -71,7 +73,10 @@ public class EveryShiftSolverTrigger {
                     LOG.error("Local solver execution failed", e);
                 }
             });
-            return Response.ok("Task submitted successfully (Local Async)").build();
+
+            JsonObject responseObject = new JsonObject();
+            responseObject.addProperty("message", "Task submitted successfully (Local Async)11");
+            return Response.ok(new Gson().toJson(responseObject) ).build();
         }
 
         try (CloudTasksClient client = CloudTasksClient.create()){
@@ -100,7 +105,12 @@ public class EveryShiftSolverTrigger {
             // 4. 큐에 전송
             client.createTask(queuePath, taskBuilder.build());
 
-            return Response.ok("Task submitted successfully").build();
+
+            String message = "Task submitted successfully";
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("message", message);
+
+            return Response.ok(jsonObject).build();
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
