@@ -26,10 +26,10 @@ public class ApplicationMain implements QuarkusApplication {
             appMode = "API";
         }
 
-        LOG.info(">>> 애플리케이션 시작 모드: " + appMode);
+        LOG.info(">>> Application startup mode: " + appMode);
 
         if ("JOB".equalsIgnoreCase(appMode)) {
-            LOG.info(">>> [JOB] 솔버 시작");
+            LOG.info(">>> [JOB] Solver started");
 
             String jsonInput = "{}"; // 기본값
 
@@ -42,12 +42,12 @@ public class ApplicationMain implements QuarkusApplication {
                     byte[] decodedBytes = Base64.getDecoder().decode(base64Input);
                     jsonInput = new String(decodedBytes, StandardCharsets.UTF_8);
 
-                    LOG.info(">>> 데이터 수신 성공 (길이: " + jsonInput.length() + ")");
+                    LOG.info(">>> Data received successfully (length: " + jsonInput.length() + ")");
                 } catch (IllegalArgumentException e) {
-                    LOG.error(">>> Base64 디코딩 실패", e);
+                    LOG.error(">>> Base64 decoding failed", e);
                 }
             } else {
-                LOG.warn(">>> 전달된 데이터가 없습니다.");
+                LOG.warn(">>> No data provided.");
             }
 
             // 복원된 JSON을 솔버에게 전달
@@ -55,7 +55,7 @@ public class ApplicationMain implements QuarkusApplication {
 
             return 0;
         } else {
-            LOG.info(">>> [API] 서버 대기 중...");
+            LOG.info(">>> [API] Server waiting...");
             Quarkus.waitForExit();
             return 0;
         }

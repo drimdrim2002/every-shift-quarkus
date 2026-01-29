@@ -44,7 +44,7 @@ public class SolverRunner {
     long randomSeed;
 
     public void run(String jsonInput) {
-        LOG.info("--- 솔버 계산 시작 ---");
+        LOG.info("--- Solver calculation started ---");
 
         try {
             // 1. Parse JSON
@@ -64,7 +64,7 @@ public class SolverRunner {
             throw new RuntimeException(e);
         }
 
-        LOG.info("--- 솔버 계산 종료 ---");
+        LOG.info("--- Solver calculation ended ---");
     }
 
     public EmployeeSchedule solve(PlanningRequest request) {

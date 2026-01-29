@@ -33,7 +33,7 @@ public class WorkerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public void processEngineTask(PlanningRequest requestDto) throws Exception {
 
-        log.info("작업 시작: {}", requestDto.organization().name());
+        log.info("Job started: {}", requestDto.organization().name());
 
         EmployeeSchedule bestSolution = solverRunner.solve(requestDto);
 
@@ -44,7 +44,7 @@ public class WorkerResource {
 
         printSchedule(bestSolution);
 
-        log.info("작업 완료");
+        log.info("Job completed");
 
     }
 

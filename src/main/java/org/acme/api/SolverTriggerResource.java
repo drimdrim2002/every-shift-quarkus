@@ -31,7 +31,7 @@ public class SolverTriggerResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response triggerJob() {
         try {
-            LOG.info("Job 실행 요청을 시작합니다.");
+            LOG.info("Starting job execution request.");
 
             // 1. Google 인증 토큰 생성
             GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
@@ -54,16 +54,16 @@ public class SolverTriggerResource {
             HttpResponse<String> apiResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (apiResponse.statusCode() == 200 || apiResponse.statusCode() == 202) {
-                LOG.info("Job 실행 요청 성공: " + apiResponse.body());
+                LOG.info("Job execution request successful: " + apiResponse.body());
                 return Response.ok("Job Started: " + apiResponse.body()).build();
             } else {
-                LOG.error("Job 실행 요청 실패: " + apiResponse.statusCode() + " / " + apiResponse.body());
+                LOG.error("Job execution request failed: " + apiResponse.statusCode() + " / " + apiResponse.body());
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Failed to start job: " + apiResponse.body()).build();
             }
 
         } catch (IOException | InterruptedException e) {
-            LOG.error("API 호출 중 오류 발생", e);
+            LOG.error("Error occurred during API call", e);
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
