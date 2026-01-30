@@ -6,6 +6,7 @@ import org.acme.model.AvailabilityType;
 import org.acme.model.Shift;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.stream.Constraint;
+import org.optaplanner.core.api.score.stream.ConstraintCollectors;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
 import org.optaplanner.core.api.score.stream.ConstraintProvider;
 import org.optaplanner.core.api.score.stream.Joiners;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 
 public class EmployeeSchedulingConstraintProvider implements ConstraintProvider {
 
-    private static int getMinuteOverlap(Shift shift1, Shift shift2) {
+    public static int getMinuteOverlap(Shift shift1, Shift shift2) {
         // The overlap of two timeslot occurs in the range common to both timeslots.
         // Both timeslots are active after the higher of their two start times,
         // and before the lower of their two end times.
@@ -43,6 +44,7 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 // soft constraints
                 desiredDayForEmployee(constraintFactory),
                 undesiredDayForEmployee(constraintFactory),
+                fairShiftDistribution(constraintFactory),
         };
     }
 
@@ -111,6 +113,14 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 .penalize(HardSoftScore.ONE_SOFT,
                         (shift, availability) -> getShiftDurationInMinutes(shift))
                 .asConstraint("Undesired day for employee");
+    }
+
+    Constraint fairShiftDistribution(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Shift.class)
+                .groupBy(Shift::getEmployee, ConstraintCollectors.count())
+                .penalize(HardSoftScore.ONE_SOFT,
+                        (employee, shiftCount) -> shiftCount * shiftCount)
+                .asConstraint("Fair shift distribution");
     }
 
 }
