@@ -17,6 +17,6 @@ gcloud run deploy every-shift-api-service \
   --region asia-northeast3 \
   --set-env-vars APP_MODE=API \
   --allow-unauthenticated \
-  --min-instances 0 --memory 256Mi --cpu 1
+  --min-instances 0 --memory 512Mi --cpu 1
 
 echo "✅ 모든 배포가 완료되었습니다!"

@@ -1,0 +1,210 @@
+package org.acme.service;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.acme.api.dto.PlanningRequest;
+import org.acme.model.EmployeeSchedule;
+import org.acme.model.ExecutionStatus;
+import org.acme.model.JobExecution;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.SetOptions;
+
+import io.quarkus.arc.Unremovable;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+/**
+ * Cloud Firestore를 사용한 Job Execution 상태 관리 서비스
+ */
+@ApplicationScoped
+@Unremovable
+public class JobExecutionService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JobExecutionService.class);
+
+    @Inject
+    Firestore firestore;
+
+    @Inject
+    ObjectMapper objectMapper;
+
+    @ConfigProperty(name = "gcp.firestore.collection", defaultValue = "job-executions")
+    String collectionName;
+
+    /**
+     * 새로운 Job Execution 문서를 생성하고 executionId를 반환
+     */
+    public String create(PlanningRequest request) {
+        String executionId = java.util.UUID.randomUUID().toString();
+        long now = Instant.now().toEpochMilli();
+
+        try {
+            JobExecution job = JobExecution.builder()
+                    .id(executionId)
+                    .tenantId(request.organization().id())
+                    .organizationName(request.organization().name())
+                    .status(ExecutionStatus.PENDING)
+                    .createdAt(now)
+                    .requestJson(objectMapper.writeValueAsString(request))
+                    .build();
+
+            firestore.collection(collectionName)
+                    .document(executionId)
+                    .set(job, SetOptions.merge())
+                    .get();
+
+            LOG.info("JobExecution created: id={}, organization={}", executionId, request.organization().name());
+            return executionId;
+
+        } catch (Exception e) {
+            LOG.error("Failed to create JobExecution", e);
+            throw new RuntimeException("Failed to create JobExecution: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * ID로 Job Execution 문서 조회
+     */
+    public Optional<JobExecution> findById(String id) {
+        try {
+            var docSnapshot = firestore.collection(collectionName)
+                    .document(id)
+                    .get()
+                    .get();
+
+            if (!docSnapshot.exists()) {
+                return Optional.empty();
+            }
+
+            JobExecution job = docSnapshot.toObject(JobExecution.class);
+            job.setId(id); // Document ID를 명시적으로 설정
+            return Optional.of(job);
+
+        } catch (Exception e) {
+            LOG.error("Failed to fetch JobExecution: id={}", id, e);
+            throw new RuntimeException("Failed to fetch JobExecution: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Job Execution 상태 업데이트
+     */
+    public void updateStatus(String id, ExecutionStatus status) {
+        try {
+            long now = Instant.now().toEpochMilli();
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", status);
+
+            if (status == ExecutionStatus.RUNNING) {
+                updates.put("startedAt", now);
+            } else if (status == ExecutionStatus.COMPLETED || status == ExecutionStatus.FAILED) {
+                updates.put("completedAt", now);
+            }
+
+            firestore.collection(collectionName)
+                    .document(id)
+                    .update(updates)
+                    .get();
+
+            LOG.debug("JobExecution status updated: id={}, status={}", id, status);
+
+        } catch (Exception e) {
+            LOG.error("Failed to update JobExecution status: id={}, status={}", id, status, e);
+            throw new RuntimeException("Failed to update status: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Solver 실행 결과 저장
+     */
+    public void saveResult(String id, EmployeeSchedule solution) {
+        try {
+            long now = Instant.now().toEpochMilli();
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", ExecutionStatus.COMPLETED);
+            updates.put("completedAt", now);
+            updates.put("hardScore", solution.getScore().hardScore());
+            updates.put("softScore", solution.getScore().softScore());
+            updates.put("resultJson", serializeSolution(solution));
+
+            firestore.collection(collectionName)
+                    .document(id)
+                    .update(updates)
+                    .get();
+
+            LOG.info("JobExecution result saved: id={}, score={}", id, solution.getScore());
+
+        } catch (Exception e) {
+            LOG.error("Failed to save JobExecution result: id={}", id, e);
+            throw new RuntimeException("Failed to save result: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 에러 메시지 저장
+     */
+    public void saveError(String id, String errorMessage) {
+        try {
+            long now = Instant.now().toEpochMilli();
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", ExecutionStatus.FAILED);
+            updates.put("completedAt", now);
+            updates.put("errorMessage", errorMessage);
+
+            firestore.collection(collectionName)
+                    .document(id)
+                    .update(updates)
+                    .get();
+
+            LOG.error("JobExecution failed: id={}, error={}", id, errorMessage);
+
+        } catch (Exception e) {
+            LOG.error("Failed to save JobExecution error: id={}", id, e);
+            throw new RuntimeException("Failed to save error: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * EmployeeSchedule을 JSON 문자열로 직렬화
+     */
+    private String serializeSolution(EmployeeSchedule solution) {
+        try {
+            return objectMapper.writeValueAsString(solution);
+        } catch (Exception e) {
+            LOG.error("Failed to serialize solution", e);
+            return null;
+        }
+    }
+
+    /**
+     * PENDING 상태의 모든 Job Execution 조회 (관리용)
+     */
+    public java.util.List<JobExecution> findByStatus(ExecutionStatus status) {
+        try {
+            var snapshot = firestore.collection(collectionName)
+                    .whereEqualTo("status", status)
+                    .get()
+                    .get();
+
+            return snapshot.getDocuments().stream()
+                    .map(doc -> {
+                        JobExecution job = doc.toObject(JobExecution.class);
+                        job.setId(doc.getId());
+                        return job;
+                    })
+                    .toList();
+
+        } catch (Exception e) {
+            LOG.error("Failed to fetch JobExecutions by status: {}", status, e);
+            throw new RuntimeException("Failed to fetch by status: " + e.getMessage(), e);
+        }
+    }
+}

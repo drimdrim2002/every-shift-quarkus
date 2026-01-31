@@ -1,16 +1,30 @@
 package org.acme.util;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import org.acme.api.dto.PlanningRequest;
-import org.acme.model.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.acme.api.dto.PlanningRequest;
+import org.acme.model.Availability;
+import org.acme.model.AvailabilityType;
+import org.acme.model.Employee;
+import org.acme.model.EmployeeSchedule;
+import org.acme.model.ScheduleState;
+import org.acme.model.Shift;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class DtoConverter {
@@ -36,21 +50,26 @@ public class DtoConverter {
         AtomicLong availabilityIdGenerator = new AtomicLong(0);
 
         // 2. Phase 1: Create Placeholder Shifts from Requirements
-        // Returns a lookup structure [Date -> ShiftId -> Queue<Shift>] to match assignments later
-        Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup =
-                createShiftsFromRequirements(request, shiftInfoByCode, shiftStartDayOffsets, request.organization().name(), finalShiftList, shiftIdGenerator);
+        // Returns a lookup structure [Date -> ShiftId -> Queue<Shift>] to match
+        // assignments later
+        Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup = createShiftsFromRequirements(request,
+                shiftInfoByCode, shiftStartDayOffsets, request.organization().name(), finalShiftList, shiftIdGenerator);
 
         // 3. Phase 2: Apply Historic Assignments (Pinned Shifts)
         // Returns a tracking map of [Date -> Set<EmployeeId>] for gap detection
-        Map<LocalDate, Set<String>> historyMap =
-                applyHistory(request, employeeMap, shiftInfoById, shiftStartDayOffsets, shiftSlotLookup, request.organization().name(), finalShiftList, shiftIdGenerator);
+        Map<LocalDate, Set<String>> historyMap = applyHistory(request, employeeMap, shiftInfoById, shiftStartDayOffsets,
+                shiftSlotLookup, request.organization().name(), finalShiftList, shiftIdGenerator);
 
         // 4. Phase 3: Fill Historic Gaps
-        // Ensures all employees have records in the historic period (Context Continuity)
-        fillHistoricGaps(scheduleState, employeeMap, shiftInfoByCode, shiftStartDayOffsets, historyMap, request.organization().name(), finalShiftList, shiftIdGenerator);
+        // Ensures all employees have records in the historic period (Context
+        // Continuity)
+        fillHistoricGaps(scheduleState, employeeMap, shiftInfoByCode, shiftStartDayOffsets, historyMap,
+                request.organization().name(), finalShiftList, shiftIdGenerator);
 
         // 5. Phase 4: Process Future Requests (Availability or Pinned Shifts)
-        applyUndesirable(request, employeeMap, shiftInfoById, shiftStartDayOffsets, shiftSlotLookup, request.organization().name(), finalShiftList, availabilityList, shiftIdGenerator, availabilityIdGenerator);
+        applyUndesirable(request, employeeMap, shiftInfoById, shiftStartDayOffsets, shiftSlotLookup,
+                request.organization().name(), finalShiftList, availabilityList, shiftIdGenerator,
+                availabilityIdGenerator);
 
         // 6. Construct Final Schedule
         EmployeeSchedule schedule = new EmployeeSchedule();
@@ -63,7 +82,8 @@ public class DtoConverter {
 
     private static Map<String, Integer> calculateShiftOffsets(List<PlanningRequest.ShiftInfo> shifts) {
         Map<String, Integer> offsets = new HashMap<>();
-        // Logic: Iterate through shifts in order. If start time resets (goes back), increment day offset.
+        // Logic: Iterate through shifts in order. If start time resets (goes back),
+        // increment day offset.
         // This handles Day(08) -> Evening(16) -> Night(00 of next day)
         LocalTime previousStartTime = LocalTime.MIN;
         int currentDayOffset = 0;
@@ -86,32 +106,29 @@ public class DtoConverter {
             Map<String, Integer> shiftStartDayOffsets,
             String defaultLocation,
             List<Shift> shiftList,
-            AtomicLong shiftIdGenerator
-    ) {
+            AtomicLong shiftIdGenerator) {
         Map<LocalDate, Map<String, Deque<Shift>>> lookup = new HashMap<>();
 
-        if (request.requirements() == null) return lookup;
+        if (request.requirements() == null)
+            return lookup;
 
-        for (Map.Entry<String, Map<String, Integer>> dateEntry : request.requirements().entrySet()) {
-            LocalDate date = LocalDate.parse(dateEntry.getKey());
-            Map<String, Integer> reqs = dateEntry.getValue();
+        // List<RequirementInfo> 구조로 변경됨
+        for (PlanningRequest.RequirementInfo req : request.requirements()) {
+            LocalDate date = request.organization().firstDraftDate().plusDays(req.dayIndex());
+            String shiftId = req.shiftId();
+            int count = req.employeeCount();
 
-            for (Map.Entry<String, Integer> req : reqs.entrySet()) {
-                String shiftCode = req.getKey();
-                if ("total".equalsIgnoreCase(shiftCode)) continue;
+            PlanningRequest.ShiftInfo info = shiftInfoByCode.get(shiftId);
+            if (info == null)
+                continue;
 
-                PlanningRequest.ShiftInfo info = shiftInfoByCode.get(shiftCode);
-                if (info == null) continue;
+            for (int i = 0; i < count; i++) {
+                Shift shift = createShift(date, info, shiftStartDayOffsets, defaultLocation, shiftIdGenerator);
+                shiftList.add(shift);
 
-                int count = req.getValue();
-                for (int i = 0; i < count; i++) {
-                    Shift shift = createShift(date, info, shiftStartDayOffsets, defaultLocation, shiftIdGenerator);
-                    shiftList.add(shift);
-
-                    lookup.computeIfAbsent(date, d -> new HashMap<>())
-                            .computeIfAbsent(info.id(), id -> new ArrayDeque<>())
-                            .add(shift);
-                }
+                lookup.computeIfAbsent(date, d -> new HashMap<>())
+                        .computeIfAbsent(info.id(), id -> new ArrayDeque<>())
+                        .add(shift);
             }
         }
         return lookup;
@@ -126,11 +143,11 @@ public class DtoConverter {
             Map<LocalDate, Map<String, Deque<Shift>>> shiftSlotLookup,
             String defaultLocation,
             List<Shift> shiftList,
-            AtomicLong shiftIdGenerator
-    ) {
+            AtomicLong shiftIdGenerator) {
         Map<LocalDate, Set<String>> historyMap = new HashMap<>();
 
-        if (request.history() == null) return historyMap;
+        if (request.history() == null)
+            return historyMap;
 
         for (PlanningRequest.AssignmentInfo assignment : request.history()) {
             LocalDate date = assignment.date();
@@ -141,7 +158,8 @@ public class DtoConverter {
             historyMap.computeIfAbsent(date, k -> new HashSet<>()).add(empId);
 
             // History is always pinned and must result in a Shift
-            Shift targetShift = findOrCreateShiftForAssignment(date, shiftId, shiftSlotLookup, shiftInfoById, shiftStartDayOffsets, defaultLocation, shiftList, shiftIdGenerator);
+            Shift targetShift = findOrCreateShiftForAssignment(date, shiftId, shiftSlotLookup, shiftInfoById,
+                    shiftStartDayOffsets, defaultLocation, shiftList, shiftIdGenerator);
 
             if (targetShift != null) {
                 Employee employee = employeeMap.get(empId);
@@ -163,23 +181,25 @@ public class DtoConverter {
             Map<LocalDate, Set<String>> historyMap,
             String defaultLocation,
             List<Shift> shiftList,
-            AtomicLong shiftIdGenerator
-    ) {
+            AtomicLong shiftIdGenerator) {
         LocalDate lastHistoricDate = scheduleState.getLastHistoricDate();
         LocalDate firstDraftDate = scheduleState.getFirstDraftDate();
         // Fixed/Published period ends exactly before the draft starts
         LocalDate fillEnd = (firstDraftDate != null) ? firstDraftDate.minusDays(1) : lastHistoricDate;
 
-        if (fillEnd == null) return;
+        if (fillEnd == null)
+            return;
 
         LocalDate fillStart = historyMap.keySet().stream()
                 .min(LocalDate::compareTo)
                 .orElse(fillEnd);
 
-        if (fillStart.isAfter(fillEnd)) return;
+        if (fillStart.isAfter(fillEnd))
+            return;
 
         PlanningRequest.ShiftInfo offShiftInfo = shiftInfoByCode.get("O");
-        if (offShiftInfo == null) return;
+        if (offShiftInfo == null)
+            return;
 
         for (LocalDate date = fillStart; !date.isAfter(fillEnd); date = date.plusDays(1)) {
             Set<String> assignedEmpIds = historyMap.getOrDefault(date, Collections.emptySet());
@@ -187,7 +207,8 @@ public class DtoConverter {
             for (Employee employee : employeeMap.values()) {
                 if (!assignedEmpIds.contains(employee.getId())) {
                     // Gap detected: Create Pinned OFF Shift
-                    Shift offShift = createShift(date, offShiftInfo, shiftStartDayOffsets, defaultLocation, shiftIdGenerator);
+                    Shift offShift = createShift(date, offShiftInfo, shiftStartDayOffsets, defaultLocation,
+                            shiftIdGenerator);
                     offShift.setEmployee(employee);
                     offShift.setPinned(true);
                     shiftList.add(offShift);
@@ -207,16 +228,17 @@ public class DtoConverter {
             List<Shift> shiftList,
             List<Availability> availabilityList,
             AtomicLong shiftIdGenerator,
-            AtomicLong availabilityIdGenerator
-    ) {
-        if (request.undesirable() == null) return;
+            AtomicLong availabilityIdGenerator) {
+        if (request.undesirable() == null)
+            return;
 
         for (PlanningRequest.AssignmentInfo req : request.undesirable()) {
             LocalDate date = req.date();
             String empId = req.employeeId();
 
             Employee employee = employeeMap.get(empId);
-            if (employee == null) continue;
+            if (employee == null)
+                continue;
 
             // Not locked -> Availability (UNDESIRABLE)
             Availability availability = new Availability(employee, date, AvailabilityType.UNDESIRABLE);
@@ -235,8 +257,7 @@ public class DtoConverter {
             Map<String, Integer> shiftStartDayOffsets,
             String defaultLocation,
             List<Shift> shiftList,
-            AtomicLong shiftIdGenerator
-    ) {
+            AtomicLong shiftIdGenerator) {
         // Try to find an empty slot from requirements
         Map<String, Deque<Shift>> dateShifts = shiftSlotLookup.get(date);
         if (dateShifts != null) {
@@ -261,8 +282,7 @@ public class DtoConverter {
             PlanningRequest.ShiftInfo info,
             Map<String, Integer> shiftStartDayOffsets,
             String defaultLocation,
-            AtomicLong shiftIdGenerator
-    ) {
+            AtomicLong shiftIdGenerator) {
         int dayOffset = shiftStartDayOffsets.getOrDefault(info.id(), 0);
 
         LocalTime startTime = info.startTime();

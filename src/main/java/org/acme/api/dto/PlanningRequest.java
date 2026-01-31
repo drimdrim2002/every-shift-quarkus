@@ -1,15 +1,15 @@
 package org.acme.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.quarkus.runtime.annotations.RegisterForReflection;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 /**
  * Quarkus Native Build를 위해 @RegisterForReflection 추가
@@ -27,8 +27,7 @@ public record PlanningRequest(
         List<AssignmentInfo> undesirable,
 
         // 기존 Map<LocalDate, Map<String, Integer>> 구조에서 확장성 있는 List 구조로 변경
-        Map<String, Map<String, Integer>> requirements
-) {
+        List<RequirementInfo> requirements) {
 
     // 1. 조직 도메인
     @RegisterForReflection
@@ -38,13 +37,11 @@ public record PlanningRequest(
             String type,
             List<ShiftInfo> shifts,
 
-            @JsonFormat(pattern = "yyyy-MM-dd")
-            LocalDate lastHistoricalDate,
+            @JsonFormat(pattern = "yyyy-MM-dd") LocalDate lastHistoricalDate,
 
             int publishLength,
 
-            @JsonFormat(pattern = "yyyy-MM-dd")
-            LocalDate firstDraftDate,
+            @JsonFormat(pattern = "yyyy-MM-dd") LocalDate firstDraftDate,
 
             int draftLength
 
@@ -58,30 +55,21 @@ public record PlanningRequest(
             String code,
             String name,
 
-            @JsonProperty("start_time")
-            @JsonFormat(pattern = "HH:mm:ss")
-            LocalTime startTime,
+            @JsonProperty("start_time") @JsonFormat(pattern = "HH:mm:ss") LocalTime startTime,
 
-            @JsonProperty("end_time")
-            @JsonFormat(pattern = "HH:mm:ss")
-            LocalTime endTime
-    ) {
+            @JsonProperty("end_time") @JsonFormat(pattern = "HH:mm:ss") LocalTime endTime) {
     }
 
     // 3. 직원(Employee) 도메인
     @RegisterForReflection
     public record EmployeeInfo(
-            @JsonProperty("employee_id")
-            String employeeId,
+            @JsonProperty("employee_id") String employeeId,
 
             String name,
 
-            @JsonProperty("available_shifts")
-            Set<String> availableShifts,
+            @JsonProperty("available_shifts") Set<String> availableShifts,
 
-            @JsonProperty("skill_set")
-            Set<String> skillSet
-    ) {
+            @JsonProperty("skill_set") Set<String> skillSet) {
         public EmployeeInfo {
             if (name == null) {
                 name = employeeId;
@@ -99,17 +87,20 @@ public record PlanningRequest(
     // 4. 기배정(Assignment) 도메인
     @RegisterForReflection
     public record AssignmentInfo(
-            @JsonProperty("employee_id")
-            String employeeId,
+            @JsonProperty("employee_id") String employeeId,
 
-            @JsonProperty("shift_id")
+            @JsonProperty("shift_id") String shiftId,
+
+            @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
+
+            @JsonProperty("is_locked") boolean isLocked) {
+    }
+
+    // 5. 요구사항(Requirement) 도메인
+    @RegisterForReflection
+    public record RequirementInfo(
             String shiftId,
-
-            @JsonFormat(pattern = "yyyy-MM-dd")
-            LocalDate date,
-
-            @JsonProperty("is_locked")
-            boolean isLocked
-    ) {
+            int dayIndex,
+            int employeeCount) {
     }
 }
