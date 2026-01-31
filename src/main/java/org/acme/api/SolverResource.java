@@ -34,9 +34,9 @@ import jakarta.ws.rs.core.Response;
  * POST /api/solve 요청을 받아서 executionId를 반환하고 실제 solver는 비동기로 실행
  */
 @Path("/api/solve")
-public class EveryShiftSolverTrigger {
+public class SolverResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EveryShiftSolverTrigger.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SolverResource.class);
 
     @Inject
     ObjectMapper objectMapper;
