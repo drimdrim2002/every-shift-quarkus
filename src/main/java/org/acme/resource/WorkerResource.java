@@ -14,6 +14,7 @@ import org.acme.model.ExecutionStatus;
 import org.acme.model.Shift;
 import org.acme.service.JobExecutionService;
 import org.acme.solver.SolverRunner;
+import org.acme.solver.output.SchedulePrinter;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class WorkerResource {
 
             validateSolution(requestDto, bestSolution);
 
-            printSchedule(bestSolution);
+            SchedulePrinter.printSchedule(bestSolution, log);
 
             // 결과 저장
             if (isNewExecution) {
@@ -81,23 +82,6 @@ public class WorkerResource {
             }
             throw e;
         }
-    }
-
-    private static void printSchedule(EmployeeSchedule schedule) {
-        log.info("\n--- Schedule ---");
-        Map<LocalDate, List<Shift>> shiftsByDate = schedule.getShiftList().stream()
-                .collect(Collectors.groupingBy(shift -> shift.getStart().toLocalDate()));
-
-        shiftsByDate.keySet().stream().sorted().forEach(date -> {
-            log.info("Date: {}", date);
-            for (Shift shift : shiftsByDate.get(date)) {
-                log.info("  {} - {} ({}): {}",
-                        shift.getStart().toLocalTime(),
-                        shift.getEnd().toLocalTime(),
-                        shift.getLocation(),
-                        shift.getEmployee() == null ? "UNASSIGNED" : shift.getEmployee().getName());
-            }
-        });
     }
 
     private static void validateSolution(PlanningRequest request, EmployeeSchedule schedule) throws ValidationException {

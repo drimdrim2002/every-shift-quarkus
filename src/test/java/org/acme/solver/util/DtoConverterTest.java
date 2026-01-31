@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,10 +12,9 @@ import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
+import org.acme.test.JsonLoader;
 import org.acme.util.DtoConverter;
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -27,19 +25,10 @@ public class DtoConverterTest {
     @Inject
     DtoConverter dtoConverter;
 
-    @Inject
-    ObjectMapper objectMapper;
-
     @Test
     public void testToEmployeeSchedule() throws IOException {
         // Given
-        PlanningRequest request;
-        try (InputStream inputStream = getClass().getResourceAsStream("/json/sample.json")) {
-            if (inputStream == null) {
-                throw new IOException("Resource not found: /json/sample.json");
-            }
-            request = objectMapper.readValue(inputStream, PlanningRequest.class);
-        }
+        PlanningRequest request = JsonLoader.load("/json/sample.json", PlanningRequest.class);
 
         // When
         EmployeeSchedule schedule = dtoConverter.toEmployeeSchedule(request);

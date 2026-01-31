@@ -5,13 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
+import org.acme.test.TestDataBuilder;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -207,20 +207,22 @@ class ScheduleExporterTest {
         EmployeeSchedule schedule = new EmployeeSchedule();
         schedule.setScore(HardSoftScore.of(0, -5));
 
-        // 직원 생성
-        Employee emp1 = new Employee();
-        emp1.setId("E001");
-        emp1.setName("홍길동");
+        // 직원 생성 (TestDataBuilder 사용)
+        Employee emp1 = TestDataBuilder.EmployeeBuilder.builder()
+                .id("E001")
+                .name("홍길동")
+                .build();
 
-        Employee emp2 = new Employee();
-        emp2.setId("E002");
-        emp2.setName("김철수");
+        Employee emp2 = TestDataBuilder.EmployeeBuilder.builder()
+                .id("E002")
+                .name("김철수")
+                .build();
 
         List<Employee> employees = List.of(emp1, emp2);
         schedule.setEmployeeList(employees);
         schedule.setAvailabilityList(new ArrayList<>());
 
-        // Shift 생성
+        // Shift 생성 (TestDataBuilder 사용)
         List<Shift> shifts = new ArrayList<>();
 
         LocalDate date1 = LocalDate.of(2025, 12, 1);
@@ -228,39 +230,32 @@ class ScheduleExporterTest {
         LocalDate date3 = LocalDate.of(2025, 12, 3);
 
         // Day shift
-        Shift shift1 = createShift(1L, date1.atTime(8, 0), date1.atTime(16, 0), "세브란스", emp1);
-        shifts.add(shift1);
+        shifts.add(TestDataBuilder.ShiftBuilder.builder()
+                .id(1L).start(date1, 8, 0).end(date1, 16, 0)
+                .location("세브란스").employee(emp1).build());
 
         // Evening shift
-        Shift shift2 = createShift(2L, date1.atTime(16, 0), date1.atTime(23, 59), "세브란스", emp2);
-        shifts.add(shift2);
+        shifts.add(TestDataBuilder.ShiftBuilder.builder()
+                .id(2L).start(date1, 16, 0).end(date1, 23, 59)
+                .location("세브란스").employee(emp2).build());
 
         // Night shift
-        Shift shift3 = createShift(3L, date2.atTime(0, 0), date2.atTime(8, 0), "강남", emp1);
-        shifts.add(shift3);
+        shifts.add(TestDataBuilder.ShiftBuilder.builder()
+                .id(3L).start(date2, 0, 0).end(date2, 8, 0)
+                .location("강남").employee(emp1).build());
 
         // Day shift at different location
-        Shift shift4 = createShift(4L, date2.atTime(8, 0), date2.atTime(16, 0), "강남", emp2);
-        shifts.add(shift4);
+        shifts.add(TestDataBuilder.ShiftBuilder.builder()
+                .id(4L).start(date2, 8, 0).end(date2, 16, 0)
+                .location("강남").employee(emp2).build());
 
         // Evening shift
-        Shift shift5 = createShift(5L, date3.atTime(16, 0), date3.atTime(23, 59), "세브란스", emp1);
-        shifts.add(shift5);
+        shifts.add(TestDataBuilder.ShiftBuilder.builder()
+                .id(5L).start(date3, 16, 0).end(date3, 23, 59)
+                .location("세브란스").employee(emp1).build());
 
         schedule.setShiftList(shifts);
 
         return schedule;
-    }
-
-    private Shift createShift(Long id, LocalDateTime start, LocalDateTime end, String location, Employee employee) {
-        Shift shift = new Shift();
-        shift.setId(id);
-        shift.setStart(start);
-        shift.setEnd(end);
-        shift.setLocation(location);
-        shift.setRequiredSkill("general");
-        shift.setEmployee(employee);
-        shift.setPinned(false);
-        return shift;
     }
 }
