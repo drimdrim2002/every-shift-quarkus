@@ -1,10 +1,11 @@
 #!/bin/bash
 
 echo "🚀 [1/3] 빌드 및 이미지 푸시 시작..."
-./mvnw clean package -DskipTests
+# -DskipTests 대신 컴파일까지 스킵하는 -Dmaven.test.skip=true를 권장합니다.
+./mvnw clean package -Dmaven.test.skip=true
 
 echo "🤖 [2/3] Cloud Run Job (솔버) 배포 중..."
-gcloud run jobs deploy hello-world-job \
+gcloud run jobs deploy every-shift-job \
   --image asia-northeast3-docker.pkg.dev/every-shift-api/containers/hello-world-job:v1 \
   --region asia-northeast3 \
   --set-env-vars APP_MODE=JOB \
@@ -16,6 +17,6 @@ gcloud run deploy every-shift-api-service \
   --region asia-northeast3 \
   --set-env-vars APP_MODE=API \
   --allow-unauthenticated \
-  --min-instances 0 --memory 512Mi --cpu 1
+  --min-instances 0 --memory 256Mi --cpu 1
 
 echo "✅ 모든 배포가 완료되었습니다!"
