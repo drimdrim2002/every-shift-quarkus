@@ -34,10 +34,11 @@ API는 다음 출처로부터의 요청을 명시적으로 수락합니다:
 
 클라이언트는 다음 헤더를 포함하여 요청을 보낼 수 있습니다:
 
-- `Content-Type`: (예: `application/json`)
-- `Authorization`: (인증용 Bearer 토큰)
-- `X-Execution-Id`: (작업 추적용 커스텀 헤더)
-- `X-Requested-With`
+- `Accept`: 응답 형식 지정 (예: `application/json`)
+- `Content-Type`: 요청 본문 형식 (예: `application/json`)
+- `Authorization`: 인증용 Bearer 토큰
+- `X-Execution-Id`: 작업 추적용 커스텀 헤더
+- `X-Requested-With`: AJAX 요청 식별용
 
 ### 4. 노출된 헤더 (Exposed Headers)
 
@@ -52,11 +53,13 @@ API는 다음 출처로부터의 요청을 명시적으로 수락합니다:
 ```properties
 quarkus.http.cors=true
 # 허용 도메인
-quarkus.http.cors.origins=http://localhost:3000,http://localhost:5173,https://*.run.app
+quarkus.http.cors.origins=http://localhost:8080,http://localhost:3000,http://localhost:5173,https://*.run.app
 # 허용 메서드
 quarkus.http.cors.methods=GET,POST,OPTIONS,PUT,DELETE
 # 허용 헤더
-quarkus.http.cors.headers=Content-Type,Authorization,X-Execution-Id
+quarkus.http.cors.headers=accept,authorization,content-type,x-requested-with,x-execution-id
 # 노출 헤더
-quarkus.http.cors.exposed-headers=X-Execution-Id
+quarkus.http.cors.exposed-headers=x-execution-id
+# 캐시 시간
+quarkus.http.cors.access-control-max-age=PT24H
 ```
