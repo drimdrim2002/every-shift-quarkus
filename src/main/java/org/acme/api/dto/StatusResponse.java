@@ -1,14 +1,20 @@
 package org.acme.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.quarkus.runtime.annotations.RegisterForReflection;
-import org.acme.model.ExecutionStatus;
-import org.acme.model.JobExecution;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
+
+import org.acme.model.ExecutionStatus;
+import org.acme.model.JobExecution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 /**
  * GET /api/status/{id} 응답 DTO
@@ -24,17 +30,18 @@ public record StatusResponse(
         @JsonProperty("error_message") String errorMessage,
         @JsonProperty("created_at") LocalDateTime createdAt,
         @JsonProperty("started_at") LocalDateTime startedAt,
-        @JsonProperty("completed_at") LocalDateTime completedAt
-) {
+        @JsonProperty("completed_at") LocalDateTime completedAt) {
     public record ScoreInfo(
             @JsonProperty("hard_score") int hardScore,
-            @JsonProperty("soft_score") int softScore
-    ) {}
+            @JsonProperty("soft_score") int softScore) {
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(StatusResponse.class);
 
     /**
      * JobExecution 엔티티로부터 StatusResponse 생성
      */
-    public static StatusResponse from(JobExecution job) {
+    public static StatusResponse from(JobExecution job, ObjectMapper objectMapper) {
         ScoreInfo scoreInfo = null;
         if (job.getHardScore() != null && job.getSoftScore() != null) {
             scoreInfo = new ScoreInfo(job.getHardScore(), job.getSoftScore());
@@ -46,12 +53,11 @@ public record StatusResponse(
                 job.getOrganizationName(),
                 job.getStatus() != null ? job.getStatus().name() : ExecutionStatus.PENDING.name(),
                 scoreInfo,
-                parseResultJson(job.getResultJson()),
+                parseResultJson(job.getResultJson(), objectMapper),
                 job.getErrorMessage(),
                 epochToLocalDateTime(job.getCreatedAt()),
                 epochToLocalDateTime(job.getStartedAt()),
-                epochToLocalDateTime(job.getCompletedAt())
-        );
+                epochToLocalDateTime(job.getCompletedAt()));
     }
 
     /**
@@ -68,12 +74,17 @@ public record StatusResponse(
      * 결과 JSON 문자열을 Map으로 변환
      * TODO: 실제 파싱이 필요한 경우 ObjectMapper를 사용하여 구현
      */
-    private static Map<String, Object> parseResultJson(String resultJson) {
+    private static Map<String, Object> parseResultJson(String resultJson, ObjectMapper objectMapper) {
         if (resultJson == null || resultJson.isEmpty()) {
             return null;
         }
-        // 간단한 구현을 위해 null 반환
+        try {
+            return objectMapper.readValue(resultJson, Map.class);
+        } catch (JsonProcessingException e) {
+            LOG.warn("Failed to parse result JSON: {}", e.getMessage());
+            return null;
+        }
         // 필요시 ObjectMapper를 사용하여 JSON 파싱
-        return null;
+        // return null;
     }
 }

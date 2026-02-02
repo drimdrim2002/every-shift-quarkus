@@ -1,5 +1,13 @@
 package org.acme.api;
 
+import java.util.Optional;
+
+import org.acme.api.dto.ErrorResponse;
+import org.acme.api.dto.StatusResponse;
+import org.acme.service.JobExecutionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -7,13 +15,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.acme.api.dto.ErrorResponse;
-import org.acme.api.dto.StatusResponse;
-import org.acme.service.JobExecutionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 /**
  * Job Execution 상태 조회 API
@@ -26,6 +27,9 @@ public class JobStatusResource {
 
     @Inject
     JobExecutionService jobExecutionService;
+
+    @Inject
+    com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @GET
     @Path("/{id}")
@@ -42,6 +46,6 @@ public class JobStatusResource {
                     .build();
         }
 
-        return Response.ok(StatusResponse.from(job.get())).build();
+        return Response.ok(StatusResponse.from(job.get(), objectMapper)).build();
     }
 }
