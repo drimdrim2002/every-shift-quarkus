@@ -27,7 +27,8 @@ https://every-shift-api-service-554455861916.a.run.app
 └─────────┘      (execution_id)     └──────────┘                     └─────────┘
      │                                   │                                 │
      │                                   │ <───────────────────────────────│
-     │                                   │      (완료 알림/상태 업데이트)     │
+     │                                   │  saveResult() → Firestore        │
+     │                                   │  (COMPLETED 상태 + 결과 저장)     │
      │                                   │                                 │
      │ GET /api/status/{id}              │                                 │
      └──────────────────────────────────>│                                 │
@@ -173,7 +174,7 @@ GET /api/status/{id}
     "hard_score": 0,
     "soft_score": -5
   },
-  "result": null,
+  "result_json": null,
   "error_message": null,
   "created_at": "2025-12-01T10:00:00",
   "started_at": "2025-12-01T10:00:05",

@@ -54,6 +54,18 @@ public class SolverRunner {
     private final SolutionValidator solutionValidator = new SolutionValidator();
 
     public void run(String jsonInput) {
+        runWithResult(jsonInput);
+    }
+
+    /**
+     * Solver를 실행하고 결과를 반환합니다.
+     * JOB 모드에서 Firestore 상태 업데이트를 위해 결과 반환 필요.
+     *
+     * @param jsonInput JSON 형식의 입력 데이터
+     * @return 최적화된 EmployeeSchedule 솔루션
+     * @throws RuntimeException 솔버 실행 실패 시
+     */
+    public EmployeeSchedule runWithResult(String jsonInput) {
         LOG.info("--- Solver calculation started ---");
 
         try {
@@ -79,12 +91,13 @@ public class SolverRunner {
                 }
             }
 
+            LOG.info("--- Solver calculation ended ---");
+            return solution;
+
         } catch (Exception e) {
             LOG.error("Solving failed", e);
             throw new RuntimeException(e);
         }
-
-        LOG.info("--- Solver calculation ended ---");
     }
 
     public EmployeeSchedule solve(PlanningRequest request) {
