@@ -91,6 +91,6 @@ This script performs the following tasks:
 
 ## 6. Development Conventions
 
-- **Language:** **Korean** is recommended for source code comments and documentation.
+- **Language:** **English** is recommended for source code comments and documentation.
 - **Structure:** Packages are separated by function (e.g., `api`, `solver`).
 - **Logging:** Use `org.slf4j.Logger` for logging key events (Job start/end, errors).

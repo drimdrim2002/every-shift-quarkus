@@ -1,12 +1,12 @@
 package org.acme.resource;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.xml.bind.ValidationException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
+
 import org.acme.api.dto.PlanningRequest;
 import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
@@ -19,10 +19,13 @@ import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.xml.bind.ValidationException;
 
 /**
  * Worker Resource
@@ -58,8 +61,15 @@ public class WorkerResource {
         }
 
         try {
-            // Solver 실행
-            EmployeeSchedule bestSolution = solverRunner.solve(requestDto);
+            // Solver 실행 (Incremental)
+            EmployeeSchedule bestSolution = solverRunner.solveIncremental(
+                    requestDto,
+                    executionId,
+                    (intermediateSolution) -> {
+                        if (isNewExecution) {
+                            jobExecutionService.saveIntermediateResult(executionId, intermediateSolution);
+                        }
+                    });
 
             HardSoftScore score = bestSolution.getScore();
             log.info("Score: {}", score);
@@ -68,7 +78,7 @@ public class WorkerResource {
 
             SchedulePrinter.printSchedule(bestSolution, log);
 
-            // 결과 저장
+            // 결과 저장 (최종)
             if (isNewExecution) {
                 jobExecutionService.saveResult(executionId, bestSolution);
             }
@@ -84,7 +94,8 @@ public class WorkerResource {
         }
     }
 
-    private static void validateSolution(PlanningRequest request, EmployeeSchedule schedule) throws ValidationException {
+    private static void validateSolution(PlanningRequest request, EmployeeSchedule schedule)
+            throws ValidationException {
         HashMap<String, String> shiftCodeMap = new HashMap<>();
         for (PlanningRequest.ShiftInfo shift : request.organization().shifts()) {
             shiftCodeMap.put(shift.id(), shift.code());

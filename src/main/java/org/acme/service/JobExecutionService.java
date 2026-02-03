@@ -149,6 +149,32 @@ public class JobExecutionService {
     }
 
     /**
+     * Solver 중간 실행 결과 저장 (Status: RUNNING 유지)
+     */
+    public void saveIntermediateResult(String id, EmployeeSchedule solution) {
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", ExecutionStatus.RUNNING);
+            updates.put("hardScore", solution.getScore().hardScore());
+            updates.put("softScore", solution.getScore().softScore());
+            updates.put("resultJson", serializeSolution(solution));
+
+            firestore.collection(collectionName)
+                    .document(id)
+                    .update(updates)
+                    .get();
+
+            LOG.info("Intermediate result saved: id={}, score={}", id, solution.getScore());
+
+        } catch (Exception e) {
+            LOG.error("Failed to save intermediate result: id={}", id, e);
+            // 중간 저장 실패는 치명적이지 않으므로 로그만 남기고 진행할 수도 있지만,
+            // 현행 로직 일관성을 위해 예외 발생
+            throw new RuntimeException("Failed to save intermediate result: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * 에러 메시지 저장
      */
     public void saveError(String id, String errorMessage) {

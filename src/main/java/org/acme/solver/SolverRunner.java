@@ -33,6 +33,9 @@ public class SolverRunner {
     @Inject
     EmployeeScheduleBuilder employeeScheduleBuilder;
 
+    @Inject
+    org.acme.util.SolutionClonerUtil solutionClonerUtil;
+
     @ConfigProperty(name = "solver.termination.spent-limit", defaultValue = "10")
     long spentLimit;
 
@@ -51,6 +54,19 @@ public class SolverRunner {
     @ConfigProperty(name = "app.export.enabled", defaultValue = "true")
     boolean exportEnabled;
 
+    // Incremental Solver Configuration
+    @ConfigProperty(name = "solver.incremental.enabled", defaultValue = "false")
+    boolean incrementalEnabled;
+
+    @ConfigProperty(name = "solver.incremental.iteration-seconds", defaultValue = "30")
+    long iterationSeconds;
+
+    @ConfigProperty(name = "solver.incremental.max-total-minutes", defaultValue = "10")
+    long maxTotalMinutes;
+
+    @ConfigProperty(name = "solver.incremental.min-iterations", defaultValue = "2")
+    int minIterations;
+
     private final SolutionValidator solutionValidator = new SolutionValidator();
 
     public void run(String jsonInput) {
@@ -59,11 +75,6 @@ public class SolverRunner {
 
     /**
      * Solver를 실행하고 결과를 반환합니다.
-     * JOB 모드에서 Firestore 상태 업데이트를 위해 결과 반환 필요.
-     *
-     * @param jsonInput JSON 형식의 입력 데이터
-     * @return 최적화된 EmployeeSchedule 솔루션
-     * @throws RuntimeException 솔버 실행 실패 시
      */
     public EmployeeSchedule runWithResult(String jsonInput) {
         LOG.info("--- Solver calculation started ---");
@@ -73,7 +84,10 @@ public class SolverRunner {
             PlanningRequest request = objectMapper.readValue(jsonInput, PlanningRequest.class);
             LOG.info("Organization: {}", request.organization().name());
 
-            // 2. Solve
+            // 2. Solve (Legacy or One-shot)
+            // Note: Cloud Run Job uses WorkerResource which calls solveIncremental
+            // manually.
+            // This method is primarily for local testing or simple runs.
             EmployeeSchedule solution = solve(request);
 
             // 3. Output
@@ -103,20 +117,88 @@ public class SolverRunner {
     public EmployeeSchedule solve(PlanningRequest request) {
         // 1. Convert to Domain Model
         EmployeeSchedule problem = employeeScheduleBuilder.build(request);
+        // 2. Solve with default termination
+        return createSolver(Duration.ofSeconds(spentLimit)).solve(problem);
+    }
 
-        // 2. Build Solver
+    /**
+     * 점진적(Incremental) 솔버 실행
+     */
+    public EmployeeSchedule solveIncremental(PlanningRequest request, String executionId,
+            java.util.function.Consumer<EmployeeSchedule> intermediateCallback) {
+
+        if (!incrementalEnabled) {
+            return solve(request);
+        }
+
+        EmployeeSchedule problem = employeeScheduleBuilder.build(request);
+        EmployeeSchedule bestSolution = null;
+        org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore previousScore = null;
+
+        long startTime = System.currentTimeMillis();
+        int iteration = 0;
+
+        LOG.info("Starting incremental solver: executionId={}, iterationSeconds={}, maxTotalMinutes={}",
+                executionId, iterationSeconds, maxTotalMinutes);
+
+        while (true) {
+            iteration++;
+            LOG.info("Iteration {} started", iteration);
+
+            // Solver 생성
+            Solver<EmployeeSchedule> solver = createSolver(Duration.ofSeconds(iterationSeconds));
+
+            // Warm start: 이전 해가 있으면 초기해로 설정
+            if (bestSolution != null) {
+                problem = solutionClonerUtil.cloneSolution(bestSolution);
+            }
+
+            // 실행
+            EmployeeSchedule currentSolution = solver.solve(problem);
+            org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore currentScore = currentSolution.getScore();
+
+            LOG.info("Iteration {} check: currentScore={}, previousScore={}", iteration, currentScore, previousScore);
+
+            // 더 나은 해이거나 첫 실행이면 bestSolution 업데이트
+            if (bestSolution == null || currentScore.compareTo(bestSolution.getScore()) >= 0) {
+                bestSolution = currentSolution;
+
+                try {
+                    intermediateCallback.accept(bestSolution);
+                } catch (Exception e) {
+                    LOG.warn("Intermediate callback failed but solver will continue", e);
+                }
+            }
+
+            // 종료 조건 1: 수렴
+            if (iteration >= minIterations && currentScore.equals(previousScore)) {
+                LOG.info("Converged after {} iterations. Score: {}", iteration, currentScore);
+                break;
+            }
+
+            // 종료 조건 2: 최대 시간 초과
+            long elapsedMinutes = (System.currentTimeMillis() - startTime) / 1000 / 60;
+            if (elapsedMinutes >= maxTotalMinutes) {
+                LOG.info("Max time limit reached after {} iterations", iteration);
+                break;
+            }
+
+            previousScore = currentScore;
+        }
+
+        return bestSolution;
+    }
+
+    private Solver<EmployeeSchedule> createSolver(Duration termination) {
         SolverFactory<EmployeeSchedule> solverFactory = SolverFactory.create(new SolverConfig()
                 .withSolutionClass(EmployeeSchedule.class)
                 .withEntityClasses(org.acme.model.Shift.class)
                 .withConstraintProviderClass(EmployeeSchedulingConstraintProvider.class)
-                .withTerminationSpentLimit(Duration.ofSeconds(spentLimit))
+                .withTerminationSpentLimit(termination)
                 .withMoveThreadCount(moveThreadCount)
                 .withEnvironmentMode(environmentMode)
                 .withRandomSeed(randomSeed));
 
-        Solver<EmployeeSchedule> solver = solverFactory.buildSolver();
-
-        // 3. Solve
-        return solver.solve(problem);
+        return solverFactory.buildSolver();
     }
 }

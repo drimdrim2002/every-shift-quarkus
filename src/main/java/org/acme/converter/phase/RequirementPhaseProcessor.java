@@ -6,7 +6,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.acme.api.dto.PlanningRequest;
@@ -47,7 +46,7 @@ public class RequirementPhaseProcessor implements PhaseProcessor {
             String shiftId = req.shiftId();
             int count = req.employeeCount();
 
-            PlanningRequest.ShiftInfo info = shiftInfoByCode.get(shiftId);
+            PlanningRequest.ShiftInfo info = shiftInfoById.get(shiftId);
             if (info == null) {
                 continue;
             }
