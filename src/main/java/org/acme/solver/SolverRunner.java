@@ -6,9 +6,7 @@ import org.acme.api.dto.PlanningRequest;
 import org.acme.converter.EmployeeScheduleBuilder;
 import org.acme.model.EmployeeSchedule;
 import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
-import org.acme.solver.output.SchedulePrinter;
 import org.acme.solver.validation.SolutionValidator;
-import org.acme.util.ScheduleExporter;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
@@ -93,17 +91,19 @@ public class SolverRunner {
             // 3. Output
             LOG.info("Score: {}", solution.getScore());
             solutionValidator.validate(solution, LOG);
-            SchedulePrinter.printSchedule(solution, LOG);
 
-            // Markdown export
-            if (exportEnabled) {
-                try {
-                    String outputPath = ScheduleExporter.exportToMarkdown(solution, exportOutputDir);
-                    LOG.info("Schedule exported to: {}", outputPath);
-                } catch (Exception e) {
-                    LOG.warn("Failed to export schedule to markdown: {}", e.getMessage());
-                }
-            }
+            // SchedulePrinter.printSchedule(solution, LOG);
+
+            // // Markdown export
+            // if (exportEnabled) {
+            // try {
+            // String outputPath = ScheduleExporter.exportToMarkdown(solution,
+            // exportOutputDir);
+            // LOG.info("Schedule exported to: {}", outputPath);
+            // } catch (Exception e) {
+            // LOG.warn("Failed to export schedule to markdown: {}", e.getMessage());
+            // }
+            // }
 
             LOG.info("--- Solver calculation ended ---");
             return solution;

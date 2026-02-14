@@ -53,7 +53,7 @@ API는 다음 출처로부터의 요청을 명시적으로 수락합니다:
 ```properties
 quarkus.http.cors=true
 # 허용 도메인
-quarkus.http.cors.origins=http://localhost:8080,http://localhost:3000,http://localhost:5173,https://*.run.app
+quarkus.http.cors.origins=http://localhost:8080,http://localhost:3000,http://localhost:5173,http://localhost:5174,https://*.run.app
 # 허용 메서드
 quarkus.http.cors.methods=GET,POST,OPTIONS,PUT,DELETE
 # 허용 헤더
