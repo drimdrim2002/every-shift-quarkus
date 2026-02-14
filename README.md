@@ -54,3 +54,19 @@ If you want to learn more about building native executables, please consult http
 Easily start your REST Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+
+## 테스트 실행 가이드
+
+`SolverRunnerTest` 확인은 아래 명령을 기준으로 실행합니다.
+
+```shell
+./mvnw -Dtest=SolverRunnerTest test
+```
+
+IntelliJ에서 JUnit을 직접 실행할 때는 VM options에 아래 값을 추가하세요.
+
+```text
+-Djava.util.logging.manager=org.jboss.logmanager.LogManager
+```
+
+이 설정이 없으면 테스트 시작 초기에 JBoss LogManager 경고가 출력될 수 있습니다.
