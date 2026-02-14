@@ -1,6 +1,7 @@
 package org.acme.export;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
+import org.acme.model.ScheduleState;
 import org.acme.model.Shift;
 
 /**
@@ -25,12 +27,32 @@ public class EmployeeViewExporter {
      * @return Markdown 형식 문자열
      */
     public String build(EmployeeSchedule schedule) {
+        LocalDate[] draftRange = resolveDraftRange(schedule);
+        if (draftRange != null) {
+            return build(schedule, draftRange[0], draftRange[1]);
+        }
+
+        // scheduleState가 없거나 불완전하면 현재 월 기준 fallback
+        YearMonth currentMonth = YearMonth.now();
+        return build(schedule, currentMonth.atDay(1), currentMonth.plusMonths(1).atDay(1));
+    }
+
+    /**
+     * 지정한 날짜 범위(시작 포함, 종료 제외)의 직원별 근무 현황 섹션을 생성합니다.
+     *
+     * @param schedule      스케줄
+     * @param startInclusive 시작일(포함)
+     * @param endExclusive   종료일(제외)
+     * @return Markdown 형식 문자열
+     */
+    String build(EmployeeSchedule schedule, LocalDate startInclusive, LocalDate endExclusive) {
         StringBuilder sb = new StringBuilder();
         sb.append("## 1. 직원별 근무 현황\n\n");
 
-        // 날짜 추출 (정렬됨)
+        // 날짜 추출 (대상 범위만, 정렬됨)
         Set<LocalDate> dates = schedule.getShiftList().stream()
                 .map(shift -> shift.getStart().toLocalDate())
+                .filter(date -> !date.isBefore(startInclusive) && date.isBefore(endExclusive))
                 .collect(Collectors.toCollection(TreeSet::new));
 
         // 직원별 날짜별 Shift 매핑
@@ -100,20 +122,37 @@ public class EmployeeViewExporter {
      */
     private String formatShiftCell(List<Shift> shifts) {
         if (shifts == null || shifts.isEmpty()) {
-            return "OFF";
+            return "";
         }
 
-        // 시작 시간순 정렬
-        shifts.sort(Comparator.comparing(Shift::getStart));
-
         return shifts.stream()
-                .map(shift -> {
-                    String code = ShiftCodeExtractor.extract(shift);
-                    String time = String.format("%s-%s",
-                            shift.getStart().toLocalTime().truncatedTo(java.time.temporal.ChronoUnit.HOURS),
-                            shift.getEnd().toLocalTime().truncatedTo(java.time.temporal.ChronoUnit.HOURS));
-                    return String.format("%s %s %s", code, time, shift.getLocation());
-                })
+                .sorted(Comparator.comparing(Shift::getStart))
+                .map(ShiftCodeExtractor::extract)
                 .collect(Collectors.joining("<br>"));
+    }
+
+    /**
+     * ScheduleState 기반 draft 날짜 범위를 계산합니다.
+     *
+     * @return [startInclusive, endExclusive] 또는 null
+     */
+    private LocalDate[] resolveDraftRange(EmployeeSchedule schedule) {
+        if (schedule == null) {
+            return null;
+        }
+
+        ScheduleState scheduleState = schedule.getScheduleState();
+        if (scheduleState == null) {
+            return null;
+        }
+
+        LocalDate startInclusive = scheduleState.getFirstDraftDate();
+        Integer draftLength = scheduleState.getDraftLength();
+        if (startInclusive == null || draftLength == null || draftLength <= 0) {
+            return null;
+        }
+
+        LocalDate endExclusive = startInclusive.plusDays(draftLength);
+        return new LocalDate[] { startInclusive, endExclusive };
     }
 }

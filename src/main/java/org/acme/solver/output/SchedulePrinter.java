@@ -18,6 +18,15 @@ import io.quarkus.runtime.LaunchMode;
 public class SchedulePrinter {
 
     /**
+     * 로컬 실행 여부를 반환합니다.
+     * DEVELOPMENT/TEST 모드만 로컬로 간주합니다.
+     */
+    public static boolean isLocalLaunchMode() {
+        LaunchMode launchMode = LaunchMode.current();
+        return launchMode == LaunchMode.DEVELOPMENT || launchMode == LaunchMode.TEST;
+    }
+
+    /**
      * 스케줄을 로그로 출력합니다.
      *
      * @param schedule 출력할 스케줄
@@ -25,8 +34,7 @@ public class SchedulePrinter {
      */
     public static void printSchedule(EmployeeSchedule schedule, Logger logger) {
         // dev 또는 test 모드에서만 실행
-        LaunchMode launchMode = LaunchMode.current();
-        if (launchMode != LaunchMode.DEVELOPMENT && launchMode != LaunchMode.TEST) {
+        if (!isLocalLaunchMode()) {
             return;
         }
 

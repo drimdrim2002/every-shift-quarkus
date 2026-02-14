@@ -4,8 +4,10 @@ import java.time.Duration;
 
 import org.acme.api.dto.PlanningRequest;
 import org.acme.converter.EmployeeScheduleBuilder;
+import org.acme.export.ScheduleExportCoordinator;
 import org.acme.model.EmployeeSchedule;
 import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
+import org.acme.solver.output.SchedulePrinter;
 import org.acme.solver.validation.SolutionValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.optaplanner.core.api.solver.Solver;
@@ -66,6 +68,7 @@ public class SolverRunner {
     int minIterations;
 
     private final SolutionValidator solutionValidator = new SolutionValidator();
+    private final ScheduleExportCoordinator scheduleExportCoordinator = new ScheduleExportCoordinator();
 
     public void run(String jsonInput) {
         runWithResult(jsonInput);
@@ -92,18 +95,14 @@ public class SolverRunner {
             LOG.info("Score: {}", solution.getScore());
             solutionValidator.validate(solution, LOG);
 
-            // SchedulePrinter.printSchedule(solution, LOG);
-
-            // // Markdown export
-            // if (exportEnabled) {
-            // try {
-            // String outputPath = ScheduleExporter.exportToMarkdown(solution,
-            // exportOutputDir);
-            // LOG.info("Schedule exported to: {}", outputPath);
-            // } catch (Exception e) {
-            // LOG.warn("Failed to export schedule to markdown: {}", e.getMessage());
-            // }
-            // }
+            if (exportEnabled && SchedulePrinter.isLocalLaunchMode()) {
+                try {
+                    String outputPath = scheduleExportCoordinator.exportToMarkdown(solution, exportOutputDir);
+                    LOG.info("Schedule exported to: {}", outputPath);
+                } catch (Exception e) {
+                    LOG.warn("Failed to export schedule to markdown: {}", e.getMessage(), e);
+                }
+            }
 
             LOG.info("--- Solver calculation ended ---");
             return solution;
