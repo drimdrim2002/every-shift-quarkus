@@ -133,6 +133,8 @@ Content-Type: application/json
 | `undesirable` | Array | 근무 기피/희망 일자 |
 | `requirements` | Array | 일자별 필요 인원 수 |
 
+`undesirable` 입력은 내부 도메인에서 `AvailabilityType.UNDESIRED`로 매핑되며, 점수 응답의 `undesired_soft_score` 계산에 사용됩니다.
+
 **Response** (성공 - 200 OK)
 ```json
 {

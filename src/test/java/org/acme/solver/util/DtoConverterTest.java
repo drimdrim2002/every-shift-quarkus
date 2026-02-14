@@ -64,16 +64,16 @@ public class DtoConverterTest {
         assertNotNull(nightShift,
                 "Should find the Night shift for So Han-ji starting on 2025-11-30 00:00 (which belongs to 2025-11-29 logical date)");
 
-        // 5. Verify UNDESIRABLE Availability
-        // Check specific request which should now be UNDESIRABLE
+        // 5. Verify UNDESIRED Availability
+        // Check specific request which should now be UNDESIRED
         // Employee: abf84b88-a0c8-4605-aa44-3aa9e5bb87a9
         // Date: 2025-12-31
-        boolean hasSpecificUndesirable = availabilities.stream()
+        boolean hasSpecificUndesired = availabilities.stream()
                 .anyMatch(a -> a.getEmployee().getId().equals("abf84b88-a0c8-4605-aa44-3aa9e5bb87a9")
                         && a.getDate().equals(LocalDate.of(2025, 12, 31))
-                        && a.getAvailabilityType() == AvailabilityType.UNDESIRABLE);
+                        && a.getAvailabilityType() == AvailabilityType.UNDESIRED);
 
-        assertTrue(hasSpecificUndesirable, "Should have specific UNDESIRABLE availability for abf84... on Dec 31");
+        assertTrue(hasSpecificUndesired, "Should have specific UNDESIRED availability for abf84... on Dec 31");
 
         // 4. Verify the "Evening" shift for another employee to ensure it didn't shift
         // dates

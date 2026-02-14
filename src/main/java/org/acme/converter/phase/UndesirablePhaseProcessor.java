@@ -3,7 +3,6 @@ package org.acme.converter.phase;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.acme.api.dto.PlanningRequest;
@@ -46,8 +45,8 @@ public class UndesirablePhaseProcessor implements PhaseProcessor {
                 continue;
             }
 
-            // Not locked -> Availability (UNDESIRABLE)
-            Availability availability = new Availability(employee, date, AvailabilityType.UNDESIRABLE);
+            // Not locked -> Availability (UNDESIRED)
+            Availability availability = new Availability(employee, date, AvailabilityType.UNDESIRED);
             availability.setId(availabilityIdGenerator.incrementAndGet());
             availabilityList.add(availability);
         }

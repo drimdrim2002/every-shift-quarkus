@@ -1,8 +1,14 @@
 package org.acme.solver.validation;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.acme.model.AvailabilityType;
 import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
@@ -46,7 +52,10 @@ public class SolutionValidator {
         // Phase 3: 핵심 - 동시성 검증
         simultaneousLocationValidator.validate(shiftsByEmployee, logger);
 
-        logger.info("=== Solution Validation Completed - No Violations Found ===");
+        // Soft 제약 진단 로깅 (예외를 던지지 않고 관측 정보만 제공)
+        logUndesiredSoftDiagnostics(schedule, logger);
+
+        logger.info("=== Solution Validation Completed - No hard-constraint violations found ===");
     }
 
     /**
@@ -56,5 +65,42 @@ public class SolutionValidator {
         return schedule.getShiftList().stream()
                 .filter(shift -> shift.getEmployee() != null)
                 .collect(java.util.stream.Collectors.groupingBy(Shift::getEmployee));
+    }
+
+    private void logUndesiredSoftDiagnostics(EmployeeSchedule schedule, Logger logger) {
+        Map<String, Set<LocalDate>> undesiredDatesByEmployeeId = new HashMap<>();
+        if (schedule.getAvailabilityList() != null) {
+            schedule.getAvailabilityList().stream()
+                    .filter(availability -> availability.getEmployee() != null)
+                    .filter(availability -> availability.getAvailabilityType() == AvailabilityType.UNDESIRED)
+                    .forEach(availability -> undesiredDatesByEmployeeId
+                            .computeIfAbsent(availability.getEmployee().getId(), key -> new HashSet<>())
+                            .add(availability.getDate()));
+        }
+
+        int undesiredMatchCount = 0;
+        int undesiredPenaltyMinutes = 0;
+        if (schedule.getShiftList() != null) {
+            for (Shift shift : schedule.getShiftList()) {
+                Employee employee = shift.getEmployee();
+                if (employee == null) {
+                    continue;
+                }
+
+                Set<LocalDate> undesiredDates = undesiredDatesByEmployeeId.get(employee.getId());
+                if (undesiredDates == null) {
+                    continue;
+                }
+
+                if (undesiredDates.contains(shift.getStart().toLocalDate())) {
+                    undesiredMatchCount++;
+                    undesiredPenaltyMinutes += (int) Duration.between(shift.getStart(), shift.getEnd()).toMinutes();
+                }
+            }
+        }
+
+        logger.info(
+                "Soft diagnostics: undesired_match_count={}, undesired_penalty_minutes={}",
+                undesiredMatchCount, undesiredPenaltyMinutes);
     }
 }
