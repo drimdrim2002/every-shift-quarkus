@@ -97,7 +97,7 @@ public class SolverRunner {
 
             if (exportEnabled && SchedulePrinter.isLocalLaunchMode()) {
                 try {
-                    String outputPath = scheduleExportCoordinator.exportToMarkdown(solution, exportOutputDir);
+                    String outputPath = scheduleExportCoordinator.exportToJson(solution, exportOutputDir);
                     LOG.info("Schedule exported to: {}", outputPath);
                 } catch (Exception e) {
                     LOG.warn("Failed to export schedule to markdown: {}", e.getMessage(), e);

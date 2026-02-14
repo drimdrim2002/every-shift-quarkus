@@ -23,11 +23,12 @@ public class ScheduleExportCoordinator {
     private final StatisticsViewExporter statisticsViewExporter = new StatisticsViewExporter();
     private final LocationViewExporter locationViewExporter = new LocationViewExporter();
     private final TimelineViewExporter timelineViewExporter = new TimelineViewExporter();
+    private final JsonScheduleExporter jsonScheduleExporter = new JsonScheduleExporter();
 
     /**
      * 스케줄을 Markdown 파일로 저장합니다.
      *
-     * @param schedule OptaPlanner 솔루션
+     * @param schedule  OptaPlanner 솔루션
      * @param outputDir 출력 디렉토리 경로
      * @return 생성된 파일의 절대 경로
      * @throws IOException 파일 생성 실패 시
@@ -48,6 +49,34 @@ public class ScheduleExportCoordinator {
 
         // 파일 저장
         Files.writeString(outputPath, markdown);
+
+        return outputPath.toAbsolutePath().toString();
+    }
+
+    /**
+     * 스케줄을 JSON 파일로 저장합니다.
+     *
+     * @param schedule  OptaPlanner 솔루션
+     * @param outputDir 출력 디렉토리 경로
+     * @return 생성된 파일의 절대 경로
+     * @throws IOException 파일 생성 실패 시
+     */
+    public String exportToJson(EmployeeSchedule schedule, String outputDir) throws IOException {
+        String json = toJson(schedule);
+
+        // 디렉토리 생성
+        Path dir = Paths.get(outputDir);
+        if (!Files.exists(dir)) {
+            Files.createDirectories(dir);
+        }
+
+        // 파일명 생성 (schedule-20250130-103000.json)
+        String fileName = String.format("schedule-%s.json",
+                LocalDateTime.now().format(FILE_TIMESTAMP_FORMAT));
+        Path outputPath = dir.resolve(fileName);
+
+        // 파일 저장
+        Files.writeString(outputPath, json);
 
         return outputPath.toAbsolutePath().toString();
     }
@@ -92,5 +121,15 @@ public class ScheduleExportCoordinator {
         sb.append("**생성일**: ").append(LocalDateTime.now().format(DATETIME_FORMAT)).append("\n");
         sb.append("**총 직원**: ").append(totalEmployees).append("명\n");
         sb.append("**총 시프트**: ").append(totalShifts).append("개\n\n");
+    }
+
+    /**
+     * 스케줄을 JSON 문자열로 변환합니다.
+     *
+     * @param schedule OptaPlanner 솔루션
+     * @return JSON 형식 문자열
+     */
+    public String toJson(EmployeeSchedule schedule) {
+        return jsonScheduleExporter.toJsonString(schedule);
     }
 }
