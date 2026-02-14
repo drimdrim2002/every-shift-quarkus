@@ -68,7 +68,7 @@ Client → GET /api/status/{execution_id} → 상태 조회 (Polling)
   - `status`: 실행 상태
   - `resultJson`: 직렬화된 결과
   - `errorMessage`: 에러 메시지
-  - `hardScore`, `softScore`: OptaPlanner 점수
+  - `hardScore`, `undesiredSoftScore`, `fairSoftScore`, `desiredSoftScore`: OptaPlanner 점수
   - `createdAt`, `startedAt`, `completedAt`: 타임스탬프
   - `requestJson`: 원본 요청 (디버깅용)
 
@@ -198,13 +198,92 @@ GET /api/status/{execution_id}
   "status": "COMPLETED",
   "score": {
     "hard_score": 0,
-    "soft_score": 5
+    "undesired_soft_score": -120,
+    "fair_soft_score": -5400,
+    "desired_soft_score": 240,
+    "legacy_soft_score_total": null
   },
   "result": null,
   "error_message": null,
   "created_at": "2025-01-31T10:00:00",
   "started_at": "2025-01-31T10:00:01",
   "completed_at": "2025-01-31T10:01:00"
+}
+```
+
+### 5.3 `/api/status` 점수 파서 계약 (프론트)
+
+- 입력 우선순위:
+  - 신규 스키마 우선: `hard_score`, `undesired_soft_score`, `fair_soft_score`, `desired_soft_score`, `legacy_soft_score_total`
+  - 레거시 fallback: `hard_score`, `soft_score`
+- 출력 계약:
+  - `hard`
+  - `undesired`
+  - `fair`
+  - `desired`
+  - `legacyTotal`
+  - `isLegacy`
+
+```typescript
+type StatusScoreV2 = {
+  hard_score: number | null;
+  undesired_soft_score: number | null;
+  fair_soft_score: number | null;
+  desired_soft_score: number | null;
+  legacy_soft_score_total: number | null;
+};
+
+type StatusScoreLegacy = {
+  hard_score: number;
+  soft_score: number;
+};
+
+type ParsedStatusScore = {
+  hard: number | null;
+  undesired: number | null;
+  fair: number | null;
+  desired: number | null;
+  legacyTotal: number | null;
+  isLegacy: boolean;
+};
+
+function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | undefined): ParsedStatusScore {
+  if (
+    score &&
+    ("undesired_soft_score" in score ||
+      "fair_soft_score" in score ||
+      "desired_soft_score" in score ||
+      "legacy_soft_score_total" in score)
+  ) {
+    return {
+      hard: score.hard_score ?? null,
+      undesired: score.undesired_soft_score ?? null,
+      fair: score.fair_soft_score ?? null,
+      desired: score.desired_soft_score ?? null,
+      legacyTotal: score.legacy_soft_score_total ?? null,
+      isLegacy: false
+    };
+  }
+
+  if (score && "soft_score" in score) {
+    return {
+      hard: score.hard_score ?? null,
+      undesired: null,
+      fair: null,
+      desired: null,
+      legacyTotal: score.soft_score ?? null,
+      isLegacy: true
+    };
+  }
+
+  return {
+    hard: null,
+    undesired: null,
+    fair: null,
+    desired: null,
+    legacyTotal: null,
+    isLegacy: false
+  };
 }
 ```
 

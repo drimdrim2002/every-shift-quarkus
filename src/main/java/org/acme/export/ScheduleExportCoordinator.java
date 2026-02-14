@@ -8,12 +8,16 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.acme.model.EmployeeSchedule;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * 스케줄 내보내기 코디네이터.
  * 개별 ViewExporter들을 조합하여 전체 Markdown 문서를 생성합니다.
  */
+@ApplicationScoped
 public class ScheduleExportCoordinator {
 
     private static final DateTimeFormatter FILE_TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
@@ -23,7 +27,8 @@ public class ScheduleExportCoordinator {
     private final StatisticsViewExporter statisticsViewExporter = new StatisticsViewExporter();
     private final LocationViewExporter locationViewExporter = new LocationViewExporter();
     private final TimelineViewExporter timelineViewExporter = new TimelineViewExporter();
-    private final JsonScheduleExporter jsonScheduleExporter = new JsonScheduleExporter();
+    @Inject
+    JsonScheduleExporter jsonScheduleExporter;
 
     /**
      * 스케줄을 Markdown 파일로 저장합니다.
@@ -112,7 +117,7 @@ public class ScheduleExportCoordinator {
      * 헤더 섹션을 생성합니다.
      */
     private void buildHeaderSection(EmployeeSchedule schedule, StringBuilder sb) {
-        HardSoftScore score = schedule.getScore();
+        BendableScore score = schedule.getScore();
         int totalEmployees = schedule.getEmployeeList().size();
         int totalShifts = schedule.getShiftList().size();
 

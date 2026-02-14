@@ -20,6 +20,7 @@ import org.acme.model.ScheduleState;
 import org.acme.model.Shift;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -69,7 +70,8 @@ class JsonScheduleExporterTest {
         ScheduleJsonDto result = exporter.toJson(schedule);
 
         // Then
-        assertEquals("0hard/-10soft", result.getMetadata().getScore());
+        assertEquals(BendableScore.of(new int[] { 0 }, new int[] { -10, 0, 0 }).toString(),
+                result.getMetadata().getScore());
         assertEquals(2, result.getMetadata().getTotalEmployees());
         assertEquals(5, result.getMetadata().getTotalShifts());
         assertNotNull(result.getMetadata().getGeneratedAt());
@@ -265,7 +267,7 @@ class JsonScheduleExporterTest {
         schedule.setAvailabilityList(new ArrayList<>());
 
         // Score 설정
-        schedule.setScore(org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore.of(0, -10));
+        schedule.setScore(BendableScore.of(new int[] { 0 }, new int[] { -10, 0, 0 }));
 
         return schedule;
     }

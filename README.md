@@ -63,10 +63,12 @@ Easily start your REST Web Services
 ./mvnw -Dtest=SolverRunnerTest test
 ```
 
-IntelliJ에서 JUnit을 직접 실행할 때는 VM options에 아래 값을 추가하세요.
+테스트 클래스패스에 등록된 JUnit LauncherSessionListener가 아래 시스템 프로퍼티를 자동 설정합니다.
 
 ```text
 -Djava.util.logging.manager=org.jboss.logmanager.LogManager
 ```
 
-이 설정이 없으면 테스트 시작 초기에 JBoss LogManager 경고가 출력될 수 있습니다.
+IntelliJ 실행 환경에서 동일 경고가 계속 보이면
+`Run | Edit Configurations | Edit configuration templates... | JUnit | VM options`
+에 같은 값을 추가해 템플릿 레벨에서 강제하세요.

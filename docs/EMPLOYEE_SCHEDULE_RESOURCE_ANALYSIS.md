@@ -20,7 +20,7 @@ The application uses the Repository pattern via Panache.
 ### 3. Optimization: OptaPlanner
 The resource integrates with OptaPlanner to solve the employee scheduling problem asynchronously.
 - **`SolverManager<EmployeeSchedule, Long>`**: Manages the background solving tasks.
-- **`SolutionManager<EmployeeSchedule, HardSoftScore>`**: Helper to calculate or update scores for a given solution.
+- **`SolutionManager<EmployeeSchedule, BendableScore>`**: Helper to calculate or update scores for a given solution.
 
 ---
 

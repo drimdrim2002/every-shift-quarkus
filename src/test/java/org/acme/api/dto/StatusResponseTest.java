@@ -62,4 +62,42 @@ class StatusResponseTest {
         // Then
         Assertions.assertNull(response.result());
     }
+
+    @Test
+    void testFrom_MapsBendableScoreFields() {
+        JobExecution job = new JobExecution();
+        job.setId("test-id");
+        job.setStatus(ExecutionStatus.COMPLETED);
+        job.setHardScore(0);
+        job.setUndesiredSoftScore(-120);
+        job.setFairSoftScore(-5400);
+        job.setDesiredSoftScore(240);
+
+        StatusResponse response = StatusResponse.from(job, objectMapper);
+
+        Assertions.assertNotNull(response.score());
+        Assertions.assertEquals(0, response.score().hardScore());
+        Assertions.assertEquals(-120, response.score().undesiredSoftScore());
+        Assertions.assertEquals(-5400, response.score().fairSoftScore());
+        Assertions.assertEquals(240, response.score().desiredSoftScore());
+        Assertions.assertNull(response.score().legacySoftScoreTotal());
+    }
+
+    @Test
+    void testFrom_MapsLegacySoftScore() {
+        JobExecution job = new JobExecution();
+        job.setId("test-id");
+        job.setStatus(ExecutionStatus.COMPLETED);
+        job.setHardScore(0);
+        job.setSoftScore(-6121);
+
+        StatusResponse response = StatusResponse.from(job, objectMapper);
+
+        Assertions.assertNotNull(response.score());
+        Assertions.assertEquals(0, response.score().hardScore());
+        Assertions.assertNull(response.score().undesiredSoftScore());
+        Assertions.assertNull(response.score().fairSoftScore());
+        Assertions.assertNull(response.score().desiredSoftScore());
+        Assertions.assertEquals(-6121, response.score().legacySoftScoreTotal());
+    }
 }

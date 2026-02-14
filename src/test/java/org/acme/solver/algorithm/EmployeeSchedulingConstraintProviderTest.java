@@ -1,6 +1,7 @@
 package org.acme.solver.algorithm;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
@@ -8,21 +9,23 @@ import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
 import org.junit.jupiter.api.Test;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.optaplanner.test.api.score.stream.ConstraintVerifier;
 
 class EmployeeSchedulingConstraintProviderTest {
 
-    ConstraintVerifier<EmployeeSchedulingConstraintProvider, EmployeeSchedule> constraintVerifier = ConstraintVerifier.build(
-            new EmployeeSchedulingConstraintProvider(), EmployeeSchedule.class, Shift.class);
+    ConstraintVerifier<EmployeeSchedulingConstraintProvider, EmployeeSchedule> constraintVerifier = ConstraintVerifier
+            .build(
+                    new EmployeeSchedulingConstraintProvider(), EmployeeSchedule.class, Shift.class);
 
     @Test
     void oneShiftPerDay() {
         Employee employee = new Employee();
         employee.setId("E1");
         employee.setName("Test Employee");
-        
+
         LocalDate date = LocalDate.of(2025, 1, 1);
-        
+
         Shift shift1 = new Shift();
         shift1.setId(1L);
         shift1.setEmployee(employee);
@@ -66,57 +69,56 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
-    void undesiredDayForEmployee() {
-        Employee employee = new Employee();
-        employee.setId("E1");
-        employee.setName("Test Employee");
 
+    void softScoreLevels_UndesiredAndFair() {
+        Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift shift = createShift(1L, employee, date, 9, 17);
+        Availability availability = new Availability(employee, date, AvailabilityType.UNDESIRED);
 
-        Shift shift = new Shift();
-        shift.setId(1L);
-        shift.setEmployee(employee);
-        shift.setStart(date.atTime(9, 0));
-        shift.setEnd(date.atTime(17, 0)); // 480분 (8시간)
-
-        Availability undesiredAvailability = new Availability(employee, date, AvailabilityType.UNDESIRED);
-
-        // ConstraintVerifier는 가중치가 적용되기 전의 기본 점수를 반환합니다.
-        // 실제 solver에서는 480분 × 1000 = 480,000 패널티가 적용됩니다.
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
-                .given(shift, undesiredAvailability)
-                .penalizesBy(480);
+        constraintVerifier.verifyThat()
+                .given(shift, availability)
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -480, -1, 0 }));
     }
 
     @Test
-    void fairShiftDistribution() {
-        Employee employee = new Employee();
-        employee.setId("E1");
-        employee.setName("Test Employee");
-
+    void softScoreLevels_FairOnly() {
+        Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift shift = createShift(1L, employee, date, 9, 17);
 
-        Shift shift1 = new Shift();
-        shift1.setId(1L);
-        shift1.setEmployee(employee);
-        shift1.setStart(date.atTime(9, 0));
-        shift1.setEnd(date.atTime(17, 0));
+        constraintVerifier.verifyThat()
+                .given(shift)
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -1, 0 }));
+    }
 
-        Shift shift2 = new Shift();
-        shift2.setId(2L);
-        shift2.setEmployee(employee);
-        shift2.setStart(date.plusDays(1).atTime(9, 0));
-        shift2.setEnd(date.plusDays(1).atTime(17, 0));
+    @Test
+    void softScoreLevels_DesiredAndFair() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift shift = createShift(1L, employee, date, 9, 17);
+        Availability availability = new Availability(employee, date, AvailabilityType.DESIRED);
 
-        Shift shift3 = new Shift();
-        shift3.setId(3L);
-        shift3.setEmployee(employee);
-        shift3.setStart(date.plusDays(2).atTime(9, 0));
-        shift3.setEnd(date.plusDays(2).atTime(17, 0));
+        constraintVerifier.verifyThat()
+                .given(shift, availability)
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -1, 480 }));
+    }
 
-        // 예상 패널티: 3² = 9 (shiftCount²)
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
-                .given(shift1, shift2, shift3)
-                .penalizesBy(9);
+    private Employee createEmployee(String id) {
+        Employee employee = new Employee();
+        employee.setId(id);
+        employee.setName("Test Employee " + id);
+        employee.setSkillSet(Set.of("ALL"));
+        return employee;
+    }
+
+    private Shift createShift(Long id, Employee employee, LocalDate date, int startHour, int endHour) {
+        Shift shift = new Shift();
+        shift.setId(id);
+        shift.setEmployee(employee);
+        shift.setStart(date.atTime(startHour, 0));
+        shift.setEnd(date.atTime(endHour, 0));
+        shift.setRequiredSkill("ALL");
+        return shift;
     }
 }

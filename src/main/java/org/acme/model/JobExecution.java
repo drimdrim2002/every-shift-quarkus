@@ -21,7 +21,10 @@ public class JobExecution {
     private String resultJson;            // 직렬화된 결과
     private String errorMessage;
     private Integer hardScore;
-    private Integer softScore;
+    private Integer softScore;            // 레거시 단일 soft 점수 (읽기 호환)
+    private Integer undesiredSoftScore;
+    private Integer fairSoftScore;
+    private Integer desiredSoftScore;
     private Long createdAt;               // Timestamp (epoch millis)
     private Long startedAt;
     private Long completedAt;
@@ -99,6 +102,30 @@ public class JobExecution {
 
     public void setSoftScore(Integer softScore) {
         this.softScore = softScore;
+    }
+
+    public Integer getUndesiredSoftScore() {
+        return undesiredSoftScore;
+    }
+
+    public void setUndesiredSoftScore(Integer undesiredSoftScore) {
+        this.undesiredSoftScore = undesiredSoftScore;
+    }
+
+    public Integer getFairSoftScore() {
+        return fairSoftScore;
+    }
+
+    public void setFairSoftScore(Integer fairSoftScore) {
+        this.fairSoftScore = fairSoftScore;
+    }
+
+    public Integer getDesiredSoftScore() {
+        return desiredSoftScore;
+    }
+
+    public void setDesiredSoftScore(Integer desiredSoftScore) {
+        this.desiredSoftScore = desiredSoftScore;
     }
 
     public Long getCreatedAt() {

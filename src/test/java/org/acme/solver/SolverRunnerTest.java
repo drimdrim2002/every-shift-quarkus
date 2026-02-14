@@ -17,7 +17,7 @@ public class SolverRunnerTest {
     @Test
     public void testRun() throws IOException {
         // Load sample.json content
-        String jsonInput = JsonLoader.loadAsString("/json/sample.json");
+        String jsonInput = JsonLoader.loadAsString("/json/request.json");
 
         // Run the solver
         // This should not throw exception

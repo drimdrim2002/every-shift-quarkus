@@ -15,7 +15,6 @@ import org.acme.model.Shift;
 import org.acme.service.JobExecutionService;
 import org.acme.solver.SolverRunner;
 import org.acme.solver.output.SchedulePrinter;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +70,7 @@ public class WorkerResource {
                         }
                     });
 
-            HardSoftScore score = bestSolution.getScore();
+            var score = bestSolution.getScore();
             log.info("Score: {}", score);
 
             validateSolution(requestDto, bestSolution);

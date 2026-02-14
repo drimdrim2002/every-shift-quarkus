@@ -5,7 +5,7 @@ import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.optaplanner.core.api.solver.SolverStatus;
 
 import java.util.List;
@@ -22,8 +22,8 @@ public class EmployeeSchedule {
     @PlanningEntityCollectionProperty
     List<Shift> shiftList;
 
-    @PlanningScore
-    HardSoftScore score;
+    @PlanningScore(bendableHardLevelsSize = 1, bendableSoftLevelsSize = 3)
+    BendableScore score;
 
     ScheduleState scheduleState;
 
@@ -72,11 +72,11 @@ public class EmployeeSchedule {
         this.shiftList = shiftList;
     }
 
-    public HardSoftScore getScore() {
+    public BendableScore getScore() {
         return score;
     }
 
-    public void setScore(HardSoftScore score) {
+    public void setScore(BendableScore score) {
         this.score = score;
     }
 

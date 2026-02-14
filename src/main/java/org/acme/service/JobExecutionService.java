@@ -10,6 +10,7 @@ import org.acme.model.EmployeeSchedule;
 import org.acme.model.ExecutionStatus;
 import org.acme.model.JobExecution;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,18 +48,17 @@ public class JobExecutionService {
         long now = Instant.now().toEpochMilli();
 
         try {
-            JobExecution job = JobExecution.builder()
-                    .id(executionId)
-                    .tenantId(request.organization().id())
-                    .organizationName(request.organization().name())
-                    .status(ExecutionStatus.PENDING)
-                    .createdAt(now)
-                    .requestJson(objectMapper.writeValueAsString(request))
-                    .build();
+            Map<String, Object> createFields = new HashMap<>();
+            createFields.put("id", executionId);
+            createFields.put("tenantId", request.organization().id());
+            createFields.put("organizationName", request.organization().name());
+            createFields.put("status", ExecutionStatus.PENDING);
+            createFields.put("createdAt", now);
+            createFields.put("requestJson", objectMapper.writeValueAsString(request));
 
             firestore.collection(collectionName)
                     .document(executionId)
-                    .set(job, SetOptions.merge())
+                    .set(createFields, SetOptions.merge())
                     .get();
 
             LOG.info("JobExecution created: id={}, organization={}", executionId, request.organization().name());
@@ -131,8 +131,7 @@ public class JobExecutionService {
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", ExecutionStatus.COMPLETED);
             updates.put("completedAt", now);
-            updates.put("hardScore", solution.getScore().hardScore());
-            updates.put("softScore", solution.getScore().softScore());
+            putScoreFields(updates, solution.getScore());
             updates.put("resultJson", serializeSolution(solution));
 
             firestore.collection(collectionName)
@@ -155,8 +154,7 @@ public class JobExecutionService {
         try {
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", ExecutionStatus.RUNNING);
-            updates.put("hardScore", solution.getScore().hardScore());
-            updates.put("softScore", solution.getScore().softScore());
+            putScoreFields(updates, solution.getScore());
             updates.put("resultJson", serializeSolution(solution));
 
             firestore.collection(collectionName)
@@ -208,6 +206,13 @@ public class JobExecutionService {
             LOG.error("Failed to serialize solution", e);
             return null;
         }
+    }
+
+    private void putScoreFields(Map<String, Object> updates, BendableScore score) {
+        updates.put("hardScore", score.hardScore(0));
+        updates.put("undesiredSoftScore", score.softScore(0));
+        updates.put("fairSoftScore", score.softScore(1));
+        updates.put("desiredSoftScore", score.softScore(2));
     }
 
     /**

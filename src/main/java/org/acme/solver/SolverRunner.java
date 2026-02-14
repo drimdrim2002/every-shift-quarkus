@@ -10,6 +10,7 @@ import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
 import org.acme.solver.output.SchedulePrinter;
 import org.acme.solver.validation.SolutionValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.optaplanner.core.config.solver.EnvironmentMode;
@@ -35,6 +36,9 @@ public class SolverRunner {
 
     @Inject
     org.acme.util.SolutionClonerUtil solutionClonerUtil;
+
+    @Inject
+    ScheduleExportCoordinator scheduleExportCoordinator;
 
     @ConfigProperty(name = "solver.termination.spent-limit", defaultValue = "10")
     long spentLimit;
@@ -68,7 +72,6 @@ public class SolverRunner {
     int minIterations;
 
     private final SolutionValidator solutionValidator = new SolutionValidator();
-    private final ScheduleExportCoordinator scheduleExportCoordinator = new ScheduleExportCoordinator();
 
     public void run(String jsonInput) {
         runWithResult(jsonInput);
@@ -132,7 +135,7 @@ public class SolverRunner {
 
         EmployeeSchedule problem = employeeScheduleBuilder.build(request);
         EmployeeSchedule bestSolution = null;
-        org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore previousScore = null;
+        BendableScore previousScore = null;
 
         long startTime = System.currentTimeMillis();
         int iteration = 0;
@@ -154,7 +157,7 @@ public class SolverRunner {
 
             // 실행
             EmployeeSchedule currentSolution = solver.solve(problem);
-            org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore currentScore = currentSolution.getScore();
+            BendableScore currentScore = currentSolution.getScore();
 
             LOG.info("Iteration {} check: currentScore={}, previousScore={}", iteration, currentScore, previousScore);
 

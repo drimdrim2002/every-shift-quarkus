@@ -68,10 +68,17 @@ public class JsonScheduleExporter {
     public String toJsonString(EmployeeSchedule schedule) {
         ScheduleJsonDto dto = toJson(schedule);
         try {
-            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+            return resolveObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dto);
         } catch (Exception e) {
             throw new RuntimeException("Failed to serialize schedule to JSON", e);
         }
+    }
+
+    /**
+     * CDI 미주입(직접 new) 상황에서도 JSON 직렬화가 가능하도록 기본 ObjectMapper를 보장합니다.
+     */
+    private ObjectMapper resolveObjectMapper() {
+        return objectMapper != null ? objectMapper : new ObjectMapper();
     }
 
     /**

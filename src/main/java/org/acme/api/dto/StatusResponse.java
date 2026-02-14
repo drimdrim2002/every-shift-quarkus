@@ -32,8 +32,11 @@ public record StatusResponse(
         @JsonProperty("started_at") LocalDateTime startedAt,
         @JsonProperty("completed_at") LocalDateTime completedAt) {
     public record ScoreInfo(
-            @JsonProperty("hard_score") int hardScore,
-            @JsonProperty("soft_score") int softScore) {
+            @JsonProperty("hard_score") Integer hardScore,
+            @JsonProperty("undesired_soft_score") Integer undesiredSoftScore,
+            @JsonProperty("fair_soft_score") Integer fairSoftScore,
+            @JsonProperty("desired_soft_score") Integer desiredSoftScore,
+            @JsonProperty("legacy_soft_score_total") Integer legacySoftScoreTotal) {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(StatusResponse.class);
@@ -43,8 +46,20 @@ public record StatusResponse(
      */
     public static StatusResponse from(JobExecution job, ObjectMapper objectMapper) {
         ScoreInfo scoreInfo = null;
-        if (job.getHardScore() != null && job.getSoftScore() != null) {
-            scoreInfo = new ScoreInfo(job.getHardScore(), job.getSoftScore());
+        if (hasBendableSoftScores(job)) {
+            scoreInfo = new ScoreInfo(
+                    job.getHardScore(),
+                    job.getUndesiredSoftScore(),
+                    job.getFairSoftScore(),
+                    job.getDesiredSoftScore(),
+                    null);
+        } else if (job.getHardScore() != null || job.getSoftScore() != null) {
+            scoreInfo = new ScoreInfo(
+                    job.getHardScore(),
+                    null,
+                    null,
+                    null,
+                    job.getSoftScore());
         }
 
         return new StatusResponse(
@@ -58,6 +73,12 @@ public record StatusResponse(
                 epochToLocalDateTime(job.getCreatedAt()),
                 epochToLocalDateTime(job.getStartedAt()),
                 epochToLocalDateTime(job.getCompletedAt()));
+    }
+
+    private static boolean hasBendableSoftScores(JobExecution job) {
+        return job.getUndesiredSoftScore() != null
+                || job.getFairSoftScore() != null
+                || job.getDesiredSoftScore() != null;
     }
 
     /**

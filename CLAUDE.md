@@ -67,7 +67,7 @@ The application behavior is controlled by the `app.mode` property (set via `APP_
 - **`EmployeeSchedule`** (`@PlanningSolution`): Container holding the solution, planning entities, and problem facts
 - **`Shift`** (`@PlanningEntity`): Planning entity with `employee` planning variable
 - **`Employee`**, **`Availability`**: Problem facts (immutable data)
-- **Scoring**: `HardSoftScore` - hard constraints must be satisfied, soft constraints optimize quality
+- **Scoring**: `BendableScore` (`1 hard + 3 soft`) - hard constraints must be satisfied first, then soft priorities are optimized lexicographically (`undesired > fair > desired`)
 
 ### Constraint Definition
 Location: `src/main/java/org/acme/solver/algorithm/EmployeeSchedulingConstraintProvider.java`

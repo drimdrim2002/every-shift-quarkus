@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -186,7 +186,7 @@ class ScheduleExporterTest {
         schedule.setShiftList(new ArrayList<>());
         schedule.setEmployeeList(new ArrayList<>());
         schedule.setAvailabilityList(new ArrayList<>());
-        schedule.setScore(HardSoftScore.ZERO);
+        schedule.setScore(BendableScore.zero(1, 3));
 
         // When
         String markdown = ScheduleExporter.toMarkdownTable(schedule);
@@ -205,7 +205,7 @@ class ScheduleExporterTest {
      */
     private EmployeeSchedule createTestSchedule() {
         EmployeeSchedule schedule = new EmployeeSchedule();
-        schedule.setScore(HardSoftScore.of(0, -5));
+        schedule.setScore(BendableScore.of(new int[]{0}, new int[]{0, -5, 0}));
 
         // 직원 생성 (TestDataBuilder 사용)
         Employee emp1 = TestDataBuilder.EmployeeBuilder.builder()

@@ -172,7 +172,10 @@ GET /api/status/{id}
   "status": "COMPLETED",
   "score": {
     "hard_score": 0,
-    "soft_score": -5
+    "undesired_soft_score": -120,
+    "fair_soft_score": -5400,
+    "desired_soft_score": 240,
+    "legacy_soft_score_total": null
   },
   "result_json": null,
   "error_message": null,
@@ -193,7 +196,10 @@ GET /api/status/{id}
 
 **Score 설명**
 - `hard_score`: **0 이상**이어야 모든 필수 제약 조건을 만족 (음수면 제약 위반 있음)
-- `soft_score`: **0에 가까울수록** 권장 사항을 잘 지킨 스케줄
+- `undesired_soft_score`: Soft 1순위 (값이 클수록 좋음, 페널티 중심)
+- `fair_soft_score`: Soft 2순위 (값이 클수록 좋음, 분배 균형)
+- `desired_soft_score`: Soft 3순위 (값이 클수록 좋음, 보상 중심)
+- `legacy_soft_score_total`: 구버전 문서 호환용 단일 soft 점수 (신규 문서에서는 `null`)
 
 ---
 
@@ -202,7 +208,68 @@ GET /api/status/{id}
 ### JavaScript/TypeScript 예시
 
 ```typescript
-const API_BASE_URL = "https://every-shift-api-service-554455861916.a.run.app";
+const API_BASE_URL = "https://every-shift-api-service-x3l5zfq7ya-du.a.run.app";
+
+type StatusScoreV2 = {
+  hard_score: number | null;
+  undesired_soft_score: number | null;
+  fair_soft_score: number | null;
+  desired_soft_score: number | null;
+  legacy_soft_score_total: number | null;
+};
+
+type StatusScoreLegacy = {
+  hard_score: number;
+  soft_score: number;
+};
+
+type ParsedStatusScore = {
+  hard: number | null;
+  undesired: number | null;
+  fair: number | null;
+  desired: number | null;
+  legacyTotal: number | null;
+  isLegacy: boolean;
+};
+
+function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | undefined): ParsedStatusScore {
+  if (
+    score &&
+    ("undesired_soft_score" in score ||
+      "fair_soft_score" in score ||
+      "desired_soft_score" in score ||
+      "legacy_soft_score_total" in score)
+  ) {
+    return {
+      hard: score.hard_score ?? null,
+      undesired: score.undesired_soft_score ?? null,
+      fair: score.fair_soft_score ?? null,
+      desired: score.desired_soft_score ?? null,
+      legacyTotal: score.legacy_soft_score_total ?? null,
+      isLegacy: false
+    };
+  }
+
+  if (score && "soft_score" in score) {
+    return {
+      hard: score.hard_score ?? null,
+      undesired: null,
+      fair: null,
+      desired: null,
+      legacyTotal: score.soft_score ?? null,
+      isLegacy: true
+    };
+  }
+
+  return {
+    hard: null,
+    undesired: null,
+    fair: null,
+    desired: null,
+    legacyTotal: null,
+    isLegacy: false
+  };
+}
 
 // 1. 스케줄 생성 요청
 async function createSchedule(requestData: any): Promise<string> {
@@ -229,6 +296,7 @@ async function pollScheduleStatus(executionId: string): Promise<any> {
   for (let i = 0; i < maxAttempts; i++) {
     const response = await fetch(`${API_BASE_URL}/api/status/${executionId}`);
     const data = await response.json();
+    const parsedScore = parseStatusScore(data.score);
 
     switch (data.status) {
       case "PENDING":
@@ -236,7 +304,7 @@ async function pollScheduleStatus(executionId: string): Promise<any> {
         await new Promise(resolve => setTimeout(resolve, interval));
         break;
       case "COMPLETED":
-        return data;
+        return { ...data, parsed_score: parsedScore };
       case "FAILED":
         throw new Error(data.error_message || "Schedule generation failed");
     }
@@ -254,7 +322,7 @@ async function generateSchedule(requestData: any) {
 
     // 상태 폴링 시작
     const result = await pollScheduleStatus(executionId);
-    console.log("Score:", result.score);
+    console.log("Parsed Score:", result.parsed_score);
 
     // 결과 렌더링
     return result;
