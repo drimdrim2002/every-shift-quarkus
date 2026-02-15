@@ -89,8 +89,8 @@ public class SolverRunner {
             LOG.info("Organization: {}", request.organization().name());
 
             // 2. Solve (Legacy or One-shot)
-            // Note: Cloud Run Job uses WorkerResource which calls solveIncremental
-            // manually.
+            // Note: WorkerResource는 점진 실행(solveIncremental)을 사용하고,
+            // 이 경로는 단순 실행/로컬 검증 시 사용됩니다.
             // This method is primarily for local testing or simple runs.
             EmployeeSchedule solution = solve(request);
 

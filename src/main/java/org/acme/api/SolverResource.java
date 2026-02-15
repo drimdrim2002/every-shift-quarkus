@@ -9,6 +9,7 @@ import org.acme.service.JobExecutionService;
 import org.acme.util.RequestValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.context.ManagedExecutor;
+import io.quarkus.runtime.LaunchMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,9 @@ public class SolverResource {
     @ConfigProperty(name = "app.solver.run-locally", defaultValue = "false")
     boolean runLocally;
 
+    @ConfigProperty(name = "quarkus.profile", defaultValue = "prod")
+    String activeProfile;
+
     @Inject
     WorkerResource workerResource;
 
@@ -81,17 +85,22 @@ public class SolverResource {
             LOG.info("JobExecution created with id: {}", executionId);
 
             // 3. 비동기 실행
-            if (runLocally) {
+            if (isLocalExecutionEnabled()) {
                 // 로컬 비동기 실행
                 managedExecutor.execute(() -> {
                     try {
                         workerResource.processEngineTask(executionId, requestDto);
                     } catch (Exception e) {
-                        LOG.error("Local solver execution failed: executionId={}", executionId, e);
-                        jobExecutionService.saveError(executionId, e.getMessage());
+                        LOG.error(
+                                "Local solver execution failed: executionId={} [shutdown 중 보조 저장 실패 가능]",
+                                executionId,
+                                e);
                     }
                 });
             } else {
+                if (runLocally && currentLaunchMode() == LaunchMode.NORMAL) {
+                    LOG.warn("run-locally=true 설정이 감지되었지만 운영 모드에서는 무시하고 Cloud Tasks를 사용합니다.");
+                }
                 // Cloud Tasks에 executionId를 Header로 전송
                 createCloudTask(requestDto, executionId);
             }
@@ -115,7 +124,7 @@ public class SolverResource {
     /**
      * Cloud Tasks에 Task 생성
      */
-    private void createCloudTask(PlanningRequest requestDto, String executionId) {
+    void createCloudTask(PlanningRequest requestDto, String executionId) {
         try (CloudTasksClient client = CloudTasksClient.create()) {
 
             // 1. Queue 경로 설정
@@ -151,5 +160,13 @@ public class SolverResource {
             jobExecutionService.saveError(executionId, "Failed to create Cloud Task: " + e.getMessage());
             throw new RuntimeException("Failed to create Cloud Task", e);
         }
+    }
+
+    boolean isLocalExecutionEnabled() {
+        return runLocally && "dev".equalsIgnoreCase(activeProfile);
+    }
+
+    LaunchMode currentLaunchMode() {
+        return LaunchMode.current();
     }
 }

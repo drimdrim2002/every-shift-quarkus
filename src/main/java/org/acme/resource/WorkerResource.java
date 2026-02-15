@@ -87,7 +87,14 @@ public class WorkerResource {
         } catch (Exception e) {
             log.error("Job failed: executionId={}", executionId, e);
             if (isNewExecution) {
-                jobExecutionService.saveError(executionId, e.getMessage());
+                try {
+                    jobExecutionService.saveError(executionId, e.getMessage());
+                } catch (Exception saveErrorException) {
+                    log.warn(
+                            "Failed to save error during shutdown-safe handling: executionId={} [Error Occurred After Shutdown]",
+                            executionId,
+                            saveErrorException);
+                }
             }
             throw e;
         }
