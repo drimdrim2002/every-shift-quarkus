@@ -37,6 +37,7 @@ public class JobExecutionService {
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
     @ConfigProperty(name = "gcp.firestore.collection", defaultValue = "job-executions")
     String collectionName;
 
