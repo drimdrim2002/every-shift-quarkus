@@ -69,6 +69,108 @@ class EmployeeSchedulingConstraintProviderTest {
                 .penalizesBy(60); // 12h(720m) - 11h(660m) = 60m penalty
     }
 
+    // 경계값 테스트 (Edge Case Tests)
+
+    @Test
+    void atLeast12HoursBetweenTwoShifts_EdgeCase_11h59m() {
+        // 17:00 종료 → 다음 날 04:59 시작 (719분 휴식)
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift shift1 = createShift(1L, employee, date.atTime(17, 0), date.atTime(17, 0), "D");
+        Shift shift2 = createShift(2L, employee, date.plusDays(1).atTime(4, 59), date.plusDays(1).atTime(12, 59), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(shift1, shift2)
+                .penalizesBy(1); // 720 - 719 = 1분 페널티
+    }
+
+    @Test
+    void atLeast12HoursBetweenTwoShifts_Exact12h() {
+        // 17:00 종료 → 다음 날 05:00 시작 (720분 휴식)
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift shift1 = createShift(1L, employee, date.atTime(17, 0), date.atTime(17, 0), "D");
+        Shift shift2 = createShift(2L, employee, date.plusDays(1).atTime(5, 0), date.plusDays(1).atTime(13, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(shift1, shift2)
+                .penalizesBy(0); // 정확히 12시간 → 페널티 없음
+    }
+
+    @Test
+    void atLeast12HoursBetweenTwoShifts_12h01m() {
+        // 17:00 종료 → 다음 날 05:01 시작 (721분 휴식)
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift shift1 = createShift(1L, employee, date.atTime(17, 0), date.atTime(17, 0), "D");
+        Shift shift2 = createShift(2L, employee, date.plusDays(1).atTime(5, 1), date.plusDays(1).atTime(13, 1), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(shift1, shift2)
+                .penalizesBy(0); // 12시간 1분 → 페널티 없음
+    }
+
+    // Shift 타입 조합 테스트 (Shift Type Combination Tests)
+
+    @Test
+    void atLeast12HoursBetweenTwoShifts_NightToDaySameDay() {
+        // Night (00:00-08:00) → Day (08:00-16:00) 같은 날
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift nightShift = createShift(1L, employee, date.atTime(0, 0), date.atTime(8, 0), "N");
+        Shift dayShift = createShift(2L, employee, date.atTime(8, 0), date.atTime(16, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(nightShift, dayShift)
+                .penalizesBy(720); // 0분 휴식 → 720분 페널티
+    }
+
+    @Test
+    void atLeast12HoursBetweenTwoShifts_DayToEveningSameDay() {
+        // Day (08:00-16:00) → Evening (16:00-00:00+1) 같은 날
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift dayShift = createShift(1L, employee, date.atTime(8, 0), date.atTime(16, 0), "D");
+        Shift eveningShift = createShift(2L, employee, date.atTime(16, 0), date.plusDays(1).atTime(0, 0), "E");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(dayShift, eveningShift)
+                .penalizesBy(720); // 0분 휴식 → 720분 페널티
+    }
+
+    @Test
+    void atLeast12HoursBetweenTwoShifts_EveningToNextDayDay() {
+        // Evening (16:00-00:00+1) → 다음 날 Day (08:00-16:00)
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift eveningShift = createShift(1L, employee, date.atTime(16, 0), date.plusDays(1).atTime(0, 0), "E");
+        Shift nextDayShift = createShift(2L, employee, date.plusDays(1).atTime(8, 0), date.plusDays(1).atTime(16, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(eveningShift, nextDayShift)
+                .penalizesBy(240); // 480분(8시간) 휴식 → 720 - 480 = 240분 페널티
+    }
+
+    @Test
+    void atLeast12HoursBetweenTwoShifts_DayToNextDayNight() {
+        // Day (08:00-16:00) → 다음 날 Night (00:00-08:00)
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift dayShift = createShift(1L, employee, date.atTime(8, 0), date.atTime(16, 0), "D");
+        Shift nextNightShift = createShift(2L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(dayShift, nextNightShift)
+                .penalizesBy(240); // 480분(8시간) 휴식 → 720 - 480 = 240분 페널티
+    }
+
     @Test
 
     void softScoreLevels_UndesiredAndFair() {

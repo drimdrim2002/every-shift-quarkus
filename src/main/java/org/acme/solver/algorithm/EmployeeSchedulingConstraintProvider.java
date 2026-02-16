@@ -63,59 +63,49 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
         public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
                 return new Constraint[] {
                                 // Hard constraints
-                                requiredSkill(constraintFactory),
-                                noOverlappingShifts(constraintFactory),
-                                atLeast12HoursBetweenTwoShifts(constraintFactory),
-                                oneShiftPerDay(constraintFactory),
+                                requiredSkill(constraintFactory), noOverlappingShifts(constraintFactory),
+                                atLeast12HoursBetweenTwoShifts(constraintFactory), oneShiftPerDay(constraintFactory),
                                 unavailableEmployee(constraintFactory),
                                 // Soft constraints (우선순위: undesired > fair > desired)
-                                undesiredDayForEmployee(constraintFactory),
-                                fairShiftDistribution(constraintFactory),
-                                desiredDayForEmployee(constraintFactory)
-                };
+                                undesiredDayForEmployee(constraintFactory), fairShiftDistribution(constraintFactory),
+                                desiredDayForEmployee(constraintFactory) };
         }
 
         Constraint requiredSkill(ConstraintFactory constraintFactory) {
                 return constraintFactory.forEach(Shift.class)
                                 .filter(shift -> !shift.getEmployee().getSkillSet().contains(shift.getRequiredSkill()))
-                                .penalize(ONE_HARD)
-                                .asConstraint("Missing required skill");
+                                .penalize(ONE_HARD).asConstraint("Missing required skill");
         }
 
         Constraint noOverlappingShifts(ConstraintFactory constraintFactory) {
-                return constraintFactory.forEachUniquePair(
-                                Shift.class,
-                                Joiners.equal(Shift::getEmployee),
-                                Joiners.overlapping(Shift::getStart, Shift::getEnd))
+                return constraintFactory
+                                .forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee),
+                                                Joiners.overlapping(Shift::getStart, Shift::getEnd))
                                 .penalize(ONE_HARD, EmployeeSchedulingConstraintProvider::getMinuteOverlap)
                                 .asConstraint("Overlapping shift");
         }
 
         Constraint atLeast12HoursBetweenTwoShifts(ConstraintFactory constraintFactory) {
-                return constraintFactory.forEachUniquePair(
-                                Shift.class,
-                                Joiners.equal(Shift::getEmployee),
-                                Joiners.lessThanOrEqual(Shift::getEnd, Shift::getStart))
+                return constraintFactory
+                                .forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee),
+                                                Joiners.lessThanOrEqual(Shift::getEnd, Shift::getStart))
                                 .filter((firstShift,
                                                 secondShift) -> Duration
                                                                 .between(firstShift.getEnd(), secondShift.getStart())
-                                                                .toHours() < MIN_SHIFT_HOURS)
+                                                                .toMinutes() < MIN_SHIFT_HOURS * 60)
                                 .penalize(ONE_HARD, (firstShift, secondShift) -> {
                                         int breakLength = (int) Duration
                                                         .between(firstShift.getEnd(), secondShift.getStart())
                                                         .toMinutes();
                                         return (MIN_SHIFT_HOURS * 60) - breakLength;
-                                })
-                                .asConstraint("At least 12 hours between 2 shifts");
+                                }).asConstraint("At least 12 hours between 2 shifts");
         }
 
         Constraint oneShiftPerDay(ConstraintFactory constraintFactory) {
-                return constraintFactory.forEachUniquePair(
-                                Shift.class,
-                                Joiners.equal(Shift::getEmployee),
-                                Joiners.equal(shift -> shift.getStart().toLocalDate()))
-                                .penalize(ONE_HARD)
-                                .asConstraint("Max one shift per day");
+                return constraintFactory
+                                .forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee),
+                                                Joiners.equal(shift -> shift.getStart().toLocalDate()))
+                                .penalize(ONE_HARD).asConstraint("Max one shift per day");
         }
 
         Constraint unavailableEmployee(ConstraintFactory constraintFactory) {
@@ -158,9 +148,9 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 return constraintFactory.forEach(Shift.class)
                                 .groupBy(Shift::getEmployee, EmployeeSchedulingConstraintProvider::resolveShiftType,
                                                 ConstraintCollectors.count())
-                                .penalize(ONE_SOFT_FAIR, (employee, shiftType, shiftCount) -> getFairWeightByShiftType(
-                                                shiftType)
-                                                * shiftCount * shiftCount)
+                                .penalize(ONE_SOFT_FAIR,
+                                                (employee, shiftType, shiftCount) -> getFairWeightByShiftType(shiftType)
+                                                                * shiftCount * shiftCount)
                                 .asConstraint("Fair shift distribution");
         }
 
@@ -178,10 +168,10 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
 
         private static int getFairWeightByShiftType(String shiftType) {
                 return switch (shiftType) {
-                        case SHIFT_TYPE_NIGHT -> FAIR_WEIGHT_NIGHT;
-                        case SHIFT_TYPE_EVENING -> FAIR_WEIGHT_EVENING;
-                        case SHIFT_TYPE_DAY -> FAIR_WEIGHT_DAY;
-                        default -> FAIR_WEIGHT_DAY;
+                case SHIFT_TYPE_NIGHT -> FAIR_WEIGHT_NIGHT;
+                case SHIFT_TYPE_EVENING -> FAIR_WEIGHT_EVENING;
+                case SHIFT_TYPE_DAY -> FAIR_WEIGHT_DAY;
+                default -> FAIR_WEIGHT_DAY;
                 };
         }
 }
