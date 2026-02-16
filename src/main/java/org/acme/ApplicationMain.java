@@ -8,6 +8,7 @@ import org.acme.model.EmployeeSchedule;
 import org.acme.model.ExecutionStatus;
 import org.acme.service.JobExecutionService;
 import org.acme.solver.SolverRunner;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.nio.charset.StandardCharsets;
@@ -25,11 +26,13 @@ public class ApplicationMain implements QuarkusApplication {
     @Inject
     JobExecutionService jobExecutionService;
 
+    @ConfigProperty(name = "app.mode", defaultValue = "API")
+    String configuredAppMode;
+
     @Override
     public int run(String... args) throws Exception {
-        // 1. 환경 변수 확인 (기본값: API)
-        String appMode = System.getenv("APP_MODE");
-        if (appMode == null || appMode.isEmpty()) {
+        String appMode = configuredAppMode == null ? "API" : configuredAppMode.trim();
+        if (appMode.isEmpty()) {
             appMode = "API";
         }
 

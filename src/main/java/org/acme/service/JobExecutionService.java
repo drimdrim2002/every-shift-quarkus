@@ -21,6 +21,7 @@ import com.google.cloud.firestore.SetOptions;
 import io.quarkus.arc.Unremovable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Cloud Firestore를 사용한 Job Execution 상태 관리 서비스
@@ -30,6 +31,7 @@ import jakarta.inject.Inject;
 public class JobExecutionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(JobExecutionService.class);
+    private static final String DEFAULT_COLLECTION_NAME = "job-executions";
 
     @Inject
     Firestore firestore;
@@ -38,8 +40,25 @@ public class JobExecutionService {
     ObjectMapper objectMapper;
 
     @Inject
-    @ConfigProperty(name = "gcp.firestore.collection", defaultValue = "job-executions")
+    @ConfigProperty(name = "gcp.firestore.collection")
+    Optional<String> configuredCollectionName;
+
     String collectionName;
+
+    @PostConstruct
+    void init() {
+        String rawCollectionName = configuredCollectionName.orElse(DEFAULT_COLLECTION_NAME);
+        String normalizedCollectionName = rawCollectionName == null ? "" : rawCollectionName.trim();
+
+        if (normalizedCollectionName.isEmpty()) {
+            LOG.warn("gcp.firestore.collection is blank. Fallback to default collection '{}'.", DEFAULT_COLLECTION_NAME);
+            this.collectionName = DEFAULT_COLLECTION_NAME;
+        } else {
+            this.collectionName = normalizedCollectionName;
+        }
+
+        LOG.info("JobExecutionService initialized: firestoreCollection={}", this.collectionName);
+    }
 
     /**
      * 새로운 Job Execution 문서를 생성하고 executionId를 반환

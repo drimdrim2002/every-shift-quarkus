@@ -71,6 +71,9 @@ public class SolverRunner {
     @ConfigProperty(name = "solver.incremental.min-iterations", defaultValue = "2")
     int minIterations;
 
+    @ConfigProperty(name = "solver.incremental.max-iterations", defaultValue = "30")
+    int maxIterations;
+
     private final SolutionValidator solutionValidator = new SolutionValidator();
 
     public void run(String jsonInput) {
@@ -138,10 +141,11 @@ public class SolverRunner {
         BendableScore previousScore = null;
 
         long startTime = System.currentTimeMillis();
+        long deadlineEpochMs = startTime + Duration.ofMinutes(maxTotalMinutes).toMillis();
         int iteration = 0;
 
-        LOG.info("Starting incremental solver: executionId={}, iterationSeconds={}, maxTotalMinutes={}",
-                executionId, iterationSeconds, maxTotalMinutes);
+        LOG.info("Starting incremental solver: executionId={}, iterationSeconds={}, maxTotalMinutes={}, maxIterations={}",
+                executionId, iterationSeconds, maxTotalMinutes, maxIterations);
 
         while (true) {
             iteration++;
@@ -172,16 +176,22 @@ public class SolverRunner {
                 }
             }
 
-            // 종료 조건 1: 수렴
-            if (iteration >= minIterations && currentScore.equals(previousScore)) {
-                LOG.info("Converged after {} iterations. Score: {}", iteration, currentScore);
-                break;
-            }
+            TerminationReason terminationReason = determineTerminationReason(
+                    iteration,
+                    currentScore,
+                    previousScore,
+                    System.currentTimeMillis(),
+                    deadlineEpochMs);
 
-            // 종료 조건 2: 최대 시간 초과
-            long elapsedMinutes = (System.currentTimeMillis() - startTime) / 1000 / 60;
-            if (elapsedMinutes >= maxTotalMinutes) {
-                LOG.info("Max time limit reached after {} iterations", iteration);
+            if (terminationReason != TerminationReason.CONTINUE) {
+                if (terminationReason == TerminationReason.CONVERGED) {
+                    LOG.info("Converged after {} iterations. Score: {}", iteration, currentScore);
+                } else if (terminationReason == TerminationReason.DEADLINE_REACHED) {
+                    long elapsedMs = System.currentTimeMillis() - startTime;
+                    LOG.info("Max time limit reached after {} iterations (elapsed={}ms)", iteration, elapsedMs);
+                } else {
+                    LOG.info("Max iteration limit reached after {} iterations", iteration);
+                }
                 break;
             }
 
@@ -189,6 +199,26 @@ public class SolverRunner {
         }
 
         return bestSolution;
+    }
+
+    TerminationReason determineTerminationReason(int iteration,
+            BendableScore currentScore,
+            BendableScore previousScore,
+            long nowEpochMs,
+            long deadlineEpochMs) {
+        if (iteration >= minIterations && currentScore.equals(previousScore)) {
+            return TerminationReason.CONVERGED;
+        }
+
+        if (maxIterations > 0 && iteration >= maxIterations) {
+            return TerminationReason.MAX_ITERATIONS_REACHED;
+        }
+
+        if (nowEpochMs >= deadlineEpochMs) {
+            return TerminationReason.DEADLINE_REACHED;
+        }
+
+        return TerminationReason.CONTINUE;
     }
 
     private Solver<EmployeeSchedule> createSolver(Duration termination) {
@@ -202,5 +232,12 @@ public class SolverRunner {
                 .withRandomSeed(randomSeed));
 
         return solverFactory.buildSolver();
+    }
+
+    enum TerminationReason {
+        CONTINUE,
+        CONVERGED,
+        DEADLINE_REACHED,
+        MAX_ITERATIONS_REACHED
     }
 }

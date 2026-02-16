@@ -1,14 +1,17 @@
 package org.acme.api;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 import org.acme.api.dto.PlanningRequest;
 import org.acme.api.dto.SolveResponse;
 import org.acme.resource.WorkerResource;
+import org.acme.service.CloudRunJobInvoker;
 import org.acme.service.JobExecutionService;
 import org.acme.util.RequestValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.context.ManagedExecutor;
+import io.quarkus.runtime.LaunchMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +23,7 @@ import com.google.cloud.tasks.v2.OidcToken;
 import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Duration;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -59,6 +63,13 @@ public class SolverResource {
     @ConfigProperty(name = "app.solver.run-locally", defaultValue = "false")
     boolean runLocally;
 
+    @ConfigProperty(name = "app.dispatch.mode", defaultValue = "CLOUD_RUN_JOB")
+    String dispatchMode;
+
+    @Inject
+    @ConfigProperty(name = "quarkus.profile", defaultValue = "prod")
+    String activeProfile;
+
     @Inject
     WorkerResource workerResource;
 
@@ -68,32 +79,40 @@ public class SolverResource {
     @Inject
     JobExecutionService jobExecutionService;
 
+    @Inject
+    CloudRunJobInvoker cloudRunJobInvoker;
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response triggerJob(PlanningRequest requestDto) {
+        String executionId = null;
+
         try {
             // 1. Input Validation
             RequestValidator.validate(requestDto);
 
             // 2. Firestore에 실행 문서 생성 (PENDING)
-            String executionId = jobExecutionService.create(requestDto);
+            executionId = jobExecutionService.create(requestDto);
             LOG.info("JobExecution created with id: {}", executionId);
 
             // 3. 비동기 실행
-            if (runLocally) {
+            if (isLocalExecutionEnabled()) {
+                final String localExecutionId = executionId;
                 // 로컬 비동기 실행
                 managedExecutor.execute(() -> {
                     try {
-                        workerResource.processEngineTask(executionId, requestDto);
+                        workerResource.processEngineTask(localExecutionId, requestDto);
                     } catch (Exception e) {
-                        LOG.error("Local solver execution failed: executionId={}", executionId, e);
-                        jobExecutionService.saveError(executionId, e.getMessage());
+                        LOG.error("Local solver execution failed: executionId={} [shutdown 중 보조 저장 실패 가능]",
+                                localExecutionId, e);
                     }
                 });
             } else {
-                // Cloud Tasks에 executionId를 Header로 전송
-                createCloudTask(requestDto, executionId);
+                if (runLocally && currentLaunchMode() == LaunchMode.NORMAL) {
+                    LOG.warn("run-locally=true 설정이 감지되었지만 운영 모드에서는 무시하고 Cloud Tasks를 사용합니다.");
+                }
+                dispatchAsyncExecution(requestDto, executionId);
             }
 
             // 4. ID 반환
@@ -105,17 +124,34 @@ public class SolverResource {
                     .entity(new org.acme.api.dto.ErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
-            LOG.error("Failed to trigger job", e);
+            LOG.error("Failed to trigger job: executionId={}", executionId, e);
+            saveDispatchError(executionId, e);
             return Response.serverError()
                     .entity(new org.acme.api.dto.ErrorResponse("Failed to trigger job: " + e.getMessage()))
                     .build();
         }
     }
 
+    void dispatchAsyncExecution(PlanningRequest requestDto, String executionId) {
+        DispatchMode mode = resolveDispatchMode();
+
+        if (mode == DispatchMode.CLOUD_RUN_JOB) {
+            cloudRunJobInvoker.runJob(executionId, requestDto);
+            return;
+        }
+
+        LOG.warn("Dispatch mode CLOUD_TASKS selected. This mode is fallback-only for production.");
+        createCloudTask(requestDto, executionId);
+    }
+
+    DispatchMode resolveDispatchMode() {
+        return DispatchMode.fromRaw(dispatchMode);
+    }
+
     /**
      * Cloud Tasks에 Task 생성
      */
-    private void createCloudTask(PlanningRequest requestDto, String executionId) {
+    void createCloudTask(PlanningRequest requestDto, String executionId) {
         try (CloudTasksClient client = CloudTasksClient.create()) {
 
             // 1. Queue 경로 설정
@@ -127,6 +163,7 @@ public class SolverResource {
 
             // 3. Task 생성 (HTTP Request 형태 정의)
             Task.Builder taskBuilder = Task.newBuilder()
+                    .setDispatchDeadline(Duration.newBuilder().setSeconds(900).build())
                     .setHttpRequest(HttpRequest.newBuilder()
                             .setBody(ByteString.copyFrom(jsonPayload, StandardCharsets.UTF_8))
                             .setUrl(workerUrl)
@@ -147,9 +184,45 @@ public class SolverResource {
 
         } catch (Exception e) {
             LOG.error("Failed to create Cloud Task: executionId={}", executionId, e);
-            // Task 생성 실패 시 FAILED 상태로 저장
-            jobExecutionService.saveError(executionId, "Failed to create Cloud Task: " + e.getMessage());
             throw new RuntimeException("Failed to create Cloud Task", e);
+        }
+    }
+
+    private void saveDispatchError(String executionId, Exception error) {
+        if (executionId == null || executionId.isBlank()) {
+            return;
+        }
+
+        try {
+            jobExecutionService.saveError(executionId, "Failed to dispatch solver job: " + error.getMessage());
+        } catch (Exception saveError) {
+            LOG.error("Failed to persist dispatch error: executionId={}", executionId, saveError);
+        }
+    }
+
+    boolean isLocalExecutionEnabled() {
+        return runLocally && "dev".equalsIgnoreCase(activeProfile);
+    }
+
+    LaunchMode currentLaunchMode() {
+        return LaunchMode.current();
+    }
+
+    enum DispatchMode {
+        CLOUD_RUN_JOB,
+        CLOUD_TASKS;
+
+        static DispatchMode fromRaw(String raw) {
+            if (raw == null || raw.isBlank()) {
+                return CLOUD_RUN_JOB;
+            }
+
+            try {
+                return DispatchMode.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                SolverResource.LOG.warn("Unknown app.dispatch.mode='{}'. Fallback to CLOUD_RUN_JOB.", raw);
+                return CLOUD_RUN_JOB;
+            }
         }
     }
 }
