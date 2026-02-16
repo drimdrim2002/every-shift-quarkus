@@ -2,6 +2,7 @@ package org.acme.solver.algorithm;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
@@ -33,6 +34,14 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                         SOFT_DESIRED_INDEX, 1);
 
         private static final int MIN_SHIFT_HOURS = 12;
+        private static final String SHIFT_TYPE_DAY = "D";
+        private static final String SHIFT_TYPE_EVENING = "E";
+        private static final String SHIFT_TYPE_NIGHT = "N";
+        private static final String SHIFT_TYPE_UNKNOWN = "UNKNOWN";
+
+        private static final int FAIR_WEIGHT_DAY = 1;
+        private static final int FAIR_WEIGHT_EVENING = 5;
+        private static final int FAIR_WEIGHT_NIGHT = 10;
 
         public static int getMinuteOverlap(Shift shift1, Shift shift2) {
                 // The overlap of two timeslot occurs in the range common to both timeslots.
@@ -147,8 +156,32 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
 
         Constraint fairShiftDistribution(ConstraintFactory constraintFactory) {
                 return constraintFactory.forEach(Shift.class)
-                                .groupBy(Shift::getEmployee, ConstraintCollectors.count())
-                                .penalize(ONE_SOFT_FAIR, (employee, shiftCount) -> shiftCount * shiftCount)
+                                .groupBy(Shift::getEmployee, EmployeeSchedulingConstraintProvider::resolveShiftType,
+                                                ConstraintCollectors.count())
+                                .penalize(ONE_SOFT_FAIR, (employee, shiftType, shiftCount) -> getFairWeightByShiftType(
+                                                shiftType)
+                                                * shiftCount * shiftCount)
                                 .asConstraint("Fair shift distribution");
+        }
+
+        private static String resolveShiftType(Shift shift) {
+                if (shift.getShiftCode() == null) {
+                        return SHIFT_TYPE_UNKNOWN;
+                }
+
+                String normalized = shift.getShiftCode().trim().toUpperCase(Locale.ROOT);
+                if (normalized.isEmpty()) {
+                        return SHIFT_TYPE_UNKNOWN;
+                }
+                return normalized;
+        }
+
+        private static int getFairWeightByShiftType(String shiftType) {
+                return switch (shiftType) {
+                        case SHIFT_TYPE_NIGHT -> FAIR_WEIGHT_NIGHT;
+                        case SHIFT_TYPE_EVENING -> FAIR_WEIGHT_EVENING;
+                        case SHIFT_TYPE_DAY -> FAIR_WEIGHT_DAY;
+                        default -> FAIR_WEIGHT_DAY;
+                };
         }
 }

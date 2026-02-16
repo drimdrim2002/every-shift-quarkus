@@ -1,6 +1,7 @@
 package org.acme.solver.algorithm;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.acme.model.Availability;
@@ -93,6 +94,52 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
+    void fairShiftDistribution_EveningWeight() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift eveningShift = createShift(1L, employee, date.atTime(16, 0), date.plusDays(1).atTime(0, 0), "E");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+                .given(eveningShift)
+                .penalizesBy(5);
+    }
+
+    @Test
+    void fairShiftDistribution_NightWeight() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift nightShift = createShift(1L, employee, date.atTime(0, 0), date.atTime(8, 0), "N");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+                .given(nightShift)
+                .penalizesBy(10);
+    }
+
+    @Test
+    void fairShiftDistribution_NightQuadraticPenalty() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift nightShift1 = createShift(1L, employee, date.atTime(0, 0), date.atTime(8, 0), "N");
+        Shift nightShift2 = createShift(2L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0),
+                "N");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+                .given(nightShift1, nightShift2)
+                .penalizesBy(40);
+    }
+
+    @Test
+    void fairShiftDistribution_UnknownCodeFallbackWeight() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift unknownShift = createShift(1L, employee, date.atTime(9, 0), date.atTime(17, 0), "X");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+                .given(unknownShift)
+                .penalizesBy(1);
+    }
+
+    @Test
     void softScoreLevels_DesiredAndFair() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
@@ -113,11 +160,31 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     private Shift createShift(Long id, Employee employee, LocalDate date, int startHour, int endHour) {
+        return createShift(id, employee, date, startHour, endHour, "D");
+    }
+
+    private Shift createShift(Long id, Employee employee, LocalDate date, int startHour, int endHour, String shiftCode) {
         Shift shift = new Shift();
         shift.setId(id);
         shift.setEmployee(employee);
         shift.setStart(date.atTime(startHour, 0));
         shift.setEnd(date.atTime(endHour, 0));
+        shift.setShiftCode(shiftCode);
+        shift.setRequiredSkill("ALL");
+        return shift;
+    }
+
+    private Shift createShift(Long id, Employee employee, LocalDateTime start, LocalDateTime end) {
+        return createShift(id, employee, start, end, "D");
+    }
+
+    private Shift createShift(Long id, Employee employee, LocalDateTime start, LocalDateTime end, String shiftCode) {
+        Shift shift = new Shift();
+        shift.setId(id);
+        shift.setEmployee(employee);
+        shift.setStart(start);
+        shift.setEnd(end);
+        shift.setShiftCode(shiftCode);
         shift.setRequiredSkill("ALL");
         return shift;
     }

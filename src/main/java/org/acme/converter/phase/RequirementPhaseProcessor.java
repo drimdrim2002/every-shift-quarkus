@@ -86,8 +86,10 @@ public class RequirementPhaseProcessor implements PhaseProcessor {
         }
 
         String requiredSkill = "ALL";
-        return new Shift(shiftIdGenerator.incrementAndGet(),
+        Shift shift = new Shift(shiftIdGenerator.incrementAndGet(),
                 info.id(),
                 startDateTime, endDateTime, defaultLocation, requiredSkill, null);
+        shift.setShiftCode(info.code());
+        return shift;
     }
 }

@@ -1,11 +1,14 @@
 package org.acme.solver.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.acme.api.dto.PlanningRequest;
 import org.acme.model.Availability;
@@ -88,5 +91,32 @@ public class DtoConverterTest {
                 .orElse(null);
 
         assertNotNull(eveningShift, "Should find the Evening shift for Kim Na-bin starting on 2025-11-28 16:00");
+    }
+
+    @Test
+    public void testToEmployeeSchedule_ShiftCodeMapping() throws IOException {
+        PlanningRequest request = JsonLoader.load("/json/request.json", PlanningRequest.class);
+
+        EmployeeSchedule schedule = dtoConverter.toEmployeeSchedule(request);
+
+        Map<String, String> shiftCodeById = request.organization().shifts().stream()
+                .collect(Collectors.toMap(PlanningRequest.ShiftInfo::id, PlanningRequest.ShiftInfo::code));
+
+        boolean hasMappedShift = false;
+        for (Shift shift : schedule.getShiftList()) {
+            String shiftId = shift.getSupabaseId();
+            if (shiftId == null) {
+                continue;
+            }
+            String expectedCode = shiftCodeById.get(shiftId);
+            if (expectedCode == null) {
+                continue;
+            }
+            hasMappedShift = true;
+            assertEquals(expectedCode, shift.getShiftCode(),
+                    "Shift code must follow organization.shifts definition for shiftId=" + shiftId);
+        }
+
+        assertTrue(hasMappedShift, "At least one mapped shift should exist for shift-code mapping verification");
     }
 }

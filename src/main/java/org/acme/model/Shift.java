@@ -32,9 +32,14 @@ public class Shift {
     }
 
     String supabaseId;
+    String shiftCode;
 
     public String getSupabaseId() {
         return supabaseId;
+    }
+
+    public String getShiftCode() {
+        return shiftCode;
     }
 
     public Shift(Long id, String supabaseId, LocalDateTime start, LocalDateTime end, String location, String requiredSkill, Employee employee) {
@@ -90,6 +95,10 @@ public class Shift {
 
     public void setRequiredSkill(String requiredSkill) {
         this.requiredSkill = requiredSkill;
+    }
+
+    public void setShiftCode(String shiftCode) {
+        this.shiftCode = shiftCode;
     }
 
     public Employee getEmployee() {
