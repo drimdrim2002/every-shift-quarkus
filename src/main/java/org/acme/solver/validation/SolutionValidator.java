@@ -12,6 +12,7 @@ import org.acme.model.AvailabilityType;
 import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
+import org.acme.solver.ShiftDateMatcher;
 import org.slf4j.Logger;
 
 /**
@@ -25,6 +26,7 @@ public class SolutionValidator {
     private final OverlapValidator overlapValidator = new OverlapValidator();
     private final OneShiftPerDayValidator oneShiftPerDayValidator = new OneShiftPerDayValidator();
     private final AvailabilityValidator availabilityValidator = new AvailabilityValidator();
+    private final NightToDayBufferValidator nightToDayBufferValidator = new NightToDayBufferValidator();
     private final SimultaneousLocationValidator simultaneousLocationValidator = new SimultaneousLocationValidator();
 
     /**
@@ -48,6 +50,7 @@ public class SolutionValidator {
         overlapValidator.validate(shiftsByEmployee, logger);
         oneShiftPerDayValidator.validate(shiftsByEmployee, logger);
         availabilityValidator.validate(schedule, shiftsByEmployee, logger);
+        nightToDayBufferValidator.validate(shiftsByEmployee, logger);
 
         // Phase 3: 핵심 - 동시성 검증
         simultaneousLocationValidator.validate(shiftsByEmployee, logger);
@@ -82,6 +85,10 @@ public class SolutionValidator {
         int undesiredPenaltyMinutes = 0;
         if (schedule.getShiftList() != null) {
             for (Shift shift : schedule.getShiftList()) {
+                if (shift.isPinned()) {
+                    continue;
+                }
+
                 Employee employee = shift.getEmployee();
                 if (employee == null) {
                     continue;
@@ -92,9 +99,13 @@ public class SolutionValidator {
                     continue;
                 }
 
-                if (undesiredDates.contains(shift.getStart().toLocalDate())) {
+                int shiftDurationMinutes = (int) Duration.between(shift.getStart(), shift.getEnd()).toMinutes();
+                for (LocalDate undesiredDate : undesiredDates) {
+                    if (!ShiftDateMatcher.matchesActualOrLogicalDate(shift, undesiredDate)) {
+                        continue;
+                    }
                     undesiredMatchCount++;
-                    undesiredPenaltyMinutes += (int) Duration.between(shift.getStart(), shift.getEnd()).toMinutes();
+                    undesiredPenaltyMinutes += shiftDurationMinutes;
                 }
             }
         }

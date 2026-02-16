@@ -172,6 +172,79 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
+    void atLeast12HoursBetweenTwoShifts_WhenIdOrderDiffersFromTimeOrder() {
+        // ID 순서와 시간 순서가 달라도 실제 휴식시간(8시간)을 기준으로 페널티가 계산되어야 함
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift laterShiftWithLowerId = createShift(1L, employee, date.plusDays(1).atTime(8, 0),
+                date.plusDays(1).atTime(16, 0), "D");
+        Shift earlierShiftWithHigherId = createShift(2L, employee, date.atTime(16, 0), date.plusDays(1).atTime(0, 0),
+                "E");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast12HoursBetweenTwoShifts)
+                .given(laterShiftWithLowerId, earlierShiftWithHigherId)
+                .penalizesBy(240); // 8시간(480분) 휴식 → 720 - 480 = 240분 페널티
+    }
+
+    @Test
+    void nightToDayRequiresTwoDayBuffer_DPlus1() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        // logical N date = 2025-01-01 (start가 2025-01-02 00:00)
+        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift dayShift = createShift(2L, employee, date.plusDays(1).atTime(8, 0), date.plusDays(1).atTime(16, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
+                .given(nightShift, dayShift)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void nightToDayRequiresTwoDayBuffer_DPlus2() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        // logical N date = 2025-01-01 (start가 2025-01-02 00:00)
+        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift dayShift = createShift(2L, employee, date.plusDays(2).atTime(8, 0), date.plusDays(2).atTime(16, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
+                .given(nightShift, dayShift)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void nightToDayRequiresTwoDayBuffer_DPlus3() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        // logical N date = 2025-01-01 (start가 2025-01-02 00:00)
+        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift dayShift = createShift(2L, employee, date.plusDays(3).atTime(8, 0), date.plusDays(3).atTime(16, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
+                .given(nightShift, dayShift)
+                .penalizesBy(0);
+    }
+
+    @Test
+    void nightToDayRequiresTwoDayBuffer_IgnoresPinnedShifts() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift pinnedNightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0),
+                "N");
+        pinnedNightShift.setPinned(true);
+        Shift dayShift = createShift(2L, employee, date.plusDays(1).atTime(8, 0), date.plusDays(1).atTime(16, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
+                .given(pinnedNightShift, dayShift)
+                .penalizesBy(0);
+    }
+
+    @Test
 
     void softScoreLevels_UndesiredAndFair() {
         Employee employee = createEmployee("E1");
@@ -182,6 +255,59 @@ class EmployeeSchedulingConstraintProviderTest {
         constraintVerifier.verifyThat()
                 .given(shift, availability)
                 .scores(BendableScore.of(new int[] { 0 }, new int[] { -480, -1, 0 }));
+    }
+
+    @Test
+    void undesiredDayForEmployee_MatchesNightLogicalDate() {
+        Employee employee = createEmployee("E1");
+        LocalDate logicalDate = LocalDate.of(2025, 1, 5);
+        Shift nightShift = createShift(1L, employee, logicalDate.plusDays(1).atTime(0, 0), logicalDate.plusDays(1).atTime(8, 0),
+                "N");
+        Availability availability = new Availability(employee, logicalDate, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(nightShift, availability)
+                .penalizesBy(480);
+    }
+
+    @Test
+    void undesiredDayForEmployee_MatchesNightActualDate() {
+        Employee employee = createEmployee("E1");
+        LocalDate logicalDate = LocalDate.of(2025, 1, 5);
+        LocalDate actualDate = logicalDate.plusDays(1);
+        Shift nightShift = createShift(1L, employee, actualDate.atTime(0, 0), actualDate.atTime(8, 0), "N");
+        Availability availability = new Availability(employee, actualDate, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(nightShift, availability)
+                .penalizesBy(480);
+    }
+
+    @Test
+    void undesiredDayForEmployee_AppliesBothLogicalAndActualDates() {
+        Employee employee = createEmployee("E1");
+        LocalDate logicalDate = LocalDate.of(2025, 1, 5);
+        LocalDate actualDate = logicalDate.plusDays(1);
+        Shift nightShift = createShift(1L, employee, actualDate.atTime(0, 0), actualDate.atTime(8, 0), "N");
+        Availability logicalAvailability = new Availability(employee, logicalDate, AvailabilityType.UNDESIRED);
+        Availability actualAvailability = new Availability(employee, actualDate, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(nightShift, logicalAvailability, actualAvailability)
+                .penalizesBy(960);
+    }
+
+    @Test
+    void undesiredDayForEmployee_IgnoresPinnedShift() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 5);
+        Shift pinnedShift = createShift(1L, employee, date, 9, 17);
+        pinnedShift.setPinned(true);
+        Availability availability = new Availability(employee, date, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(pinnedShift, availability)
+                .penalizesBy(0);
     }
 
     @Test

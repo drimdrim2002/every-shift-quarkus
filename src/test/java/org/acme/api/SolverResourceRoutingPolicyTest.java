@@ -7,10 +7,10 @@ import org.acme.api.dto.PlanningRequest;
 import org.acme.service.CloudRunJobInvoker;
 import org.junit.jupiter.api.Test;
 
-class SolverResourceRoutingPolicyTest {
+public class SolverResourceRoutingPolicyTest {
 
     @Test
-    void runLocallyIsEnabledOnlyInDevProfile() {
+    public void runLocallyIsEnabledOnlyInDevProfile() {
         SolverResource resource = new SolverResource();
         resource.runLocally = true;
         resource.activeProfile = "dev";
@@ -19,7 +19,7 @@ class SolverResourceRoutingPolicyTest {
     }
 
     @Test
-    void runLocallyIsDisabledInNonDevProfile() {
+    public void runLocallyIsDisabledInNonDevProfile() {
         SolverResource resource = new SolverResource();
         resource.runLocally = true;
         resource.activeProfile = "prod";
@@ -28,7 +28,7 @@ class SolverResourceRoutingPolicyTest {
     }
 
     @Test
-    void runLocallyFlagFalseAlwaysDisablesLocalExecution() {
+    public void runLocallyFlagFalseAlwaysDisablesLocalExecution() {
         SolverResource resource = new SolverResource();
         resource.runLocally = false;
         resource.activeProfile = "dev";
@@ -37,7 +37,7 @@ class SolverResourceRoutingPolicyTest {
     }
 
     @Test
-    void dispatchModeCloudRunJobCallsCloudRunInvoker() {
+    public void dispatchModeCloudRunJobCallsCloudRunInvoker() {
         TestSolverResource resource = new TestSolverResource();
         StubCloudRunJobInvoker invoker = new StubCloudRunJobInvoker();
         resource.dispatchMode = "CLOUD_RUN_JOB";
@@ -50,7 +50,7 @@ class SolverResourceRoutingPolicyTest {
     }
 
     @Test
-    void dispatchModeCloudTasksCallsCloudTaskDispatcher() {
+    public void dispatchModeCloudTasksCallsCloudTaskDispatcher() {
         TestSolverResource resource = new TestSolverResource();
         StubCloudRunJobInvoker invoker = new StubCloudRunJobInvoker();
         resource.dispatchMode = "CLOUD_TASKS";

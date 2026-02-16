@@ -133,7 +133,7 @@ Content-Type: application/json
 | `undesirable` | Array | 근무 기피/희망 일자 |
 | `requirements` | Array | 일자별 필요 인원 수 |
 
-`undesirable` 입력은 내부 도메인에서 `AvailabilityType.UNDESIRED`로 매핑되며, 점수 응답의 `undesired_soft_score` 계산에 사용됩니다.
+`undesirable` 입력은 내부 도메인에서 `AvailabilityType.UNDESIRED`로 매핑됩니다. 점수 계산 시에는 **Draft 시프트만 대상**이며, 지정 날짜와 시프트의 **실제시간 겹침 또는 논리일 일치(Night는 시작일-1)** 조건을 만족하면 `undesired_soft_score`에 패널티가 반영됩니다.
 
 **Response** (성공 - 200 OK)
 ```json

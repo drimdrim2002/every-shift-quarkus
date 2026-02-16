@@ -131,23 +131,23 @@ class JsonScheduleExporterTest {
         ShiftDetailDto shift1 = shifts.get(0);
         assertEquals(LocalDate.of(2025, 12, 1), shift1.getDate());
         assertEquals("D", shift1.getCode());
-        assertEquals("08:00", shift1.getStartTime());
-        assertEquals("16:00", shift1.getEndTime());
+        assertEquals("2025-12-01 09:00", shift1.getStartTime());
+        assertEquals("2025-12-01 17:00", shift1.getEndTime());
         assertEquals("세브란스", shift1.getLocation());
 
         // E 시프트 (16:00-00:00)
         ShiftDetailDto shift2 = shifts.get(1);
         assertEquals(LocalDate.of(2025, 12, 2), shift2.getDate());
         assertEquals("E", shift2.getCode());
-        assertEquals("16:00", shift2.getStartTime());
-        assertEquals("00:00", shift2.getEndTime());
+        assertEquals("2025-12-02 17:00", shift2.getStartTime());
+        assertEquals("2025-12-02 23:59", shift2.getEndTime());
 
         // N 시프트 (00:00-08:00)
         ShiftDetailDto shift3 = shifts.get(2);
-        assertEquals(LocalDate.of(2025, 12, 3), shift3.getDate());
+        assertEquals(LocalDate.of(2025, 12, 2), shift3.getDate());
         assertEquals("N", shift3.getCode());
-        assertEquals("00:00", shift3.getStartTime());
-        assertEquals("08:00", shift3.getEndTime());
+        assertEquals("2025-12-03 00:00", shift3.getStartTime());
+        assertEquals("2025-12-03 08:00", shift3.getEndTime());
     }
 
     @Test

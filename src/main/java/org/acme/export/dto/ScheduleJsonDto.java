@@ -2,7 +2,6 @@ package org.acme.export.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -221,8 +220,10 @@ public class ScheduleJsonDto {
      */
     public static class ShiftDetailDto {
 
-        private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
-
+        /**
+         * 논리 근무일.
+         * Night(N)는 실제 시작일 - 1일, Day/Evening은 실제 시작일과 동일합니다.
+         */
         @JsonProperty("date")
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate date;
@@ -230,9 +231,15 @@ public class ScheduleJsonDto {
         @JsonProperty("code")
         private String code;
 
+        /**
+         * 실제 근무 시작 일시 (yyyy-MM-dd HH:mm).
+         */
         @JsonProperty("startTime")
         private String startTime;
 
+        /**
+         * 실제 근무 종료 일시 (yyyy-MM-dd HH:mm).
+         */
         @JsonProperty("endTime")
         private String endTime;
 

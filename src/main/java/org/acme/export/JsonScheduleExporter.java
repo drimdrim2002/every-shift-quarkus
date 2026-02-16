@@ -3,6 +3,7 @@ package org.acme.export;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,6 +33,8 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class JsonScheduleExporter {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Inject
     ObjectMapper objectMapper;
@@ -145,10 +148,10 @@ public class JsonScheduleExporter {
      * 시프트 상세 DTO로 변환합니다.
      */
     private ShiftDetailDto toShiftDetailDto(Shift shift) {
-        LocalDate date = shift.getStart().toLocalDate();
         String code = determineShiftCode(shift);
-        String startTime = formatTime(getStartTime(code));
-        String endTime = formatTime(getEndTime(code));
+        LocalDate date = resolveLogicalDate(shift, code);
+        String startTime = formatDateTime(shift.getStart());
+        String endTime = formatDateTime(shift.getEnd());
         String location = shift.getLocation();
 
         return new ShiftDetailDto(date, code, startTime, endTime, location);
@@ -168,35 +171,13 @@ public class JsonScheduleExporter {
         }
     }
 
-    /**
-     * 시프트 코드에 따른 시작 시간을 반환합니다.
-     */
-    private LocalTime getStartTime(String code) {
-        return switch (code) {
-            case "D" -> LocalTime.of(8, 0);
-            case "E" -> LocalTime.of(16, 0);
-            case "N" -> LocalTime.of(0, 0);
-            default -> LocalTime.MIDNIGHT;
-        };
+    private LocalDate resolveLogicalDate(Shift shift, String code) {
+        LocalDate actualStartDate = shift.getStart().toLocalDate();
+        return "N".equals(code) ? actualStartDate.minusDays(1) : actualStartDate;
     }
 
-    /**
-     * 시프트 코드에 따른 종료 시간을 반환합니다.
-     */
-    private LocalTime getEndTime(String code) {
-        return switch (code) {
-            case "D" -> LocalTime.of(16, 0);
-            case "E" -> LocalTime.of(0, 0);
-            case "N" -> LocalTime.of(8, 0);
-            default -> LocalTime.MIDNIGHT;
-        };
-    }
-
-    /**
-     * 시간을 HH:mm 형식으로 포맷팅합니다.
-     */
-    private String formatTime(LocalTime time) {
-        return time.toString();
+    private String formatDateTime(LocalDateTime dateTime) {
+        return dateTime.format(DATE_TIME_FORMATTER);
     }
 
     /**

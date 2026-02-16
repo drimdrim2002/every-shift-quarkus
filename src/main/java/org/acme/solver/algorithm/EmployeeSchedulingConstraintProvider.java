@@ -1,12 +1,15 @@
 package org.acme.solver.algorithm;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
 import org.acme.model.Shift;
+import org.acme.solver.ShiftDateMatcher;
 import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintCollectors;
@@ -34,6 +37,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                         SOFT_DESIRED_INDEX, 1);
 
         private static final int MIN_SHIFT_HOURS = 12;
+        private static final int MIN_NIGHT_TO_DAY_GAP_DAYS = 1;
+        private static final int MAX_NIGHT_TO_DAY_GAP_DAYS = 2;
         private static final String SHIFT_TYPE_DAY = "D";
         private static final String SHIFT_TYPE_EVENING = "E";
         private static final String SHIFT_TYPE_NIGHT = "N";
@@ -64,7 +69,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 return new Constraint[] {
                                 // Hard constraints
                                 requiredSkill(constraintFactory), noOverlappingShifts(constraintFactory),
-                                atLeast12HoursBetweenTwoShifts(constraintFactory), oneShiftPerDay(constraintFactory),
+                                atLeast12HoursBetweenTwoShifts(constraintFactory),
+                                nightToDayRequiresTwoDayBuffer(constraintFactory), oneShiftPerDay(constraintFactory),
                                 unavailableEmployee(constraintFactory),
                                 // Soft constraints (우선순위: undesired > fair > desired)
                                 undesiredDayForEmployee(constraintFactory), fairShiftDistribution(constraintFactory),
@@ -87,18 +93,28 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
 
         Constraint atLeast12HoursBetweenTwoShifts(ConstraintFactory constraintFactory) {
                 return constraintFactory
-                                .forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee),
-                                                Joiners.lessThanOrEqual(Shift::getEnd, Shift::getStart))
-                                .filter((firstShift,
-                                                secondShift) -> Duration
-                                                                .between(firstShift.getEnd(), secondShift.getStart())
-                                                                .toMinutes() < MIN_SHIFT_HOURS * 60)
+                                .forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee))
+                                .filter((firstShift, secondShift) -> {
+                                        int breakLength = getBreakLengthInMinutes(firstShift, secondShift);
+                                        return breakLength >= 0 && breakLength < MIN_SHIFT_HOURS * 60;
+                                })
                                 .penalize(ONE_HARD, (firstShift, secondShift) -> {
-                                        int breakLength = (int) Duration
-                                                        .between(firstShift.getEnd(), secondShift.getStart())
-                                                        .toMinutes();
+                                        int breakLength = getBreakLengthInMinutes(firstShift, secondShift);
                                         return (MIN_SHIFT_HOURS * 60) - breakLength;
                                 }).asConstraint("At least 12 hours between 2 shifts");
+        }
+
+        Constraint nightToDayRequiresTwoDayBuffer(ConstraintFactory constraintFactory) {
+                return constraintFactory.forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee))
+                                .filter((firstShift, secondShift) -> !firstShift.isPinned() && !secondShift.isPinned())
+                                .filter(EmployeeSchedulingConstraintProvider::isNightDayPair)
+                                .filter((firstShift, secondShift) -> {
+                                        long logicalDayGap = getNightToDayLogicalDayGap(firstShift, secondShift);
+                                        return logicalDayGap >= MIN_NIGHT_TO_DAY_GAP_DAYS
+                                                        && logicalDayGap <= MAX_NIGHT_TO_DAY_GAP_DAYS;
+                                })
+                                .penalize(ONE_HARD)
+                                .asConstraint("Night to day requires two-day buffer");
         }
 
         Constraint oneShiftPerDay(ConstraintFactory constraintFactory) {
@@ -134,12 +150,13 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
 
         Constraint undesiredDayForEmployee(ConstraintFactory constraintFactory) {
                 return constraintFactory.forEach(Shift.class)
+                                .filter(shift -> !shift.isPinned())
                                 .join(Availability.class,
-                                                Joiners.equal((Shift shift) -> shift.getStart().toLocalDate(),
-                                                                Availability::getDate),
                                                 Joiners.equal(Shift::getEmployee, Availability::getEmployee))
                                 .filter((shift, availability) -> availability
                                                 .getAvailabilityType() == AvailabilityType.UNDESIRED)
+                                .filter((shift, availability) -> ShiftDateMatcher
+                                                .matchesActualOrLogicalDate(shift, availability.getDate()))
                                 .penalize(ONE_SOFT_UNDESIRED, (shift, availability) -> getShiftDurationInMinutes(shift))
                                 .asConstraint("Undesired day for employee");
         }
@@ -173,5 +190,39 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 case SHIFT_TYPE_DAY -> FAIR_WEIGHT_DAY;
                 default -> FAIR_WEIGHT_DAY;
                 };
+        }
+
+        private static int getBreakLengthInMinutes(Shift firstShift, Shift secondShift) {
+                if (!firstShift.getEnd().isAfter(secondShift.getStart())) {
+                        return (int) Duration.between(firstShift.getEnd(), secondShift.getStart()).toMinutes();
+                }
+
+                if (!secondShift.getEnd().isAfter(firstShift.getStart())) {
+                        return (int) Duration.between(secondShift.getEnd(), firstShift.getStart()).toMinutes();
+                }
+
+                return -1;
+        }
+
+        private static boolean isNightDayPair(Shift firstShift, Shift secondShift) {
+                return (isNightShift(firstShift) && isDayShift(secondShift))
+                                || (isDayShift(firstShift) && isNightShift(secondShift));
+        }
+
+        private static long getNightToDayLogicalDayGap(Shift firstShift, Shift secondShift) {
+                Shift nightShift = isNightShift(firstShift) ? firstShift : secondShift;
+                Shift dayShift = isDayShift(firstShift) ? firstShift : secondShift;
+
+                LocalDate nightLogicalDate = nightShift.getStart().toLocalDate().minusDays(1);
+                LocalDate dayDate = dayShift.getStart().toLocalDate();
+                return ChronoUnit.DAYS.between(nightLogicalDate, dayDate);
+        }
+
+        private static boolean isNightShift(Shift shift) {
+                return SHIFT_TYPE_NIGHT.equals(resolveShiftType(shift));
+        }
+
+        private static boolean isDayShift(Shift shift) {
+                return SHIFT_TYPE_DAY.equals(resolveShiftType(shift));
         }
 }
