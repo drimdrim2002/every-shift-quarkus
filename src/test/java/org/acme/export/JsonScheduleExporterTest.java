@@ -151,6 +151,20 @@ class JsonScheduleExporterTest {
     }
 
     @Test
+    void toJson_Shifts_NightAt2300_UsesActualStartDate() {
+        EmployeeSchedule schedule = createSingleShiftSchedule(
+                LocalDateTime.of(2025, 12, 3, 23, 0),
+                LocalDateTime.of(2025, 12, 4, 7, 0),
+                "N");
+
+        ScheduleJsonDto result = exporter.toJson(schedule);
+        ShiftDetailDto shift = result.getEmployees().get(0).getShifts().get(0);
+
+        assertEquals("N", shift.getCode());
+        assertEquals(LocalDate.of(2025, 12, 3), shift.getDate());
+    }
+
+    @Test
     void toJson_Statistics_VerifiesCalculations() {
         // Given
         EmployeeSchedule schedule = createTestSchedule();
@@ -269,6 +283,36 @@ class JsonScheduleExporterTest {
         // Score 설정
         schedule.setScore(BendableScore.of(new int[] { 0 }, new int[] { -10, 0, 0 }));
 
+        return schedule;
+    }
+
+    private EmployeeSchedule createSingleShiftSchedule(LocalDateTime start, LocalDateTime end, String shiftCode) {
+        EmployeeSchedule schedule = new EmployeeSchedule();
+
+        ScheduleState scheduleState = new ScheduleState();
+        scheduleState.setTenantId("test-org");
+        scheduleState.setName("테스트 병원");
+        scheduleState.setFirstDraftDate(LocalDate.of(2025, 12, 1));
+        scheduleState.setDraftLength(30);
+        schedule.setScheduleState(scheduleState);
+
+        Employee employee = new Employee();
+        employee.setId("E001");
+        employee.setName("홍길동");
+        schedule.setEmployeeList(List.of(employee));
+
+        Shift shift = new Shift();
+        shift.setId(1L);
+        shift.setEmployee(employee);
+        shift.setStart(start);
+        shift.setEnd(end);
+        shift.setShiftCode(shiftCode);
+        shift.setLocation("세브란스");
+        shift.setRequiredSkill("ALL");
+
+        schedule.setShiftList(List.of(shift));
+        schedule.setAvailabilityList(new ArrayList<>());
+        schedule.setScore(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0 }));
         return schedule;
     }
 }

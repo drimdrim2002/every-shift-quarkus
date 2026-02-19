@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -118,5 +119,33 @@ public class DtoConverterTest {
         }
 
         assertTrue(hasMappedShift, "At least one mapped shift should exist for shift-code mapping verification");
+    }
+
+    @Test
+    public void testToEmployeeSchedule_DeduplicatesUndesirableDatePerEmployee() throws IOException {
+        PlanningRequest request = JsonLoader.load("/json/request.json", PlanningRequest.class);
+        PlanningRequest.AssignmentInfo duplicateTarget = request.undesirable().get(0);
+
+        List<PlanningRequest.AssignmentInfo> duplicatedUndesirable = new ArrayList<>(request.undesirable());
+        duplicatedUndesirable.add(duplicateTarget);
+
+        PlanningRequest duplicatedRequest = new PlanningRequest(
+                request.organization(),
+                request.employees(),
+                request.history(),
+                duplicatedUndesirable,
+                request.requirements());
+
+        EmployeeSchedule schedule = dtoConverter.convert(duplicatedRequest);
+
+        long matchCount = schedule.getAvailabilityList().stream()
+                .filter(availability -> availability.getAvailabilityType() == AvailabilityType.UNDESIRED)
+                .filter(availability -> availability.getEmployee() != null)
+                .filter(availability -> availability.getEmployee().getId().equals(duplicateTarget.employeeId()))
+                .filter(availability -> availability.getDate().equals(duplicateTarget.date()))
+                .count();
+
+        assertEquals(1, matchCount,
+                "Duplicate undesirable entries for same employee/date should be deduplicated to one availability");
     }
 }

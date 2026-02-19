@@ -1,8 +1,10 @@
 package org.acme.converter.phase;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.acme.api.dto.PlanningRequest;
@@ -36,12 +38,21 @@ public class UndesirablePhaseProcessor implements PhaseProcessor {
             return previousPhaseResult;
         }
 
+        Set<String> processedUndesiredKeys = new HashSet<>();
         for (PlanningRequest.AssignmentInfo req : request.undesirable()) {
             LocalDate date = req.date();
             String empId = req.employeeId();
+            if (date == null || empId == null || empId.isBlank()) {
+                continue;
+            }
 
             Employee employee = employeeMap.get(empId);
             if (employee == null) {
+                continue;
+            }
+
+            String dedupeKey = empId + "|" + date;
+            if (!processedUndesiredKeys.add(dedupeKey)) {
                 continue;
             }
 

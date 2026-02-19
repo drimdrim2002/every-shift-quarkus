@@ -188,60 +188,144 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
-    void nightToDayRequiresTwoDayBuffer_DPlus1() {
+    void noThreeConsecutiveNightShifts_PenalizesThreeConsecutiveLogicalDays() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
 
-        // logical N date = 2025-01-01 (start가 2025-01-02 00:00)
-        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
-        Shift dayShift = createShift(2L, employee, date.plusDays(1).atTime(8, 0), date.plusDays(1).atTime(16, 0), "D");
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+        Shift night3 = createShift(3L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
-                .given(nightShift, dayShift)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::noThreeConsecutiveNightShifts)
+                .given(night1, night2, night3)
                 .penalizesBy(1);
     }
 
     @Test
-    void nightToDayRequiresTwoDayBuffer_DPlus2() {
+    void noThreeConsecutiveNightShifts_OnlyTwoNights() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
 
-        // logical N date = 2025-01-01 (start가 2025-01-02 00:00)
-        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
-        Shift dayShift = createShift(2L, employee, date.plusDays(2).atTime(8, 0), date.plusDays(2).atTime(16, 0), "D");
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
-                .given(nightShift, dayShift)
-                .penalizesBy(1);
-    }
-
-    @Test
-    void nightToDayRequiresTwoDayBuffer_DPlus3() {
-        Employee employee = createEmployee("E1");
-        LocalDate date = LocalDate.of(2025, 1, 1);
-
-        // logical N date = 2025-01-01 (start가 2025-01-02 00:00)
-        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
-        Shift dayShift = createShift(2L, employee, date.plusDays(3).atTime(8, 0), date.plusDays(3).atTime(16, 0), "D");
-
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
-                .given(nightShift, dayShift)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::noThreeConsecutiveNightShifts)
+                .given(night1, night2)
                 .penalizesBy(0);
     }
 
     @Test
-    void nightToDayRequiresTwoDayBuffer_IgnoresPinnedShifts() {
+    void noThreeConsecutiveNightShifts_FourConsecutiveLogicalDays() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
 
-        Shift pinnedNightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0),
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+        Shift night3 = createShift(3L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
+        Shift night4 = createShift(4L, employee, date.plusDays(4).atTime(0, 0), date.plusDays(4).atTime(8, 0), "N");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::noThreeConsecutiveNightShifts)
+                .given(night1, night2, night3, night4)
+                .penalizesBy(2);
+    }
+
+    @Test
+    void noThreeConsecutiveNightShifts_GapBreaksConsecutive() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night3 = createShift(2L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
+        Shift night4 = createShift(3L, employee, date.plusDays(4).atTime(0, 0), date.plusDays(4).atTime(8, 0), "N");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::noThreeConsecutiveNightShifts)
+                .given(night1, night3, night4)
+                .penalizesBy(0);
+    }
+
+    @Test
+    void noThreeConsecutiveNightShifts_IncludesPinnedShifts() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift pinnedNight1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0),
                 "N");
-        pinnedNightShift.setPinned(true);
-        Shift dayShift = createShift(2L, employee, date.plusDays(1).atTime(8, 0), date.plusDays(1).atTime(16, 0), "D");
+        pinnedNight1.setPinned(true);
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+        Shift night3 = createShift(3L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightToDayRequiresTwoDayBuffer)
-                .given(pinnedNightShift, dayShift)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::noThreeConsecutiveNightShifts)
+                .given(pinnedNight1, night2, night3)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void atLeast32HoursFromNightToNextDayShift_EdgeCase31h59m() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift nextDayShift = createShift(2L, employee, date.plusDays(2).atTime(15, 59), date.plusDays(2).atTime(23, 59),
+                "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast32HoursFromNightToNextDayShift)
+                .given(nightShift, nextDayShift)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void atLeast32HoursFromNightToNextDayShift_Exact32Hours() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift nextDayShift = createShift(2L, employee, date.plusDays(2).atTime(16, 0), date.plusDays(3).atTime(0, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast32HoursFromNightToNextDayShift)
+                .given(nightShift, nextDayShift)
                 .penalizesBy(0);
+    }
+
+    @Test
+    void atLeast32HoursFromNightToNextDayShift_UsesNextDayOnly() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift nightShift = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift nearDayShift = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "D");
+        Shift farDayShift = createShift(3L, employee, date.plusDays(3).atTime(16, 0), date.plusDays(4).atTime(0, 0), "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast32HoursFromNightToNextDayShift)
+                .given(nightShift, nearDayShift, farDayShift)
+                .penalizesBy(960);
+    }
+
+    @Test
+    void atLeast32HoursFromNightToNextDayShift_NoFollowingDayShift() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift dayBeforeNight = createShift(1L, employee, date.plusDays(1).atTime(8, 0), date.plusDays(1).atTime(16, 0), "D");
+        Shift nightShift = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast32HoursFromNightToNextDayShift)
+                .given(dayBeforeNight, nightShift)
+                .penalizesBy(0);
+    }
+
+    @Test
+    void atLeast32HoursFromNightToNextDayShift_IncludesPinnedShifts() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift pinnedNight = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        pinnedNight.setPinned(true);
+        Shift nextDayShift = createShift(2L, employee, date.plusDays(2).atTime(15, 59), date.plusDays(2).atTime(23, 59),
+                "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast32HoursFromNightToNextDayShift)
+                .given(pinnedNight, nextDayShift)
+                .penalizesBy(1);
     }
 
     @Test
@@ -284,7 +368,33 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
-    void undesiredDayForEmployee_AppliesBothLogicalAndActualDates() {
+    void undesiredDayForEmployee_NightBeforeCutoff_UsesPreviousLogicalDate() {
+        Employee employee = createEmployee("E1");
+        LocalDate logicalDate = LocalDate.of(2025, 1, 5);
+        Shift nightShift = createShift(1L, employee, logicalDate.plusDays(1).atTime(5, 59), logicalDate.plusDays(1).atTime(13, 59),
+                "N");
+        Availability availability = new Availability(employee, logicalDate, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(nightShift, availability)
+                .penalizesBy(480);
+    }
+
+    @Test
+    void undesiredDayForEmployee_NightAtCutoff_DoesNotUsePreviousLogicalDate() {
+        Employee employee = createEmployee("E1");
+        LocalDate previousDate = LocalDate.of(2025, 1, 5);
+        Shift nightShift = createShift(1L, employee, previousDate.plusDays(1).atTime(6, 0), previousDate.plusDays(1).atTime(14, 0),
+                "N");
+        Availability availability = new Availability(employee, previousDate, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(nightShift, availability)
+                .penalizesBy(0);
+    }
+
+    @Test
+    void undesiredDayForEmployee_AppliesLogicalAndActualDatesOncePerShift() {
         Employee employee = createEmployee("E1");
         LocalDate logicalDate = LocalDate.of(2025, 1, 5);
         LocalDate actualDate = logicalDate.plusDays(1);
@@ -294,7 +404,20 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
                 .given(nightShift, logicalAvailability, actualAvailability)
-                .penalizesBy(960);
+                .penalizesBy(480);
+    }
+
+    @Test
+    void undesiredDayForEmployee_DeduplicatesSameDateMatchesPerShift() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 5);
+        Shift shift = createShift(1L, employee, date, 9, 17);
+        Availability firstAvailability = new Availability(employee, date, AvailabilityType.UNDESIRED);
+        Availability duplicateAvailability = new Availability(employee, date, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(shift, firstAvailability, duplicateAvailability)
+                .penalizesBy(480);
     }
 
     @Test

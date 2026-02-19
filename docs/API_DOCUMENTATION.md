@@ -133,7 +133,20 @@ Content-Type: application/json
 | `undesirable` | Array | 근무 기피/희망 일자 |
 | `requirements` | Array | 일자별 필요 인원 수 |
 
-`undesirable` 입력은 내부 도메인에서 `AvailabilityType.UNDESIRED`로 매핑됩니다. 점수 계산 시에는 **Draft 시프트만 대상**이며, 지정 날짜와 시프트의 **실제시간 겹침 또는 논리일 일치(Night는 시작일-1)** 조건을 만족하면 `undesired_soft_score`에 패널티가 반영됩니다.
+`undesirable` 입력은 내부 도메인에서 `AvailabilityType.UNDESIRED`로 매핑됩니다. 점수 계산 시에는 **Draft 시프트만 대상**이며, 지정 날짜와 시프트의 **실제시간 겹침 또는 논리일 일치** 조건을 만족하면 `undesired_soft_score`에 패널티가 반영됩니다. 단, **하나의 시프트는 최대 1회만 패널티**됩니다.
+
+Night 논리일 규칙(컷오프 06:00):
+- Night(`N`) 시작 시각이 `00:00~05:59`면 논리일은 `시작일 - 1일`
+- Night(`N`) 시작 시각이 `06:00~23:59`면 논리일은 `시작일`
+- Day/Evening은 논리일이 `시작일`
+
+예시:
+- `N 00:00~08:00` -> 논리일 `-1일`
+- `N 23:00~07:00` -> 논리일 `당일`
+
+추가 규칙:
+- `undesirable` 내 동일 `employee_id + date` 중복 항목은 서버에서 자동 dedupe 됩니다.
+- `undesirable.shift_id`, `undesirable.is_locked`는 현재 버전에서 제약 계산에 사용되지 않습니다(입력 호환용 필드).
 
 **Response** (성공 - 200 OK)
 ```json

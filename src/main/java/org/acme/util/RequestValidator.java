@@ -3,7 +3,9 @@ package org.acme.util;
 import org.acme.api.dto.PlanningRequest;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * PlanningRequest 유효성 검증 유틸리티
@@ -41,6 +43,15 @@ public class RequestValidator {
         if (request.employees() == null || request.employees().isEmpty()) {
             errors.add("At least one employee is required");
         }
+        Set<String> knownEmployeeIds = new HashSet<>();
+        if (request.employees() != null) {
+            for (PlanningRequest.EmployeeInfo employee : request.employees()) {
+                if (employee == null || employee.employeeId() == null || employee.employeeId().isBlank()) {
+                    continue;
+                }
+                knownEmployeeIds.add(employee.employeeId());
+            }
+        }
 
         // History/Undesirable 검증 (선택사항이지만 null 체크)
         if (request.history() == null) {
@@ -49,6 +60,24 @@ public class RequestValidator {
 
         if (request.undesirable() == null) {
             errors.add("Undesirable list cannot be null (use empty array if no undesirable shifts)");
+        } else {
+            for (int i = 0; i < request.undesirable().size(); i++) {
+                PlanningRequest.AssignmentInfo assignment = request.undesirable().get(i);
+                if (assignment == null) {
+                    errors.add("Undesirable[" + i + "] cannot be null");
+                    continue;
+                }
+                if (assignment.employeeId() == null || assignment.employeeId().isBlank()) {
+                    errors.add("Undesirable[" + i + "].employee_id is required");
+                } else if (!knownEmployeeIds.isEmpty() && !knownEmployeeIds.contains(assignment.employeeId())) {
+                    errors.add("Undesirable[" + i + "].employee_id must exist in employees list");
+                }
+                if (assignment.date() == null) {
+                    errors.add("Undesirable[" + i + "].date is required");
+                }
+                // Note: undesirable.shift_id / undesirable.is_locked are accepted for compatibility,
+                // but are ignored by current solver constraints.
+            }
         }
 
         // Requirements 검증

@@ -26,7 +26,7 @@ public class SolutionValidator {
     private final OverlapValidator overlapValidator = new OverlapValidator();
     private final OneShiftPerDayValidator oneShiftPerDayValidator = new OneShiftPerDayValidator();
     private final AvailabilityValidator availabilityValidator = new AvailabilityValidator();
-    private final NightToDayBufferValidator nightToDayBufferValidator = new NightToDayBufferValidator();
+    private final NightHardConstraintValidator nightHardConstraintValidator = new NightHardConstraintValidator();
     private final SimultaneousLocationValidator simultaneousLocationValidator = new SimultaneousLocationValidator();
 
     /**
@@ -50,7 +50,7 @@ public class SolutionValidator {
         overlapValidator.validate(shiftsByEmployee, logger);
         oneShiftPerDayValidator.validate(shiftsByEmployee, logger);
         availabilityValidator.validate(schedule, shiftsByEmployee, logger);
-        nightToDayBufferValidator.validate(shiftsByEmployee, logger);
+        nightHardConstraintValidator.validate(shiftsByEmployee, logger);
 
         // Phase 3: 핵심 - 동시성 검증
         simultaneousLocationValidator.validate(shiftsByEmployee, logger);
@@ -99,11 +99,10 @@ public class SolutionValidator {
                     continue;
                 }
 
-                int shiftDurationMinutes = (int) Duration.between(shift.getStart(), shift.getEnd()).toMinutes();
-                for (LocalDate undesiredDate : undesiredDates) {
-                    if (!ShiftDateMatcher.matchesActualOrLogicalDate(shift, undesiredDate)) {
-                        continue;
-                    }
+                boolean hasUndesiredMatch = undesiredDates.stream()
+                        .anyMatch(undesiredDate -> ShiftDateMatcher.matchesActualOrLogicalDate(shift, undesiredDate));
+                if (hasUndesiredMatch) {
+                    int shiftDurationMinutes = (int) Duration.between(shift.getStart(), shift.getEnd()).toMinutes();
                     undesiredMatchCount++;
                     undesiredPenaltyMinutes += shiftDurationMinutes;
                 }

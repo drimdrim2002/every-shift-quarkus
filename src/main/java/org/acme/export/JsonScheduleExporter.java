@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.ScheduleState;
 import org.acme.model.Shift;
+import org.acme.solver.ShiftDateMatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -149,7 +151,8 @@ public class JsonScheduleExporter {
      */
     private ShiftDetailDto toShiftDetailDto(Shift shift) {
         String code = determineShiftCode(shift);
-        LocalDate date = resolveLogicalDate(shift, code);
+        // Exported logical date must stay consistent with solver constraint policy.
+        LocalDate date = resolveLogicalDateForExport(shift, code);
         String startTime = formatDateTime(shift.getStart());
         String endTime = formatDateTime(shift.getEnd());
         String location = shift.getLocation();
@@ -161,6 +164,13 @@ public class JsonScheduleExporter {
      * 시프트 시작 시간에 따라 시프트 코드를 결정합니다.
      */
     private String determineShiftCode(Shift shift) {
+        if (shift.getShiftCode() != null) {
+            String normalized = shift.getShiftCode().trim().toUpperCase(Locale.ROOT);
+            if (!normalized.isEmpty()) {
+                return normalized;
+            }
+        }
+
         LocalTime start = shift.getStart().toLocalTime();
         if (start.isBefore(LocalTime.of(8, 0))) {
             return "N"; // 00:00-08:00
@@ -171,9 +181,18 @@ public class JsonScheduleExporter {
         }
     }
 
-    private LocalDate resolveLogicalDate(Shift shift, String code) {
-        LocalDate actualStartDate = shift.getStart().toLocalDate();
-        return "N".equals(code) ? actualStartDate.minusDays(1) : actualStartDate;
+    private LocalDate resolveLogicalDateForExport(Shift shift, String resolvedCode) {
+        if (shift.getShiftCode() != null && !shift.getShiftCode().isBlank()) {
+            return ShiftDateMatcher.resolveLogicalDate(shift);
+        }
+
+        // Fallback for legacy/test data where shiftCode is absent:
+        // infer code once, then delegate to the shared logical-date policy.
+        Shift fallbackShift = new Shift();
+        fallbackShift.setStart(shift.getStart());
+        fallbackShift.setEnd(shift.getEnd());
+        fallbackShift.setShiftCode(resolvedCode);
+        return ShiftDateMatcher.resolveLogicalDate(fallbackShift);
     }
 
     private String formatDateTime(LocalDateTime dateTime) {

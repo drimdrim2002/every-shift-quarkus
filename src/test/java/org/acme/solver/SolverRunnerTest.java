@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +27,8 @@ import jakarta.inject.Inject;
 @QuarkusTest
 public class SolverRunnerTest {
 
+    private static final long MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES = 32L * 60L;
+
     @Inject
     SolverRunner solverRunner;
 
@@ -44,9 +46,13 @@ public class SolverRunnerTest {
         assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(0),
                 "softScore(0) should match actual undesired penalty minutes from the solved schedule");
 
-        int nightToDayViolations = countNightToDayBufferViolations(solution);
-        assertEquals(0, nightToDayViolations,
-                "Draft 범위에서 Night 이후 1~2일 내 Day 배정은 없어야 합니다.");
+        int threeConsecutiveNightViolations = countThreeConsecutiveNightViolations(solution);
+        assertEquals(0, threeConsecutiveNightViolations,
+                "3연속 Night 배정은 없어야 합니다.");
+
+        int nightToNextDayMinimum32HourViolations = countNightToNextDayMinimum32HourViolations(solution);
+        assertEquals(0, nightToNextDayMinimum32HourViolations,
+                "Night 종료 후 다음 Day 시작까지 최소 32시간이 보장되어야 합니다.");
     }
 
     private int calculateUndesiredSoftScore(EmployeeSchedule schedule) {
@@ -71,18 +77,18 @@ public class SolverRunnerTest {
                 continue;
             }
 
-            int shiftDurationMinutes = (int) Duration.between(shift.getStart(), shift.getEnd()).toMinutes();
-            for (LocalDate undesiredDate : undesiredDates) {
-                if (ShiftDateMatcher.matchesActualOrLogicalDate(shift, undesiredDate)) {
-                    penaltyMinutes += shiftDurationMinutes;
-                }
+            boolean hasUndesiredMatch = undesiredDates.stream()
+                    .anyMatch(undesiredDate -> ShiftDateMatcher.matchesActualOrLogicalDate(shift, undesiredDate));
+            if (hasUndesiredMatch) {
+                int shiftDurationMinutes = (int) Duration.between(shift.getStart(), shift.getEnd()).toMinutes();
+                penaltyMinutes += shiftDurationMinutes;
             }
         }
 
         return -penaltyMinutes;
     }
 
-    private int countNightToDayBufferViolations(EmployeeSchedule schedule) {
+    private int countThreeConsecutiveNightViolations(EmployeeSchedule schedule) {
         if (schedule.getShiftList() == null) {
             return 0;
         }
@@ -93,25 +99,55 @@ public class SolverRunnerTest {
 
         int violations = 0;
         for (List<Shift> shifts : shiftsByEmployeeId.values()) {
-            List<Shift> draftShifts = shifts.stream()
-                    .filter(shift -> !shift.isPinned())
+            List<LocalDate> nightLogicalDates = shifts.stream()
+                    .filter(this::isNightShift)
+                    .map(ShiftDateMatcher::resolveLogicalDate)
+                    .sorted()
                     .toList();
+            for (int i = 0; i <= nightLogicalDates.size() - 3; i++) {
+                LocalDate first = nightLogicalDates.get(i);
+                LocalDate second = nightLogicalDates.get(i + 1);
+                LocalDate third = nightLogicalDates.get(i + 2);
+                if (second.equals(first.plusDays(1)) && third.equals(first.plusDays(2))) {
+                    violations++;
+                }
+            }
+        }
 
-            List<Shift> nightShifts = draftShifts.stream()
+        return violations;
+    }
+
+    private int countNightToNextDayMinimum32HourViolations(EmployeeSchedule schedule) {
+        if (schedule.getShiftList() == null) {
+            return 0;
+        }
+
+        Map<String, List<Shift>> shiftsByEmployeeId = schedule.getShiftList().stream()
+                .filter(shift -> shift.getEmployee() != null)
+                .collect(Collectors.groupingBy(shift -> shift.getEmployee().getId()));
+
+        int violations = 0;
+        for (List<Shift> shifts : shiftsByEmployeeId.values()) {
+            List<Shift> dayShifts = shifts.stream()
+                    .filter(this::isDayShift)
+                    .sorted(Comparator.comparing(Shift::getStart))
+                    .toList();
+            List<Shift> nightShifts = shifts.stream()
                     .filter(this::isNightShift)
                     .toList();
 
-            List<Shift> dayShifts = draftShifts.stream()
-                    .filter(this::isDayShift)
-                    .toList();
-
             for (Shift nightShift : nightShifts) {
-                LocalDate nightLogicalDate = nightShift.getStart().toLocalDate().minusDays(1);
-                for (Shift dayShift : dayShifts) {
-                    long dayGap = ChronoUnit.DAYS.between(nightLogicalDate, dayShift.getStart().toLocalDate());
-                    if (dayGap >= 1 && dayGap <= 2) {
-                        violations++;
-                    }
+                Shift nextDayShift = dayShifts.stream()
+                        .filter(dayShift -> dayShift.getStart().isAfter(nightShift.getEnd()))
+                        .findFirst()
+                        .orElse(null);
+                if (nextDayShift == null) {
+                    continue;
+                }
+
+                long restMinutes = Duration.between(nightShift.getEnd(), nextDayShift.getStart()).toMinutes();
+                if (restMinutes < MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES) {
+                    violations++;
                 }
             }
         }
