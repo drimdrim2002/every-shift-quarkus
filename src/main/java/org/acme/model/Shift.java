@@ -1,5 +1,6 @@
 package org.acme.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.lookup.PlanningId;
@@ -35,6 +36,11 @@ public class Shift {
     String shiftCode;
 
     public String getSupabaseId() {
+        return supabaseId;
+    }
+
+    @JsonProperty("shiftId")
+    public String getShiftId() {
         return supabaseId;
     }
 
