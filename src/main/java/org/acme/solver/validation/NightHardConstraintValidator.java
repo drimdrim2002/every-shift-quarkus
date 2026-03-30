@@ -1,0 +1,116 @@
+package org.acme.solver.validation;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.acme.model.Employee;
+import org.acme.model.Shift;
+import org.acme.solver.ShiftDateMatcher;
+import org.slf4j.Logger;
+
+/**
+ * 야간 하드 제약 검증을 수행합니다.
+ * - 3연속 Night 근무 금지
+ * - Night 종료 후 다음 Day 시작까지 최소 32시간 보장
+ */
+public class NightHardConstraintValidator {
+
+    private static final int MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES = 32 * 60;
+    private static final String SHIFT_TYPE_DAY = "D";
+    private static final String SHIFT_TYPE_NIGHT = "N";
+
+    /**
+     * 야간 관련 하드 제약을 검증합니다.
+     *
+     * @param shiftsByEmployee 직원별 시프트 맵
+     * @param logger 사용할 로거
+     * @throws ValidationException 검증 실패 시
+     */
+    public void validate(Map<Employee, List<Shift>> shiftsByEmployee, Logger logger) {
+        for (Map.Entry<Employee, List<Shift>> entry : shiftsByEmployee.entrySet()) {
+            Employee employee = entry.getKey();
+            List<Shift> shifts = entry.getValue().stream()
+                    .sorted(Comparator.comparing(Shift::getStart))
+                    .collect(Collectors.toList());
+
+            validateNoThreeConsecutiveNightShifts(employee, shifts);
+            validateNightToNextDayRest(employee, shifts);
+        }
+    }
+
+    private void validateNoThreeConsecutiveNightShifts(Employee employee, List<Shift> shifts) {
+        List<Shift> nightShifts = shifts.stream()
+                .filter(this::isNightShift)
+                .sorted(Comparator.comparing(Shift::getStart))
+                .collect(Collectors.toList());
+
+        int consecutiveNightCount = 0;
+        LocalDate previousLogicalDate = null;
+
+        for (Shift nightShift : nightShifts) {
+            LocalDate logicalDate = ShiftDateMatcher.resolveLogicalDate(nightShift);
+
+            if (previousLogicalDate == null) {
+                consecutiveNightCount = 1;
+            } else if (logicalDate.equals(previousLogicalDate.plusDays(1))) {
+                consecutiveNightCount++;
+            } else if (!logicalDate.equals(previousLogicalDate)) {
+                consecutiveNightCount = 1;
+            }
+
+            if (consecutiveNightCount >= 3) {
+                throw new ValidationException(
+                        "Employee '%s' violates no-three-consecutive-night-shifts: logicalDate=%s, shiftId=%d",
+                        employee.getName(), logicalDate, nightShift.getId());
+            }
+
+            previousLogicalDate = logicalDate;
+        }
+    }
+
+    private void validateNightToNextDayRest(Employee employee, List<Shift> shifts) {
+        for (Shift nightShift : shifts) {
+            if (!isNightShift(nightShift)) {
+                continue;
+            }
+
+            Shift nextDayShift = shifts.stream()
+                    .filter(this::isDayShift)
+                    .filter(shift -> shift.getStart().isAfter(nightShift.getEnd()))
+                    .min(Comparator.comparing(Shift::getStart))
+                    .orElse(null);
+
+            if (nextDayShift == null) {
+                continue;
+            }
+
+            int restMinutes = (int) Duration.between(nightShift.getEnd(), nextDayShift.getStart()).toMinutes();
+            if (restMinutes < MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES) {
+                throw new ValidationException(
+                        "Employee '%s' violates night-to-day rest: nightShiftId=%d, dayShiftId=%d, restMinutes=%d",
+                        employee.getName(), nightShift.getId(), nextDayShift.getId(), restMinutes);
+            }
+        }
+    }
+
+    private boolean isNightShift(Shift shift) {
+        return SHIFT_TYPE_NIGHT.equals(normalizeShiftCode(shift));
+    }
+
+    private boolean isDayShift(Shift shift) {
+        return SHIFT_TYPE_DAY.equals(normalizeShiftCode(shift));
+    }
+
+    private String normalizeShiftCode(Shift shift) {
+        if (shift.getShiftCode() == null) {
+            return "";
+        }
+        return shift.getShiftCode().trim().toUpperCase(Locale.ROOT);
+    }
+}
