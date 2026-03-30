@@ -193,6 +193,8 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 ### 테스트
 ```bash
 API_URL="https://every-shift-api-service-554455861916.asia-northeast3.run.app"
+# 프런트엔드 환경변수 예시
+# VITE_API_BASE_URL=https://every-shift-api-service-554455861916.asia-northeast3.run.app
 curl -X POST "$API_URL/api/solve" \
   -H "Content-Type: application/json" \
   -d '{...}'

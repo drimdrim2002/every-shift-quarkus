@@ -6,7 +6,14 @@
 
 ### Base URL
 ```
-https://every-shift-api-service-554455861916.a.run.app
+https://every-shift-api-service-554455861916.asia-northeast3.run.app
+```
+
+프론트엔드에서는 URL을 하드코딩하지 말고 `VITE_API_BASE_URL` 환경변수로 주입하는 것을 권장합니다.
+
+```bash
+# .env.development
+VITE_API_BASE_URL=https://every-shift-api-service-554455861916.asia-northeast3.run.app
 ```
 
 ### 인증
@@ -223,7 +230,9 @@ GET /api/status/{id}
 ### JavaScript/TypeScript 예시
 
 ```typescript
-const API_BASE_URL = "https://every-shift-api-service-x3l5zfq7ya-du.a.run.app";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ??
+  "https://every-shift-api-service-554455861916.asia-northeast3.run.app";
 
 type StatusScoreV2 = {
   hard_score: number | null;
@@ -397,7 +406,9 @@ src/test/resources/json/sample.json
 
 ```bash
 # curl 테스트 예시
-curl -X POST https://every-shift-api-service-554455861916.a.run.app/api/solve \
+API_URL="https://every-shift-api-service-554455861916.asia-northeast3.run.app"
+
+curl -X POST "$API_URL/api/solve" \
   -H "Content-Type: application/json" \
   -d @src/test/resources/json/sample.json
 ```
