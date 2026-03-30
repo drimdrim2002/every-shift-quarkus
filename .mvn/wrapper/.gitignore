@@ -1,1 +1,2 @@
-maven-wrapper.jar
+# 네트워크 제약 환경에서도 mvnw가 동작하도록 wrapper jar는 저장소에서 추적한다.
+!maven-wrapper.jar
