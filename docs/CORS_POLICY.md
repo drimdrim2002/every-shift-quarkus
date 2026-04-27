@@ -17,7 +17,9 @@ API는 다음 출처로부터의 요청을 명시적으로 수락합니다:
   - `http://localhost:8080` (백엔드 자체)
 - **운영 / 스테이징 환경:**
   - `https://*.run.app` (Google Cloud Run 도메인)
-  - _(필요 시 실제 서비스 도메인을 여기에 추가)_
+  - `https://every-shift-mvp.vercel.app` (Vercel 운영 프론트엔드)
+  - `https://every-shift-mvp-git-main-sindeaf-2002s-projects.vercel.app` (Vercel main 브랜치 프리뷰)
+  - `https://www.everyshift.co.kr` (서비스 커스텀 도메인)
 
 > **참고:** 보안 상의 이유로 운영 환경에서 와일드카드(`*`) 사용은 지양하며, 명시적인 도메인 목록을 관리합니다.
 
@@ -53,7 +55,7 @@ API는 다음 출처로부터의 요청을 명시적으로 수락합니다:
 ```properties
 quarkus.http.cors=true
 # 허용 도메인
-quarkus.http.cors.origins=http://localhost:8080,http://localhost:3000,http://localhost:5173,http://localhost:5174,https://*.run.app
+quarkus.http.cors.origins=http://localhost:8080,http://localhost:3000,http://localhost:5173,http://localhost:5174,https://*.run.app,https://every-shift-mvp.vercel.app,https://every-shift-mvp-git-main-sindeaf-2002s-projects.vercel.app,https://www.everyshift.co.kr
 # 허용 메서드
 quarkus.http.cors.methods=GET,POST,OPTIONS,PUT,DELETE
 # 허용 헤더
