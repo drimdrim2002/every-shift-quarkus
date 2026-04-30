@@ -109,7 +109,7 @@ run_cmd gcloud run deploy "${SERVICE_NAME}" \
   --region "${REGION}" \
   --set-env-vars "APP_MODE=API,APP_SOLVER_RUN_LOCALLY=false,APP_DISPATCH_MODE=CLOUD_RUN_JOB,GCP_RUN_JOB_NAME=${JOB_NAME},GCP_RUN_REGION=${REGION},GCP_FIRESTORE_COLLECTION=${FIRESTORE_COLLECTION}" \
   --no-allow-unauthenticated \
-  --min-instances 1 --memory 512Mi --cpu 0.5 --timeout 60s
+  --min-instances 1 --memory 512Mi --cpu 1 --timeout 60s
 
 echo "🔐 권한 확인"
 echo "  - API 서비스 계정에 Cloud Run Job 실행 권한(run.jobs.run / run.jobs.runWithOverrides)이 필요합니다."
