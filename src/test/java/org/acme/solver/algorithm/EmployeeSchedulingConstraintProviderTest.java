@@ -2,6 +2,8 @@ package org.acme.solver.algorithm;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.acme.model.Availability;
@@ -329,6 +331,127 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
+    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_EdgeCase47h59m() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+        Shift nextDayShift = createShift(3L, employee, date.plusDays(4).atTime(7, 59), date.plusDays(4).atTime(15, 59),
+                "D");
+
+        constraintVerifier.verifyThat()
+                .given(night1, night2, nextDayShift)
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, -41, 0 }));
+    }
+
+    @Test
+    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_Exact48Hours() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+        Shift nextDayShift = createShift(3L, employee, date.plusDays(4).atTime(8, 0), date.plusDays(4).atTime(16, 0),
+                "D");
+
+        constraintVerifier.verifyThat()
+                .given(night1, night2, nextDayShift)
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -41, 0 }));
+    }
+
+    @Test
+    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_AppliesToEveningShift() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+        Shift nextEveningShift = createShift(3L, employee, date.plusDays(4).atTime(7, 59), date.plusDays(4).atTime(15, 59),
+                "E");
+
+        constraintVerifier.verifyThat()
+                .given(night1, night2, nextEveningShift)
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, -45, 0 }));
+    }
+
+    @Test
+    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_AppliesToNightShift() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
+        Shift nextNightShift = createShift(3L, employee, date.plusDays(4).atTime(7, 59), date.plusDays(4).atTime(15, 59),
+                "N");
+
+        constraintVerifier.verifyThat()
+                .given(night1, night2, nextNightShift)
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, -90, 0 }));
+    }
+
+    @Test
+    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_LogicalDateGapDoesNotApply() {
+        Employee employee = createEmployee("E1");
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
+        Shift night3 = createShift(2L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
+        Shift nextDayShift = createShift(3L, employee, date.plusDays(5).atTime(7, 59), date.plusDays(5).atTime(15, 59),
+                "D");
+
+        constraintVerifier.verifyThat()
+                .given(night1, night3, nextDayShift)
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -41, 0 }));
+    }
+
+    @Test
+    void monthlyNightShifts_ActualStartMonthPenalizes16thNight() {
+        Employee employee = createEmployee("E1");
+        Shift[] marchNightShifts = createEveryOtherDayNightShifts(employee, LocalDate.of(2026, 3, 1), 16);
+
+        constraintVerifier.verifyThat()
+                .given((Object[]) marchNightShifts)
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, -2560, 0 }));
+    }
+
+    @Test
+    void monthlyNightShifts_ActualStartMonthAllows15Nights() {
+        Employee employee = createEmployee("E1");
+        Shift[] marchNightShifts = createEveryOtherDayNightShifts(employee, LocalDate.of(2026, 3, 1), 15);
+
+        constraintVerifier.verifyThat()
+                .given((Object[]) marchNightShifts)
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -2250, 0 }));
+    }
+
+    @Test
+    void monthlyNightShifts_UsesActualStartMonthWhenLogicalDateIsPreviousMonth() {
+        Employee employee = createEmployee("E1");
+        Shift[] marchNightShifts = createEveryOtherDayNightShifts(employee, LocalDate.of(2026, 3, 1), 16);
+
+        constraintVerifier.verifyThat()
+                .given((Object[]) marchNightShifts)
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, -2560, 0 }));
+    }
+
+    @Test
+    void monthlyNightShifts_CountsEachEmployeeAndMonthIndependently() {
+        Employee employee1 = createEmployee("E1");
+        Employee employee2 = createEmployee("E2");
+        Shift[] employee1MarchNightShifts = createEveryOtherDayNightShifts(employee1, LocalDate.of(2026, 3, 1), 15,
+                1L);
+        Shift[] employee1AprilNightShifts = createEveryOtherDayNightShifts(employee1, LocalDate.of(2026, 4, 1), 1,
+                101L);
+        Shift[] employee2MarchNightShifts = createEveryOtherDayNightShifts(employee2, LocalDate.of(2026, 3, 1), 15,
+                201L);
+
+        constraintVerifier.verifyThat()
+                .given(combine(employee1MarchNightShifts, employee1AprilNightShifts, employee2MarchNightShifts))
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -4810, 0 }));
+    }
+
+    @Test
 
     void softScoreLevels_UndesiredAndFair() {
         Employee employee = createEmployee("E1");
@@ -538,5 +661,26 @@ class EmployeeSchedulingConstraintProviderTest {
         shift.setShiftCode(shiftCode);
         shift.setRequiredSkill("ALL");
         return shift;
+    }
+
+    private Shift[] createEveryOtherDayNightShifts(Employee employee, LocalDate firstStartDate, int count) {
+        return createEveryOtherDayNightShifts(employee, firstStartDate, count, 1L);
+    }
+
+    private Shift[] createEveryOtherDayNightShifts(Employee employee, LocalDate firstStartDate, int count, long firstId) {
+        Shift[] shifts = new Shift[count];
+        for (int index = 0; index < count; index++) {
+            LocalDate startDate = firstStartDate.plusDays(index * 2L);
+            shifts[index] = createShift(firstId + index, employee, startDate.atTime(0, 0), startDate.atTime(8, 0), "N");
+        }
+        return shifts;
+    }
+
+    private Object[] combine(Shift[]... shiftGroups) {
+        List<Shift> shifts = new ArrayList<>();
+        for (Shift[] shiftGroup : shiftGroups) {
+            shifts.addAll(List.of(shiftGroup));
+        }
+        return shifts.toArray();
     }
 }

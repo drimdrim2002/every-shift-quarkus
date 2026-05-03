@@ -3,6 +3,7 @@ package org.acme.solver.algorithm;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.Locale;
 
 import org.acme.model.Availability;
@@ -37,6 +38,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
 
     private static final int MIN_SHIFT_HOURS = 12;
     private static final int MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES = 32 * 60;
+    private static final int MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES = 48 * 60;
+    private static final int MAX_MONTHLY_NIGHT_SHIFTS = 15;
     private static final String SHIFT_TYPE_DAY = "D";
     private static final String SHIFT_TYPE_EVENING = "E";
     private static final String SHIFT_TYPE_NIGHT = "N";
@@ -69,7 +72,9 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 requiredSkill(constraintFactory), noOverlappingShifts(constraintFactory),
                 atLeast12HoursBetweenTwoShifts(constraintFactory),
                 noThreeConsecutiveNightShifts(constraintFactory),
-                atLeast32HoursFromNightToNextDayShift(constraintFactory), oneShiftPerDay(constraintFactory),
+                atLeast32HoursFromNightToNextDayShift(constraintFactory),
+                atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
+                max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
                 unavailableEmployee(constraintFactory),
                 // Soft constraints (우선순위: undesired > fair > desired)
                 undesiredDayForEmployee(constraintFactory), fairShiftDistribution(constraintFactory),
@@ -109,7 +114,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 .join(Shift.class, Joiners.equal(Shift::getEmployee))
                 .filter((firstNight, secondNight) -> isNightShift(secondNight)
                         && getNightLogicalDate(secondNight).equals(getNightLogicalDate(firstNight).plusDays(1)))
-                .join(Shift.class, Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(), Shift::getEmployee))
+                .join(Shift.class,
+                        Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(), Shift::getEmployee))
                 .filter((firstNight, secondNight, thirdNight) -> isNightShift(thirdNight)
                         && getNightLogicalDate(thirdNight).equals(getNightLogicalDate(firstNight).plusDays(2)))
                 .penalize(ONE_HARD)
@@ -132,6 +138,36 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                         (nightShift, nextDayStart) -> MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES
                                 - getMinutesBetween(nightShift.getEnd(), nextDayStart))
                 .asConstraint("At least 32 hours from night to next day shift");
+    }
+
+    Constraint atLeast48HoursAfterTwoConsecutiveNightShifts(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Shift.class)
+                .filter(EmployeeSchedulingConstraintProvider::isNightShift)
+                .join(Shift.class, Joiners.equal(Shift::getEmployee))
+                .filter((firstNight, secondNight) -> isNightShift(secondNight)
+                        && getNightLogicalDate(secondNight).equals(getNightLogicalDate(firstNight).plusDays(1)))
+                .join(Shift.class,
+                        Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(), Shift::getEmployee))
+                .filter((firstNight, secondNight, nextShift) -> !nextShift.getStart().isBefore(secondNight.getEnd()))
+                .groupBy((firstNight, secondNight, nextShift) -> secondNight,
+                        ConstraintCollectors.<Shift, Shift, Shift, LocalDateTime>min(
+                                (firstNight, secondNight, nextShift) -> nextShift.getStart()))
+                .filter((secondNight, nextShiftStart) -> getMinutesBetween(secondNight.getEnd(), nextShiftStart)
+                        < MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES)
+                .penalize(ONE_HARD,
+                        (secondNight, nextShiftStart) -> MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES
+                                - getMinutesBetween(secondNight.getEnd(), nextShiftStart))
+                .asConstraint("At least 48 hours after two consecutive night shifts");
+    }
+
+    Constraint max15NightShiftsPerMonth(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Shift.class)
+                .filter(EmployeeSchedulingConstraintProvider::isNightShift)
+                .groupBy(Shift::getEmployee, shift -> YearMonth.from(shift.getStart()), ConstraintCollectors.count())
+                .filter((employee, month, nightShiftCount) -> nightShiftCount > MAX_MONTHLY_NIGHT_SHIFTS)
+                .penalize(ONE_HARD,
+                        (employee, month, nightShiftCount) -> nightShiftCount - MAX_MONTHLY_NIGHT_SHIFTS)
+                .asConstraint("Max 15 night shifts per month");
     }
 
     Constraint oneShiftPerDay(ConstraintFactory constraintFactory) {

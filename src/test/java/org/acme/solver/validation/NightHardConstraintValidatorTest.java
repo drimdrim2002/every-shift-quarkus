@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +61,71 @@ class NightHardConstraintValidatorTest {
         assertDoesNotThrow(() -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
     }
 
+    @Test
+    void validate_throwsWhenNextShiftStartsWithin48HoursAfterTwoConsecutiveNightShifts() {
+        Employee employee = employee("emp-1", "테스터");
+
+        Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
+                employee,
+                List.of(
+                        shift(1L, "N", LocalDateTime.of(2026, 2, 2, 0, 0), LocalDateTime.of(2026, 2, 2, 8, 0), employee),
+                        shift(2L, "N", LocalDateTime.of(2026, 2, 3, 0, 0), LocalDateTime.of(2026, 2, 3, 8, 0), employee),
+                        shift(3L, "E", LocalDateTime.of(2026, 2, 5, 7, 59), LocalDateTime.of(2026, 2, 5, 15, 59), employee)));
+
+        assertThrows(ValidationException.class,
+                () -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
+    }
+
+    @Test
+    void validate_allowsExactly48HoursAfterTwoConsecutiveNightShifts() {
+        Employee employee = employee("emp-1", "테스터");
+
+        Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
+                employee,
+                List.of(
+                        shift(1L, "N", LocalDateTime.of(2026, 2, 2, 0, 0), LocalDateTime.of(2026, 2, 2, 8, 0), employee),
+                        shift(2L, "N", LocalDateTime.of(2026, 2, 3, 0, 0), LocalDateTime.of(2026, 2, 3, 8, 0), employee),
+                        shift(3L, "D", LocalDateTime.of(2026, 2, 5, 8, 0), LocalDateTime.of(2026, 2, 5, 16, 0), employee)));
+
+        assertDoesNotThrow(() -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
+    }
+
+    @Test
+    void validate_throwsWhenActualStartMonthHas16NightShifts() {
+        Employee employee = employee("emp-1", "테스터");
+
+        Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
+                employee,
+                Arrays.asList(everyOtherDayNightShifts(employee, LocalDateTime.of(2026, 3, 1, 0, 0), 16)));
+
+        assertThrows(ValidationException.class,
+                () -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
+    }
+
+    @Test
+    void validate_allows15NightShiftsInActualStartMonth() {
+        Employee employee = employee("emp-1", "테스터");
+
+        Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
+                employee,
+                Arrays.asList(everyOtherDayNightShifts(employee, LocalDateTime.of(2026, 3, 1, 0, 0), 15)));
+
+        assertDoesNotThrow(() -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
+    }
+
+    @Test
+    void validate_countsMonthlyNightShiftsByActualStartMonthIndependently() {
+        Employee employee = employee("emp-1", "테스터");
+
+        Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
+                employee,
+                List.of(
+                        shift(1L, "N", LocalDateTime.of(2026, 3, 1, 0, 0), LocalDateTime.of(2026, 3, 1, 8, 0), employee),
+                        shift(2L, "N", LocalDateTime.of(2026, 4, 1, 0, 0), LocalDateTime.of(2026, 4, 1, 8, 0), employee)));
+
+        assertDoesNotThrow(() -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
+    }
+
     private static Employee employee(String id, String name) {
         return new Employee(id, name, Set.of("D", "N"), Set.of("ALL"));
     }
@@ -68,5 +134,14 @@ class NightHardConstraintValidatorTest {
         Shift shift = new Shift(id, "shift-" + id, start, end, "ward-a", "ALL", employee, false);
         shift.setShiftCode(shiftCode);
         return shift;
+    }
+
+    private static Shift[] everyOtherDayNightShifts(Employee employee, LocalDateTime firstStart, int count) {
+        Shift[] shifts = new Shift[count];
+        for (int index = 0; index < count; index++) {
+            LocalDateTime start = firstStart.plusDays(index * 2L);
+            shifts[index] = shift((long) index + 1, "N", start, start.plusHours(8), employee);
+        }
+        return shifts;
     }
 }
