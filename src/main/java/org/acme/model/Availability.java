@@ -1,22 +1,14 @@
 package org.acme.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import org.optaplanner.core.api.domain.lookup.PlanningId;
 
 import java.time.LocalDate;
 
-@Entity
 public class Availability {
 
     @PlanningId
-    @Id
-    @GeneratedValue
     Long id;
 
-    @ManyToOne
     Employee employee;
 
     LocalDate date;
