@@ -1,17 +1,13 @@
 package org.acme.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-@Entity
 public class ScheduleState {
 
-    @Id
     String tenantId;
 
     Integer publishLength; // In number of days

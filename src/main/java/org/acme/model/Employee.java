@@ -1,26 +1,18 @@
 package org.acme.model;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import org.optaplanner.core.api.domain.lookup.PlanningId;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
 public class Employee {
-    @Id
     @PlanningId
     String id;
 
     String name;
 
-    @ElementCollection(fetch = FetchType.EAGER)
     Set<String> skillSet;
 
-    @ElementCollection(fetch = FetchType.EAGER)
     Set<String> availableShift;
 
 

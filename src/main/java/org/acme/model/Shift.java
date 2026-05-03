@@ -1,30 +1,24 @@
 package org.acme.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.lookup.PlanningId;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
 import java.time.LocalDateTime;
 
-@Entity
 @PlanningEntity(pinningFilter = ShiftPinningFilter.class)
 public class Shift {
-    @Id
     @PlanningId
-    @GeneratedValue
     Long id;
 
     LocalDateTime start;
-    @Column(name = "endDateTime") // "end" clashes with H2 syntax.
     LocalDateTime end;
 
     String location;
     String requiredSkill;
 
     @PlanningVariable
-    @ManyToOne
     Employee employee;
 
     boolean pinned;
