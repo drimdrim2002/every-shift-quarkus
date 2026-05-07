@@ -9,37 +9,17 @@ import java.util.Set;
 import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
 import org.acme.model.Employee;
+import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
 import org.junit.jupiter.api.Test;
-import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
-import org.optaplanner.core.api.domain.solution.PlanningScore;
-import org.optaplanner.core.api.domain.solution.PlanningSolution;
-import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
-import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.optaplanner.test.api.score.stream.ConstraintVerifier;
 
 class EmployeeSchedulingConstraintProviderTest {
 
-    ConstraintVerifier<EmployeeSchedulingConstraintProvider, TestEmployeeSchedule> constraintVerifier = ConstraintVerifier
+    ConstraintVerifier<EmployeeSchedulingConstraintProvider, EmployeeSchedule> constraintVerifier = ConstraintVerifier
             .build(
-                    new EmployeeSchedulingConstraintProvider(), TestEmployeeSchedule.class, Shift.class);
-
-    @PlanningSolution
-    static class TestEmployeeSchedule {
-        @ProblemFactCollectionProperty
-        List<Availability> availabilityList;
-
-        @ProblemFactCollectionProperty
-        @ValueRangeProvider
-        List<Employee> employeeList;
-
-        @PlanningEntityCollectionProperty
-        List<Shift> shiftList;
-
-        @PlanningScore(bendableHardLevelsSize = 1, bendableSoftLevelsSize = 5)
-        BendableScore score;
-    }
+                    new EmployeeSchedulingConstraintProvider(), EmployeeSchedule.class, Shift.class);
 
     @Test
     void oneShiftPerDay() {

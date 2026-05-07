@@ -80,7 +80,7 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 noThreeConsecutiveNightShifts(constraintFactory),
                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
                 unavailableEmployee(constraintFactory),
-                // Soft constraints
+                // Soft constraints (우선순위: night48 > night32 > undesired > fair > desired)
                 atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
                 atLeast32HoursFromNightToNextDayShift(constraintFactory),
                 undesiredDayForEmployee(constraintFactory), fairShiftDistribution(constraintFactory),
