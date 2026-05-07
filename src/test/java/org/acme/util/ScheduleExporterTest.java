@@ -186,7 +186,7 @@ class ScheduleExporterTest {
         schedule.setShiftList(new ArrayList<>());
         schedule.setEmployeeList(new ArrayList<>());
         schedule.setAvailabilityList(new ArrayList<>());
-        schedule.setScore(BendableScore.zero(1, 3));
+        schedule.setScore(BendableScore.zero(1, 5));
 
         // When
         String markdown = ScheduleExporter.toMarkdownTable(schedule);
@@ -205,7 +205,7 @@ class ScheduleExporterTest {
      */
     private EmployeeSchedule createTestSchedule() {
         EmployeeSchedule schedule = new EmployeeSchedule();
-        schedule.setScore(BendableScore.of(new int[]{0}, new int[]{0, -5, 0}));
+        schedule.setScore(BendableScore.of(new int[]{0}, new int[]{0, 0, 0, -5, 0}));
 
         // 직원 생성 (TestDataBuilder 사용)
         Employee emp1 = TestDataBuilder.EmployeeBuilder.builder()
