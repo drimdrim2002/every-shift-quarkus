@@ -20,15 +20,21 @@ import org.optaplanner.core.api.score.stream.Joiners;
 public class EmployeeSchedulingConstraintProvider implements ConstraintProvider {
 
     private static final int HARD_LEVELS = 1;
-    private static final int SOFT_LEVELS = 3;
+    private static final int SOFT_LEVELS = 5;
 
     private static final int HARD_LEVEL_INDEX = 0;
-    private static final int SOFT_UNDESIRED_INDEX = 0;
-    private static final int SOFT_FAIR_INDEX = 1;
-    private static final int SOFT_DESIRED_INDEX = 2;
+    private static final int SOFT_NIGHT_48H_REST_INDEX = 0;
+    private static final int SOFT_NIGHT_32H_REST_INDEX = 1;
+    private static final int SOFT_UNDESIRED_INDEX = 2;
+    private static final int SOFT_FAIR_INDEX = 3;
+    private static final int SOFT_DESIRED_INDEX = 4;
 
     private static final BendableScore ONE_HARD = BendableScore.ofHard(HARD_LEVELS, SOFT_LEVELS, HARD_LEVEL_INDEX,
             1);
+    private static final BendableScore ONE_SOFT_NIGHT_48H_REST = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
+            SOFT_NIGHT_48H_REST_INDEX, 1);
+    private static final BendableScore ONE_SOFT_NIGHT_32H_REST = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
+            SOFT_NIGHT_32H_REST_INDEX, 1);
     private static final BendableScore ONE_SOFT_UNDESIRED = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
             SOFT_UNDESIRED_INDEX, 1);
     private static final BendableScore ONE_SOFT_FAIR = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
@@ -72,11 +78,11 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 requiredSkill(constraintFactory), noOverlappingShifts(constraintFactory),
                 atLeast12HoursBetweenTwoShifts(constraintFactory),
                 noThreeConsecutiveNightShifts(constraintFactory),
-                atLeast32HoursFromNightToNextDayShift(constraintFactory),
-                atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
                 unavailableEmployee(constraintFactory),
-                // Soft constraints (우선순위: undesired > fair > desired)
+                // Soft constraints
+                atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
+                atLeast32HoursFromNightToNextDayShift(constraintFactory),
                 undesiredDayForEmployee(constraintFactory), fairShiftDistribution(constraintFactory),
                 desiredDayForEmployee(constraintFactory)};
     }
@@ -134,7 +140,7 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 (Shift nightShift, Shift dayShift) -> dayShift.getStart()))
                 .filter((nightShift, nextDayStart) -> getMinutesBetween(nightShift.getEnd(), nextDayStart)
                         < MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES)
-                .penalize(ONE_HARD,
+                .penalize(ONE_SOFT_NIGHT_32H_REST,
                         (nightShift, nextDayStart) -> MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES
                                 - getMinutesBetween(nightShift.getEnd(), nextDayStart))
                 .asConstraint("At least 32 hours from night to next day shift");
@@ -154,7 +160,7 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 (firstNight, secondNight, nextShift) -> nextShift.getStart()))
                 .filter((secondNight, nextShiftStart) -> getMinutesBetween(secondNight.getEnd(), nextShiftStart)
                         < MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES)
-                .penalize(ONE_HARD,
+                .penalize(ONE_SOFT_NIGHT_48H_REST,
                         (secondNight, nextShiftStart) -> MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES
                                 - getMinutesBetween(secondNight.getEnd(), nextShiftStart))
                 .asConstraint("At least 48 hours after two consecutive night shifts");
