@@ -33,6 +33,8 @@ public record StatusResponse(
         @JsonProperty("completed_at") LocalDateTime completedAt) {
     public record ScoreInfo(
             @JsonProperty("hard_score") Integer hardScore,
+            @JsonProperty("night48_rest_soft_score") Integer night48RestSoftScore,
+            @JsonProperty("night32_rest_soft_score") Integer night32RestSoftScore,
             @JsonProperty("undesired_soft_score") Integer undesiredSoftScore,
             @JsonProperty("fair_soft_score") Integer fairSoftScore,
             @JsonProperty("desired_soft_score") Integer desiredSoftScore,
@@ -49,6 +51,8 @@ public record StatusResponse(
         if (hasBendableSoftScores(job)) {
             scoreInfo = new ScoreInfo(
                     job.getHardScore(),
+                    job.getNight48RestSoftScore(),
+                    job.getNight32RestSoftScore(),
                     job.getUndesiredSoftScore(),
                     job.getFairSoftScore(),
                     job.getDesiredSoftScore(),
@@ -56,6 +60,8 @@ public record StatusResponse(
         } else if (job.getHardScore() != null || job.getSoftScore() != null) {
             scoreInfo = new ScoreInfo(
                     job.getHardScore(),
+                    null,
+                    null,
                     null,
                     null,
                     null,
@@ -76,7 +82,9 @@ public record StatusResponse(
     }
 
     private static boolean hasBendableSoftScores(JobExecution job) {
-        return job.getUndesiredSoftScore() != null
+        return job.getNight48RestSoftScore() != null
+                || job.getNight32RestSoftScore() != null
+                || job.getUndesiredSoftScore() != null
                 || job.getFairSoftScore() != null
                 || job.getDesiredSoftScore() != null;
     }

@@ -76,6 +76,8 @@ class StatusResponseTest {
         job.setId("test-id");
         job.setStatus(ExecutionStatus.COMPLETED);
         job.setHardScore(0);
+        job.setNight48RestSoftScore(-7);
+        job.setNight32RestSoftScore(-30);
         job.setUndesiredSoftScore(-120);
         job.setFairSoftScore(-5400);
         job.setDesiredSoftScore(240);
@@ -84,6 +86,8 @@ class StatusResponseTest {
 
         Assertions.assertNotNull(response.score());
         Assertions.assertEquals(0, response.score().hardScore());
+        Assertions.assertEquals(-7, response.score().night48RestSoftScore());
+        Assertions.assertEquals(-30, response.score().night32RestSoftScore());
         Assertions.assertEquals(-120, response.score().undesiredSoftScore());
         Assertions.assertEquals(-5400, response.score().fairSoftScore());
         Assertions.assertEquals(240, response.score().desiredSoftScore());
@@ -102,10 +106,48 @@ class StatusResponseTest {
 
         Assertions.assertNotNull(response.score());
         Assertions.assertEquals(0, response.score().hardScore());
+        Assertions.assertNull(response.score().night48RestSoftScore());
+        Assertions.assertNull(response.score().night32RestSoftScore());
         Assertions.assertNull(response.score().undesiredSoftScore());
         Assertions.assertNull(response.score().fairSoftScore());
         Assertions.assertNull(response.score().desiredSoftScore());
         Assertions.assertEquals(-6121, response.score().legacySoftScoreTotal());
+    }
+
+    @Test
+    void testFrom_TreatsNightRestOnlyScoresAsBendableScoreFields() {
+        JobExecution job = new JobExecution();
+        job.setId("test-id");
+        job.setStatus(ExecutionStatus.COMPLETED);
+        job.setHardScore(0);
+        job.setNight48RestSoftScore(-7);
+
+        StatusResponse response = StatusResponse.from(job, objectMapper);
+
+        Assertions.assertNotNull(response.score());
+        Assertions.assertEquals(0, response.score().hardScore());
+        Assertions.assertEquals(-7, response.score().night48RestSoftScore());
+        Assertions.assertNull(response.score().night32RestSoftScore());
+        Assertions.assertNull(response.score().undesiredSoftScore());
+        Assertions.assertNull(response.score().fairSoftScore());
+        Assertions.assertNull(response.score().desiredSoftScore());
+        Assertions.assertNull(response.score().legacySoftScoreTotal());
+    }
+
+    @Test
+    void testFrom_SerializesNightRestScoreJsonNames() throws Exception {
+        JobExecution job = new JobExecution();
+        job.setId("test-id");
+        job.setStatus(ExecutionStatus.COMPLETED);
+        job.setHardScore(0);
+        job.setNight48RestSoftScore(-7);
+        job.setNight32RestSoftScore(-30);
+
+        StatusResponse response = StatusResponse.from(job, objectMapper);
+        String json = objectMapper.writeValueAsString(response);
+
+        Assertions.assertTrue(json.contains("\"night48_rest_soft_score\":-7"));
+        Assertions.assertTrue(json.contains("\"night32_rest_soft_score\":-30"));
     }
 
     @Test
