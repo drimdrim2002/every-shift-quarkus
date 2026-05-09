@@ -33,36 +33,44 @@
 *   **내용**: 한 직원의 연속된 두 근무 사이 휴식이 **12시간 미만**이면 패널티가 발생합니다.
 *   **패널티**: `12시간 - 실제 휴식시간`(분 단위)만큼 감점합니다.
 
-#### 4. `oneShiftPerDay` (하루 1교대 제한)
+#### 4. `noThreeConsecutiveNightShifts` (3연속 Night 금지)
+*   **내용**: 동일 직원에게 Night 근무가 논리일 기준 3일 연속 배정되는지 확인합니다.
+*   **패널티**: 3연속 Night 패턴이 발견되면 점수를 깎습니다 (`ONE_HARD`).
+
+#### 5. `max15NightShiftsPerMonth` (월 15회 Night 제한)
+*   **내용**: 직원별 월간 Night 근무 횟수가 15회를 초과하는지 확인합니다.
+*   **패널티**: 초과한 Night 근무 횟수만큼 점수를 깎습니다 (`ONE_HARD`).
+
+#### 6. `oneShiftPerDay` (하루 1교대 제한)
 *   **내용**: 한 직원이 같은 날짜(`LocalDate`)에 두 개 이상의 근무를 할 수 없습니다.
 *   **패널티**: 같은 날 두 번 배정되면 점수를 깎습니다.
 
-#### 5. `unavailableEmployee` (근무 불가능일 준수)
+#### 7. `unavailableEmployee` (근무 불가능일 준수)
 *   **내용**: 직원의 `Availability`가 `UNAVAILABLE`(근무 불가)로 설정된 날짜에 근무가 배정되었는지 확인합니다.
 *   **패널티**: 해당 근무의 길이(분 단위)만큼 점수를 깎습니다.
 
 ### B. Soft Constraints (선호 조건)
-직원의 만족도를 높이기 위한 규칙들입니다.
+휴식 품질과 안전, 직원 선호 반영, 근무 분배 균형을 개선하기 위한 규칙들입니다.
 
-#### 6. `atLeast48HoursAfterTwoConsecutiveNightShifts` (2연속 Night 후 48시간 휴식, Soft 1순위)
+#### 8. `atLeast48HoursAfterTwoConsecutiveNightShifts` (2연속 Night 후 48시간 휴식, Soft 1순위)
 *   **내용**: 직원이 2연속 Night 근무 후 다음 근무까지 최소 48시간을 쉬었는지 확인합니다.
 *   **패널티**: 부족한 휴식 시간(분 단위)만큼 `soft[0]` 점수를 깎습니다.
 
-#### 7. `atLeast32HoursFromNightToNextDayShift` (Night 후 Day shift까지 32시간 휴식, Soft 2순위)
+#### 9. `atLeast32HoursFromNightToNextDayShift` (Night 후 Day shift까지 32시간 휴식, Soft 2순위)
 *   **내용**: 직원이 Night 근무 후 다음 Day shift까지 최소 32시간을 쉬었는지 확인합니다.
 *   **패널티**: 부족한 휴식 시간(분 단위)만큼 `soft[1]` 점수를 깎습니다.
 
-#### 8. `undesiredDayForEmployee` (비선호 근무일, Soft 3순위)
+#### 10. `undesiredDayForEmployee` (비선호 근무일, Soft 3순위)
 *   **내용**: 직원이 `UNDESIRED`(근무 기피)로 설정한 날짜에 근무가 배정되었는지 확인합니다.
 *   **패널티**: 근무 시간(분 단위)만큼 `soft[2]` 점수를 깎습니다.
 *   **중요 정책**: 실제일/논리일이 동시에 매칭되거나 동일 날짜 요청이 중복되어도, **시프트 1건당 패널티는 최대 1회**만 적용됩니다.
 *   **Night 논리일 정책**: `ShiftDateMatcher`의 컷오프(06:00) 규칙을 따릅니다. 즉, Night 시작 시각이 `00:00~05:59`면 `-1일`, `06:00~23:59`면 `당일`로 처리됩니다.
 
-#### 9. `fairShiftDistribution` (근무 분배 균형, Soft 4순위)
+#### 11. `fairShiftDistribution` (근무 분배 균형, Soft 4순위)
 *   **내용**: 직원별 근무 유형(Day/Evening/Night)별 시프트 수를 집계해 불균형을 패널티화합니다.
 *   **패널티**: 근무 유형별 가중치와 `shiftCount * shiftCount`를 곱한 값만큼 `soft[3]` 점수를 깎습니다.
 
-#### 10. `desiredDayForEmployee` (선호 근무일, Soft 5순위)
+#### 12. `desiredDayForEmployee` (선호 근무일, Soft 5순위)
 *   **내용**: 직원이 `DESIRED`(근무 희망)로 설정한 날짜에 근무가 배정되었는지 확인합니다.
 *   **보상 (Reward)**: 근무 시간(분 단위)만큼 `soft[4]` 점수를 **더해줍니다**.
 
