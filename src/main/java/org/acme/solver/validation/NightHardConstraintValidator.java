@@ -1,8 +1,6 @@
 package org.acme.solver.validation;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Comparator;
 import java.util.List;
@@ -22,10 +20,7 @@ import org.slf4j.Logger;
  */
 public class NightHardConstraintValidator {
 
-    private static final int MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES = 32 * 60;
-    private static final int MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES = 48 * 60;
     private static final int MAX_MONTHLY_NIGHT_SHIFTS = 15;
-    private static final String SHIFT_TYPE_DAY = "D";
     private static final String SHIFT_TYPE_NIGHT = "N";
 
     /**
@@ -77,64 +72,6 @@ public class NightHardConstraintValidator {
         }
     }
 
-    private void validateNightToNextDayRest(Employee employee, List<Shift> shifts) {
-        for (Shift nightShift : shifts) {
-            if (!isNightShift(nightShift)) {
-                continue;
-            }
-
-            Shift nextDayShift = shifts.stream()
-                    .filter(this::isDayShift)
-                    .filter(shift -> shift.getStart().isAfter(nightShift.getEnd()))
-                    .min(Comparator.comparing(Shift::getStart))
-                    .orElse(null);
-
-            if (nextDayShift == null) {
-                continue;
-            }
-
-            int restMinutes = (int) Duration.between(nightShift.getEnd(), nextDayShift.getStart()).toMinutes();
-            if (restMinutes < MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES) {
-                throw new ValidationException(
-                        "Employee '%s' violates night-to-day rest: nightShiftId=%d, dayShiftId=%d, restMinutes=%d",
-                        employee.getName(), nightShift.getId(), nextDayShift.getId(), restMinutes);
-            }
-        }
-    }
-
-    private void validateRestAfterTwoConsecutiveNightShifts(Employee employee, List<Shift> shifts) {
-        List<Shift> nightShifts = shifts.stream()
-                .filter(this::isNightShift)
-                .sorted(Comparator.comparing(Shift::getStart))
-                .collect(Collectors.toList());
-
-        for (Shift firstNight : nightShifts) {
-            LocalDate firstLogicalDate = ShiftDateMatcher.resolveLogicalDate(firstNight);
-
-            for (Shift secondNight : nightShifts) {
-                if (!ShiftDateMatcher.resolveLogicalDate(secondNight).equals(firstLogicalDate.plusDays(1))) {
-                    continue;
-                }
-
-                Shift nextShift = shifts.stream()
-                        .filter(shift -> !shift.getStart().isBefore(secondNight.getEnd()))
-                        .min(Comparator.comparing(Shift::getStart))
-                        .orElse(null);
-
-                if (nextShift == null) {
-                    continue;
-                }
-
-                int restMinutes = (int) Duration.between(secondNight.getEnd(), nextShift.getStart()).toMinutes();
-                if (restMinutes < MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES) {
-                    throw new ValidationException(
-                            "Employee '%s' violates rest-after-two-consecutive-night-shifts: firstNightShiftId=%d, secondNightShiftId=%d, nextShiftId=%d, restMinutes=%d",
-                            employee.getName(), firstNight.getId(), secondNight.getId(), nextShift.getId(), restMinutes);
-                }
-            }
-        }
-    }
-
     private void validateMonthlyNightShiftLimit(Employee employee, List<Shift> shifts) {
         Map<YearMonth, Long> nightShiftCountByMonth = shifts.stream()
                 .filter(this::isNightShift)
@@ -153,10 +90,6 @@ public class NightHardConstraintValidator {
 
     private boolean isNightShift(Shift shift) {
         return SHIFT_TYPE_NIGHT.equals(normalizeShiftCode(shift));
-    }
-
-    private boolean isDayShift(Shift shift) {
-        return SHIFT_TYPE_DAY.equals(normalizeShiftCode(shift));
     }
 
     private String normalizeShiftCode(Shift shift) {
