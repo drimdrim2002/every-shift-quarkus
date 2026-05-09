@@ -2,9 +2,11 @@ package org.acme.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 
 class JobExecutionServiceConfigTest {
 
@@ -36,5 +38,19 @@ class JobExecutionServiceConfigTest {
         service.init();
 
         assertEquals("custom-jobs", service.collectionName);
+    }
+
+    @Test
+    void extractScoreFieldsMapsBusinessSoftScoresAfterNightPriorityLevels() {
+        BendableScore score = BendableScore.of(
+                new int[] { 0 },
+                new int[] { -7, -30, -120, -5400, 240 });
+
+        Map<String, Object> fields = JobExecutionService.extractScoreFields(score);
+
+        assertEquals(0, fields.get("hardScore"));
+        assertEquals(-120, fields.get("undesiredSoftScore"));
+        assertEquals(-5400, fields.get("fairSoftScore"));
+        assertEquals(240, fields.get("desiredSoftScore"));
     }
 }

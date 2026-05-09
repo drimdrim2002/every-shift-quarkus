@@ -18,8 +18,6 @@ import org.slf4j.Logger;
 /**
  * 야간 하드 제약 검증을 수행합니다.
  * - 3연속 Night 근무 금지
- * - Night 종료 후 다음 Day 시작까지 최소 32시간 보장
- * - 2연속 Night 근무 후 다음 근무 시작까지 최소 48시간 보장
  * - 직원별 실제 시작월 기준 Night 근무 월 15회 이하
  */
 public class NightHardConstraintValidator {
@@ -45,8 +43,6 @@ public class NightHardConstraintValidator {
                     .collect(Collectors.toList());
 
             validateNoThreeConsecutiveNightShifts(employee, shifts);
-            validateNightToNextDayRest(employee, shifts);
-            validateRestAfterTwoConsecutiveNightShifts(employee, shifts);
             validateMonthlyNightShiftLimit(employee, shifts);
         }
     }

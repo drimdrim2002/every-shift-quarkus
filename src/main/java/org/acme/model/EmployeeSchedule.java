@@ -22,7 +22,7 @@ public class EmployeeSchedule {
     @PlanningEntityCollectionProperty
     List<Shift> shiftList;
 
-    @PlanningScore(bendableHardLevelsSize = 1, bendableSoftLevelsSize = 3)
+    @PlanningScore(bendableHardLevelsSize = 1, bendableSoftLevelsSize = 5)
     BendableScore score;
 
     ScheduleState scheduleState;

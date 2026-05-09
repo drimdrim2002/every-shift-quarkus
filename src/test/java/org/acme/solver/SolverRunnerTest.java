@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,8 +26,6 @@ import jakarta.inject.Inject;
 @QuarkusTest
 public class SolverRunnerTest {
 
-    private static final long MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES = 32L * 60L;
-
     @Inject
     SolverRunner solverRunner;
 
@@ -43,16 +40,12 @@ public class SolverRunnerTest {
         assertNotNull(solution.getScore(), "Score should not be null");
 
         int expectedUndesiredSoftScore = calculateUndesiredSoftScore(solution);
-        assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(0),
-                "softScore(0) should match actual undesired penalty minutes from the solved schedule");
+        assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(2),
+                "softScore(2) should match actual undesired penalty minutes from the solved schedule");
 
         int threeConsecutiveNightViolations = countThreeConsecutiveNightViolations(solution);
         assertEquals(0, threeConsecutiveNightViolations,
                 "3연속 Night 배정은 없어야 합니다.");
-
-        int nightToNextDayMinimum32HourViolations = countNightToNextDayMinimum32HourViolations(solution);
-        assertEquals(0, nightToNextDayMinimum32HourViolations,
-                "Night 종료 후 다음 Day 시작까지 최소 32시간이 보장되어야 합니다.");
     }
 
     private int calculateUndesiredSoftScore(EmployeeSchedule schedule) {
@@ -117,50 +110,8 @@ public class SolverRunnerTest {
         return violations;
     }
 
-    private int countNightToNextDayMinimum32HourViolations(EmployeeSchedule schedule) {
-        if (schedule.getShiftList() == null) {
-            return 0;
-        }
-
-        Map<String, List<Shift>> shiftsByEmployeeId = schedule.getShiftList().stream()
-                .filter(shift -> shift.getEmployee() != null)
-                .collect(Collectors.groupingBy(shift -> shift.getEmployee().getId()));
-
-        int violations = 0;
-        for (List<Shift> shifts : shiftsByEmployeeId.values()) {
-            List<Shift> dayShifts = shifts.stream()
-                    .filter(this::isDayShift)
-                    .sorted(Comparator.comparing(Shift::getStart))
-                    .toList();
-            List<Shift> nightShifts = shifts.stream()
-                    .filter(this::isNightShift)
-                    .toList();
-
-            for (Shift nightShift : nightShifts) {
-                Shift nextDayShift = dayShifts.stream()
-                        .filter(dayShift -> dayShift.getStart().isAfter(nightShift.getEnd()))
-                        .findFirst()
-                        .orElse(null);
-                if (nextDayShift == null) {
-                    continue;
-                }
-
-                long restMinutes = Duration.between(nightShift.getEnd(), nextDayShift.getStart()).toMinutes();
-                if (restMinutes < MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES) {
-                    violations++;
-                }
-            }
-        }
-
-        return violations;
-    }
-
     private boolean isNightShift(Shift shift) {
         return "N".equals(normalizeShiftCode(shift));
-    }
-
-    private boolean isDayShift(Shift shift) {
-        return "D".equals(normalizeShiftCode(shift));
     }
 
     private String normalizeShiftCode(Shift shift) {

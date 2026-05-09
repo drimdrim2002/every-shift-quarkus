@@ -228,11 +228,17 @@ public class JobExecutionService {
         }
     }
 
+    static Map<String, Object> extractScoreFields(BendableScore score) {
+        Map<String, Object> scoreFields = new HashMap<>();
+        scoreFields.put("hardScore", score.hardScore(0));
+        scoreFields.put("undesiredSoftScore", score.softScore(2));
+        scoreFields.put("fairSoftScore", score.softScore(3));
+        scoreFields.put("desiredSoftScore", score.softScore(4));
+        return scoreFields;
+    }
+
     private void putScoreFields(Map<String, Object> updates, BendableScore score) {
-        updates.put("hardScore", score.hardScore(0));
-        updates.put("undesiredSoftScore", score.softScore(0));
-        updates.put("fairSoftScore", score.softScore(1));
-        updates.put("desiredSoftScore", score.softScore(2));
+        updates.putAll(extractScoreFields(score));
     }
 
     /**
