@@ -68,7 +68,7 @@ Client → GET /api/status/{execution_id} → 상태 조회 (Polling)
   - `status`: 실행 상태
   - `resultJson`: 직렬화된 결과
   - `errorMessage`: 에러 메시지
-  - `hardScore`, `undesiredSoftScore`, `fairSoftScore`, `desiredSoftScore`: OptaPlanner 점수
+  - `hardScore`, `softScore`, `night48RestSoftScore`, `night32RestSoftScore`, `undesiredSoftScore`, `fairSoftScore`, `desiredSoftScore`: OptaPlanner 점수
   - `createdAt`, `startedAt`, `completedAt`: 타임스탬프
   - `requestJson`: 원본 요청 (디버깅용)
 

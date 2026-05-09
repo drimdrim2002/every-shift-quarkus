@@ -201,7 +201,7 @@ GET /api/status/{id}
     "desired_soft_score": 240,
     "legacy_soft_score_total": null
   },
-  "result_json": null,
+  "result": null,
   "error_message": null,
   "created_at": "2025-12-01T10:00:00",
   "started_at": "2025-12-01T10:00:05",
