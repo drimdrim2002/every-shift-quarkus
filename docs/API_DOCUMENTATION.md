@@ -194,6 +194,8 @@ GET /api/status/{id}
   "status": "COMPLETED",
   "score": {
     "hard_score": 0,
+    "night48_rest_soft_score": -7,
+    "night32_rest_soft_score": -30,
     "undesired_soft_score": -120,
     "fair_soft_score": -5400,
     "desired_soft_score": 240,
@@ -218,10 +220,12 @@ GET /api/status/{id}
 
 **Score 설명**
 - `hard_score`: **0 이상**이어야 모든 필수 제약 조건을 만족 (음수면 제약 위반 있음)
-- `undesired_soft_score`: Soft 1순위 (값이 클수록 좋음, 페널티 중심)
-- `fair_soft_score`: Soft 2순위 (값이 클수록 좋음, 분배 균형)
-- `desired_soft_score`: Soft 3순위 (값이 클수록 좋음, 보상 중심)
-- `legacy_soft_score_total`: 구버전 문서 호환용 단일 soft 점수 (신규 문서에서는 `null`)
+- `night48_rest_soft_score`: Soft 1순위, 2연속 Night 후 다음 근무까지 48시간 휴식 부족분
+- `night32_rest_soft_score`: Soft 2순위, Night 후 다음 Day shift까지 32시간 휴식 부족분
+- `undesired_soft_score`: Soft 3순위, Off/비선호 요청일 배정 페널티
+- `fair_soft_score`: Soft 4순위, 근무 유형별 분배 균형
+- `desired_soft_score`: Soft 5순위, 선호일 배정 보상
+- `legacy_soft_score_total`: 구버전 문서 호환용 단일 soft 점수
 
 ---
 
@@ -236,6 +240,8 @@ const API_BASE_URL =
 
 type StatusScoreV2 = {
   hard_score: number | null;
+  night48_rest_soft_score: number | null;
+  night32_rest_soft_score: number | null;
   undesired_soft_score: number | null;
   fair_soft_score: number | null;
   desired_soft_score: number | null;
@@ -249,6 +255,8 @@ type StatusScoreLegacy = {
 
 type ParsedStatusScore = {
   hard: number | null;
+  night48Rest: number | null;
+  night32Rest: number | null;
   undesired: number | null;
   fair: number | null;
   desired: number | null;
@@ -259,13 +267,17 @@ type ParsedStatusScore = {
 function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | undefined): ParsedStatusScore {
   if (
     score &&
-    ("undesired_soft_score" in score ||
+    ("night48_rest_soft_score" in score ||
+      "night32_rest_soft_score" in score ||
+      "undesired_soft_score" in score ||
       "fair_soft_score" in score ||
       "desired_soft_score" in score ||
       "legacy_soft_score_total" in score)
   ) {
     return {
       hard: score.hard_score ?? null,
+      night48Rest: score.night48_rest_soft_score ?? null,
+      night32Rest: score.night32_rest_soft_score ?? null,
       undesired: score.undesired_soft_score ?? null,
       fair: score.fair_soft_score ?? null,
       desired: score.desired_soft_score ?? null,
@@ -277,6 +289,8 @@ function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | unde
   if (score && "soft_score" in score) {
     return {
       hard: score.hard_score ?? null,
+      night48Rest: null,
+      night32Rest: null,
       undesired: null,
       fair: null,
       desired: null,
@@ -287,6 +301,8 @@ function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | unde
 
   return {
     hard: null,
+    night48Rest: null,
+    night32Rest: null,
     undesired: null,
     fair: null,
     desired: null,
