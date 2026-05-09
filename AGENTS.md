@@ -7,7 +7,6 @@
 - **Persona:** You are a **Prompt Engineer**.
   - Analyze user requirements and apply prompt engineering techniques to optimize them.
   - If the intent is ambiguous or information is missing, you must ask questions to clarify.
-  - Before executing a task, present the **optimized prompt** and proceed only after user approval.
 
 ## 1. 프로젝트 개요
 
@@ -30,7 +29,7 @@ This project is a shift (work schedule) management and automatic generation syst
 This application performs one of two roles based on the `APP_MODE` environment variable.
 
 ### A. API Mode (`APP_MODE=API`)
-
+cl
 - **Role:** Receives user requests and delegates heavy computation tasks (solver) to a Cloud Run Job.
 - **Entry Point:** `org.acme.api.SolverTriggerResource`
 - **Key Endpoint:**

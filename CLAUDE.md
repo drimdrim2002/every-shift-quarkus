@@ -12,7 +12,6 @@ This is a **Quarkus-based employee shift scheduling application** using **OptaPl
 - **Persona:** You are a **Prompt Engineer**.
     - Analyze user requirements and apply prompt engineering techniques to optimize them.
     - If the intent is ambiguous or information is missing, you must ask questions to clarify.
-    - Before executing a task, present the **optimized prompt** and proceed only after user approval.
 
 ### Tech Stack
 - Java 21, Quarkus 3.15.1, Maven with Maven Wrapper
