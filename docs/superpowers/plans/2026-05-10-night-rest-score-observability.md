@@ -1,6 +1,6 @@
 # Night Rest Score Observability Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 32h/48h 야간 휴식 soft score를 Firestore 저장 필드와 `GET /api/status/{id}` 응답에서 명시적으로 관측 가능하게 만든다.
 
@@ -61,7 +61,7 @@ legacy softScore -> API legacy_soft_score_total
 - Modify: `src/main/java/org/acme/solver/validation/NightHardConstraintValidator.java`
 - Test: `src/test/java/org/acme/solver/validation/NightHardConstraintValidatorTest.java`
 
-- [ ] **Step 1: 기존 soft 정책 테스트 확인**
+- [x] **Step 1: 기존 soft 정책 테스트 확인**
 
 확인할 테스트명:
 
@@ -76,7 +76,7 @@ void validate_allowsNextShiftStartsWithin48HoursAfterTwoConsecutiveNightShiftsBe
 assertDoesNotThrow(() -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
 ```
 
-- [ ] **Step 2: focused validator test baseline 확인**
+- [x] **Step 2: focused validator test baseline 확인**
 
 Run:
 
@@ -86,7 +86,7 @@ Run:
 
 Expected before implementation: PASS. 현재 호출 경로에서 32h/48h helper는 사용되지 않지만, 미사용 코드가 hard 정책으로 오해될 수 있는 상태다.
 
-- [ ] **Step 3: 미사용 32h/48h helper 삭제**
+- [x] **Step 3: 미사용 32h/48h helper 삭제**
 
 `NightHardConstraintValidator`에서 다음 private method 전체를 삭제한다.
 
@@ -100,7 +100,7 @@ private void validateRestAfterTwoConsecutiveNightShifts(Employee employee, List<
 }
 ```
 
-- [ ] **Step 4: 관련 import, 상수, helper 삭제**
+- [x] **Step 4: 관련 import, 상수, helper 삭제**
 
 삭제할 import:
 
@@ -125,7 +125,7 @@ private boolean isDayShift(Shift shift) {
 }
 ```
 
-- [ ] **Step 5: focused validator test 통과 확인**
+- [x] **Step 5: focused validator test 통과 확인**
 
 Run:
 
@@ -142,7 +142,7 @@ validate_allowsNextShiftStartsWithin48HoursAfterTwoConsecutiveNightShiftsBecause
 validate_throwsWhenActualStartMonthHas16NightShifts
 ```
 
-- [ ] **Step 6: Task 1 커밋**
+- [x] **Step 6: Task 1 커밋**
 
 ```bash
 git add src/main/java/org/acme/solver/validation/NightHardConstraintValidator.java src/test/java/org/acme/solver/validation/NightHardConstraintValidatorTest.java
@@ -156,7 +156,7 @@ git commit -m "refactor: remove soft night rest checks from hard validator"
 - Modify: `src/test/java/org/acme/service/JobExecutionServiceConfigTest.java`
 - Modify: `src/main/java/org/acme/service/JobExecutionService.java`
 
-- [ ] **Step 1: failing test로 `soft[0]`, `soft[1]` 저장 매핑 고정**
+- [x] **Step 1: failing test로 `soft[0]`, `soft[1]` 저장 매핑 고정**
 
 `JobExecutionServiceConfigTest.extractScoreFieldsMapsBusinessSoftScoresAfterNightPriorityLevels`에 assertion을 추가한다.
 
@@ -182,7 +182,7 @@ assertEquals(-5400, fields.get("fairSoftScore"));
 assertEquals(240, fields.get("desiredSoftScore"));
 ```
 
-- [ ] **Step 2: focused service test 실패 확인**
+- [x] **Step 2: focused service test 실패 확인**
 
 Run:
 
@@ -192,7 +192,7 @@ Run:
 
 Expected before implementation: FAIL. `night48RestSoftScore`, `night32RestSoftScore`가 `null`로 조회된다.
 
-- [ ] **Step 3: `JobExecution` 필드 추가**
+- [x] **Step 3: `JobExecution` 필드 추가**
 
 `JobExecution`의 score 필드 영역에 다음 필드를 추가한다.
 
@@ -221,7 +221,7 @@ public void setNight32RestSoftScore(Integer night32RestSoftScore) {
 }
 ```
 
-- [ ] **Step 4: `extractScoreFields` 매핑 추가**
+- [x] **Step 4: `extractScoreFields` 매핑 추가**
 
 `JobExecutionService.extractScoreFields(BendableScore score)`를 다음처럼 확장한다.
 
@@ -238,7 +238,7 @@ static Map<String, Object> extractScoreFields(BendableScore score) {
 }
 ```
 
-- [ ] **Step 5: focused service test 통과 확인**
+- [x] **Step 5: focused service test 통과 확인**
 
 Run:
 
@@ -248,7 +248,7 @@ Run:
 
 Expected after implementation: PASS.
 
-- [ ] **Step 6: Task 2 커밋**
+- [x] **Step 6: Task 2 커밋**
 
 ```bash
 git add src/main/java/org/acme/model/JobExecution.java src/main/java/org/acme/service/JobExecutionService.java src/test/java/org/acme/service/JobExecutionServiceConfigTest.java
@@ -261,7 +261,7 @@ git commit -m "feat: persist night rest soft score fields"
 - Modify: `src/main/java/org/acme/api/dto/StatusResponse.java`
 - Test: `src/test/java/org/acme/api/dto/StatusResponseTest.java`
 
-- [ ] **Step 1: failing test로 bendable 응답 필드 고정**
+- [x] **Step 1: failing test로 bendable 응답 필드 고정**
 
 `StatusResponseTest.testFrom_MapsBendableScoreFields`에서 job setup에 신규 score를 추가한다.
 
@@ -277,7 +277,7 @@ Assertions.assertEquals(-7, response.score().night48RestSoftScore());
 Assertions.assertEquals(-30, response.score().night32RestSoftScore());
 ```
 
-- [ ] **Step 2: failing test로 legacy 응답 호환성 고정**
+- [x] **Step 2: failing test로 legacy 응답 호환성 고정**
 
 `StatusResponseTest.testFrom_MapsLegacySoftScore`에 다음 assertion을 추가한다.
 
@@ -286,7 +286,7 @@ Assertions.assertNull(response.score().night48RestSoftScore());
 Assertions.assertNull(response.score().night32RestSoftScore());
 ```
 
-- [ ] **Step 3: failing test로 night-only bendable 판별 고정**
+- [x] **Step 3: failing test로 night-only bendable 판별 고정**
 
 `StatusResponseTest`에 다음 테스트를 추가한다.
 
@@ -312,7 +312,7 @@ void testFrom_TreatsNightRestOnlyScoresAsBendableScoreFields() {
 }
 ```
 
-- [ ] **Step 4: focused DTO test 실패 확인**
+- [x] **Step 4: focused DTO test 실패 확인**
 
 Run:
 
@@ -322,7 +322,7 @@ Run:
 
 Expected before implementation: 컴파일 실패. `ScoreInfo`에 `night48RestSoftScore()`, `night32RestSoftScore()` accessor가 없다.
 
-- [ ] **Step 5: `ScoreInfo` record 필드 추가**
+- [x] **Step 5: `ScoreInfo` record 필드 추가**
 
 `StatusResponse.ScoreInfo`를 다음 순서로 확장한다.
 
@@ -338,7 +338,7 @@ public record ScoreInfo(
 }
 ```
 
-- [ ] **Step 6: bendable branch 생성자 인자 추가**
+- [x] **Step 6: bendable branch 생성자 인자 추가**
 
 `StatusResponse.from`의 bendable score branch를 다음처럼 바꾼다.
 
@@ -353,7 +353,7 @@ scoreInfo = new ScoreInfo(
         null);
 ```
 
-- [ ] **Step 7: legacy branch 생성자 인자 추가**
+- [x] **Step 7: legacy branch 생성자 인자 추가**
 
 legacy branch를 다음처럼 바꾼다.
 
@@ -368,7 +368,7 @@ scoreInfo = new ScoreInfo(
         job.getSoftScore());
 ```
 
-- [ ] **Step 8: `hasBendableSoftScores` 판별 확장**
+- [x] **Step 8: `hasBendableSoftScores` 판별 확장**
 
 `hasBendableSoftScores`를 다음처럼 바꾼다.
 
@@ -382,7 +382,7 @@ private static boolean hasBendableSoftScores(JobExecution job) {
 }
 ```
 
-- [ ] **Step 9: focused DTO test 통과 확인**
+- [x] **Step 9: focused DTO test 통과 확인**
 
 Run:
 
@@ -392,7 +392,7 @@ Run:
 
 Expected after implementation: PASS.
 
-- [ ] **Step 10: JSON 직렬화 smoke test 추가 여부 판단**
+- [x] **Step 10: JSON 직렬화 smoke test 추가 여부 판단**
 
 현재 `StatusResponseTest`는 record accessor 중심이다. JSON field name 회귀 위험을 낮추려면 다음 테스트를 추가한다.
 
@@ -422,7 +422,7 @@ void testFrom_SerializesNightRestScoreJsonNames() throws Exception {
 
 Expected after optional test: PASS.
 
-- [ ] **Step 11: Task 3 커밋**
+- [x] **Step 11: Task 3 커밋**
 
 ```bash
 git add src/main/java/org/acme/api/dto/StatusResponse.java src/test/java/org/acme/api/dto/StatusResponseTest.java
@@ -435,7 +435,7 @@ git commit -m "feat: expose night rest soft scores in status response"
 - Modify: `docs/API_DOCUMENTATION.md`
 - Optional Modify: `docs/WORK_SUMMARY.md`
 
-- [ ] **Step 1: `GET /api/status/{id}` 응답 예시 수정**
+- [x] **Step 1: `GET /api/status/{id}` 응답 예시 수정**
 
 `docs/API_DOCUMENTATION.md`의 status 응답 예시 score 블록을 다음 형태로 바꾼다.
 
@@ -451,7 +451,7 @@ git commit -m "feat: expose night rest soft scores in status response"
 }
 ```
 
-- [ ] **Step 2: score 설명 수정**
+- [x] **Step 2: score 설명 수정**
 
 기존 `undesired_soft_score`가 Soft 1순위라고 설명된 부분을 다음으로 바꾼다.
 
@@ -464,7 +464,7 @@ desired_soft_score: Soft 5순위, 선호일 배정 보상
 legacy_soft_score_total: 구버전 문서 호환용 단일 soft 점수
 ```
 
-- [ ] **Step 3: TypeScript `StatusScoreV2` 타입 수정**
+- [x] **Step 3: TypeScript `StatusScoreV2` 타입 수정**
 
 `StatusScoreV2`를 다음 형태로 바꾼다.
 
@@ -480,7 +480,7 @@ type StatusScoreV2 = {
 };
 ```
 
-- [ ] **Step 4: TypeScript parsed score 타입 수정**
+- [x] **Step 4: TypeScript parsed score 타입 수정**
 
 `ParsedStatusScore`에 신규 필드를 추가한다.
 
@@ -496,7 +496,7 @@ type ParsedStatusScore = {
 };
 ```
 
-- [ ] **Step 5: TypeScript parser의 V2 판별과 반환값 수정**
+- [x] **Step 5: TypeScript parser의 V2 판별과 반환값 수정**
 
 V2 판별 조건에 신규 필드를 추가한다.
 
@@ -536,7 +536,7 @@ return {
 };
 ```
 
-- [ ] **Step 6: `docs/WORK_SUMMARY.md` 수정 여부 판단**
+- [x] **Step 6: `docs/WORK_SUMMARY.md` 수정 여부 판단**
 
 다음 기준으로 결정한다.
 
@@ -547,7 +547,7 @@ return {
 
 수정한다면 `docs/API_DOCUMENTATION.md`와 동일한 score 예시, 필드 설명, TypeScript 타입/parser를 반영한다.
 
-- [ ] **Step 7: 문서 diff 확인**
+- [x] **Step 7: 문서 diff 확인**
 
 Run:
 
@@ -557,7 +557,7 @@ git diff -- docs/API_DOCUMENTATION.md docs/WORK_SUMMARY.md
 
 Expected: status API score contract에 신규 night-rest 필드가 추가되고, 기존 legacy 호환 설명은 유지된다.
 
-- [ ] **Step 8: Task 4 커밋**
+- [x] **Step 8: Task 4 커밋**
 
 ```bash
 git add docs/API_DOCUMENTATION.md
@@ -572,7 +572,7 @@ git commit -m "docs: document night rest soft score fields"
 **Files:**
 - Verify only: implementation and docs touched by Tasks 1-4
 
-- [ ] **Step 1: focused regression 실행**
+- [x] **Step 1: focused regression 실행**
 
 Run:
 
@@ -582,7 +582,9 @@ Run:
 
 Expected: PASS.
 
-- [ ] **Step 2: full regression 실행**
+Result: PASS. `Tests run: 20, Failures: 0, Errors: 0, Skipped: 0`.
+
+- [x] **Step 2: full regression 실행**
 
 Run:
 
@@ -592,7 +594,9 @@ Run:
 
 Expected: PASS.
 
-- [ ] **Step 3: 최종 diff 검토**
+Result: sandbox 환경에서는 Quarkus HTTP 서버 바인드가 `java.net.SocketException: Operation not permitted`로 실패했다. sandbox에서 실행 가능한 비-`@QuarkusTest` 회귀는 별도 실행했고 `Tests run: 77, Failures: 0, Errors: 0, Skipped: 0`로 통과했다. 비-sandbox 전체 테스트 재실행은 정책상 승인되지 않았다.
+
+- [x] **Step 3: 최종 diff 검토**
 
 Run:
 
@@ -610,7 +614,7 @@ soft[1]은 night32RestSoftScore / night32_rest_soft_score로 노출된다.
 legacy score 응답은 기존 문서와 호환된다.
 ```
 
-- [ ] **Step 4: 최종 커밋 상태 확인**
+- [x] **Step 4: 최종 커밋 상태 확인**
 
 Run:
 
@@ -619,6 +623,8 @@ git status --short
 ```
 
 Expected: 작업 커밋을 모두 만들었다면 clean. 계획 문서 자체를 같은 브랜치에서 추적한다면 `docs/superpowers/plans/2026-05-10-night-rest-score-observability.md`도 커밋되어 있어야 한다.
+
+Result: 최종 리뷰 시점 기준 working tree는 clean이며, 계획 문서도 브랜치에 커밋했다.
 
 ## Assumptions
 
