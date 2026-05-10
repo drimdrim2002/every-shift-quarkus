@@ -43,9 +43,13 @@ public class SolverRunnerTest {
         assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(2),
                 "softScore(2) should match actual undesired penalty minutes from the solved schedule");
 
-        int threeConsecutiveNightViolations = countThreeConsecutiveNightViolations(solution);
-        assertEquals(0, threeConsecutiveNightViolations,
-                "3연속 Night 배정은 없어야 합니다.");
+        int expectedThreeConsecutiveNightSoftScore = -countThreeConsecutiveNightWindows(solution);
+        assertEquals(expectedThreeConsecutiveNightSoftScore, solution.getScore().softScore(3),
+                "softScore(3) should match three-consecutive-night window count");
+
+        int fourConsecutiveNightViolations = countFourConsecutiveNightViolations(solution);
+        assertEquals(0, fourConsecutiveNightViolations,
+                "4연속 Night 배정은 하드 제약으로 금지되어야 합니다.");
     }
 
     private int calculateUndesiredSoftScore(EmployeeSchedule schedule) {
@@ -81,7 +85,7 @@ public class SolverRunnerTest {
         return -penaltyMinutes;
     }
 
-    private int countThreeConsecutiveNightViolations(EmployeeSchedule schedule) {
+    private int countThreeConsecutiveNightWindows(EmployeeSchedule schedule) {
         if (schedule.getShiftList() == null) {
             return 0;
         }
@@ -102,6 +106,38 @@ public class SolverRunnerTest {
                 LocalDate second = nightLogicalDates.get(i + 1);
                 LocalDate third = nightLogicalDates.get(i + 2);
                 if (second.equals(first.plusDays(1)) && third.equals(first.plusDays(2))) {
+                    violations++;
+                }
+            }
+        }
+
+        return violations;
+    }
+
+    private int countFourConsecutiveNightViolations(EmployeeSchedule schedule) {
+        if (schedule.getShiftList() == null) {
+            return 0;
+        }
+
+        Map<String, List<Shift>> shiftsByEmployeeId = schedule.getShiftList().stream()
+                .filter(shift -> shift.getEmployee() != null)
+                .collect(Collectors.groupingBy(shift -> shift.getEmployee().getId()));
+
+        int violations = 0;
+        for (List<Shift> shifts : shiftsByEmployeeId.values()) {
+            List<LocalDate> nightLogicalDates = shifts.stream()
+                    .filter(this::isNightShift)
+                    .map(ShiftDateMatcher::resolveLogicalDate)
+                    .sorted()
+                    .toList();
+            for (int i = 0; i <= nightLogicalDates.size() - 4; i++) {
+                LocalDate first = nightLogicalDates.get(i);
+                LocalDate second = nightLogicalDates.get(i + 1);
+                LocalDate third = nightLogicalDates.get(i + 2);
+                LocalDate fourth = nightLogicalDates.get(i + 3);
+                if (second.equals(first.plusDays(1))
+                        && third.equals(first.plusDays(2))
+                        && fourth.equals(first.plusDays(3))) {
                     violations++;
                 }
             }

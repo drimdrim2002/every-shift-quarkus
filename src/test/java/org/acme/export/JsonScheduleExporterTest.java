@@ -70,7 +70,7 @@ class JsonScheduleExporterTest {
         ScheduleJsonDto result = exporter.toJson(schedule);
 
         // Then
-        assertEquals(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -10, 0, 0 }).toString(),
+        assertEquals(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -10, 0, 0, 0 }).toString(),
                 result.getMetadata().getScore());
         assertEquals(2, result.getMetadata().getTotalEmployees());
         assertEquals(5, result.getMetadata().getTotalShifts());
@@ -281,7 +281,7 @@ class JsonScheduleExporterTest {
         schedule.setAvailabilityList(new ArrayList<>());
 
         // Score 설정
-        schedule.setScore(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -10, 0, 0 }));
+        schedule.setScore(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -10, 0, 0, 0 }));
 
         return schedule;
     }
@@ -312,7 +312,7 @@ class JsonScheduleExporterTest {
 
         schedule.setShiftList(List.of(shift));
         schedule.setAvailabilityList(new ArrayList<>());
-        schedule.setScore(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0 }));
+        schedule.setScore(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, 0 }));
         return schedule;
     }
 }

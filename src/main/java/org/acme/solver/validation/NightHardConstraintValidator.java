@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 
 /**
  * 야간 하드 제약 검증을 수행합니다.
- * - 3연속 Night 근무 금지
+ * - 4연속 Night 근무 금지
  * - 직원별 실제 시작월 기준 Night 근무 월 15회 이하
  */
 public class NightHardConstraintValidator {
@@ -37,12 +37,12 @@ public class NightHardConstraintValidator {
                     .sorted(Comparator.comparing(Shift::getStart))
                     .collect(Collectors.toList());
 
-            validateNoThreeConsecutiveNightShifts(employee, shifts);
+            validateNoFourConsecutiveNightShifts(employee, shifts);
             validateMonthlyNightShiftLimit(employee, shifts);
         }
     }
 
-    private void validateNoThreeConsecutiveNightShifts(Employee employee, List<Shift> shifts) {
+    private void validateNoFourConsecutiveNightShifts(Employee employee, List<Shift> shifts) {
         List<Shift> nightShifts = shifts.stream()
                 .filter(this::isNightShift)
                 .sorted(Comparator.comparing(Shift::getStart))
@@ -62,9 +62,9 @@ public class NightHardConstraintValidator {
                 consecutiveNightCount = 1;
             }
 
-            if (consecutiveNightCount >= 3) {
+            if (consecutiveNightCount >= 4) {
                 throw new ValidationException(
-                        "Employee '%s' violates no-three-consecutive-night-shifts: logicalDate=%s, shiftId=%d",
+                        "Employee '%s' violates no-four-consecutive-night-shifts: logicalDate=%s, shiftId=%d",
                         employee.getName(), logicalDate, nightShift.getId());
             }
 

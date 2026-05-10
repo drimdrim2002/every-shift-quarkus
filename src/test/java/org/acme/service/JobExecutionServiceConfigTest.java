@@ -44,7 +44,7 @@ class JobExecutionServiceConfigTest {
     void extractScoreFieldsMapsBusinessSoftScoresAfterNightPriorityLevels() {
         BendableScore score = BendableScore.of(
                 new int[] { 0 },
-                new int[] { -7, -30, -120, -5400, 240 });
+                new int[] { -7, -30, -120, -3, -5400, 240 });
 
         Map<String, Object> fields = JobExecutionService.extractScoreFields(score);
 

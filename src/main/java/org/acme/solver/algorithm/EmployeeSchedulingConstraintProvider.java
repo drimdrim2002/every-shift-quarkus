@@ -20,14 +20,15 @@ import org.optaplanner.core.api.score.stream.Joiners;
 public class EmployeeSchedulingConstraintProvider implements ConstraintProvider {
 
     private static final int HARD_LEVELS = 1;
-    private static final int SOFT_LEVELS = 5;
+    private static final int SOFT_LEVELS = 6;
 
     private static final int HARD_LEVEL_INDEX = 0;
     private static final int SOFT_NIGHT_48H_REST_INDEX = 0;
     private static final int SOFT_NIGHT_32H_REST_INDEX = 1;
     private static final int SOFT_UNDESIRED_INDEX = 2;
-    private static final int SOFT_FAIR_INDEX = 3;
-    private static final int SOFT_DESIRED_INDEX = 4;
+    private static final int SOFT_THREE_CONSECUTIVE_NIGHT_INDEX = 3;
+    private static final int SOFT_FAIR_INDEX = 4;
+    private static final int SOFT_DESIRED_INDEX = 5;
 
     private static final BendableScore ONE_HARD = BendableScore.ofHard(HARD_LEVELS, SOFT_LEVELS, HARD_LEVEL_INDEX,
             1);
@@ -37,6 +38,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
             SOFT_NIGHT_32H_REST_INDEX, 1);
     private static final BendableScore ONE_SOFT_UNDESIRED = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
             SOFT_UNDESIRED_INDEX, 1);
+    private static final BendableScore ONE_SOFT_THREE_CONSECUTIVE_NIGHT = BendableScore.ofSoft(HARD_LEVELS,
+            SOFT_LEVELS, SOFT_THREE_CONSECUTIVE_NIGHT_INDEX, 1);
     private static final BendableScore ONE_SOFT_FAIR = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
             SOFT_FAIR_INDEX, 1);
     private static final BendableScore ONE_SOFT_DESIRED = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
@@ -77,14 +80,15 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 // Hard constraints
                 requiredSkill(constraintFactory), noOverlappingShifts(constraintFactory),
                 atLeast12HoursBetweenTwoShifts(constraintFactory),
-                noThreeConsecutiveNightShifts(constraintFactory),
+                noFourConsecutiveNightShifts(constraintFactory),
                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
                 unavailableEmployee(constraintFactory),
-                // Soft constraints (우선순위: night48 > night32 > undesired > fair > desired)
+                // Soft constraints (우선순위: night48 > night32 > undesired > 3-consecutive-night > fair > desired)
                 atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
                 atLeast32HoursFromNightToNextDayShift(constraintFactory),
-                undesiredDayForEmployee(constraintFactory), fairShiftDistribution(constraintFactory),
-                desiredDayForEmployee(constraintFactory)};
+                undesiredDayForEmployee(constraintFactory),
+                minimizeThreeConsecutiveNightShifts(constraintFactory),
+                fairShiftDistribution(constraintFactory), desiredDayForEmployee(constraintFactory)};
     }
 
     Constraint requiredSkill(ConstraintFactory constraintFactory) {
@@ -114,7 +118,7 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 }).asConstraint("At least 12 hours between 2 shifts");
     }
 
-    Constraint noThreeConsecutiveNightShifts(ConstraintFactory constraintFactory) {
+    Constraint noFourConsecutiveNightShifts(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Shift.class)
                 .filter(EmployeeSchedulingConstraintProvider::isNightShift)
                 .join(Shift.class, Joiners.equal(Shift::getEmployee))
@@ -124,8 +128,12 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                         Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(), Shift::getEmployee))
                 .filter((firstNight, secondNight, thirdNight) -> isNightShift(thirdNight)
                         && getNightLogicalDate(thirdNight).equals(getNightLogicalDate(firstNight).plusDays(2)))
+                .join(Shift.class, Joiners.equal(
+                        (firstNight, secondNight, thirdNight) -> firstNight.getEmployee(), Shift::getEmployee))
+                .filter((firstNight, secondNight, thirdNight, fourthNight) -> isNightShift(fourthNight)
+                        && getNightLogicalDate(fourthNight).equals(getNightLogicalDate(firstNight).plusDays(3)))
                 .penalize(ONE_HARD)
-                .asConstraint("No three consecutive night shifts");
+                .asConstraint("No four consecutive night shifts");
     }
 
     Constraint atLeast32HoursFromNightToNextDayShift(ConstraintFactory constraintFactory) {
@@ -144,6 +152,20 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                         (nightShift, nextDayStart) -> MIN_NIGHT_TO_NEXT_DAY_REST_MINUTES
                                 - getMinutesBetween(nightShift.getEnd(), nextDayStart))
                 .asConstraint("At least 32 hours from night to next day shift");
+    }
+
+    Constraint minimizeThreeConsecutiveNightShifts(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Shift.class)
+                .filter(EmployeeSchedulingConstraintProvider::isNightShift)
+                .join(Shift.class, Joiners.equal(Shift::getEmployee))
+                .filter((firstNight, secondNight) -> isNightShift(secondNight)
+                        && getNightLogicalDate(secondNight).equals(getNightLogicalDate(firstNight).plusDays(1)))
+                .join(Shift.class,
+                        Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(), Shift::getEmployee))
+                .filter((firstNight, secondNight, thirdNight) -> isNightShift(thirdNight)
+                        && getNightLogicalDate(thirdNight).equals(getNightLogicalDate(firstNight).plusDays(2)))
+                .penalize(ONE_SOFT_THREE_CONSECUTIVE_NIGHT)
+                .asConstraint("Minimize three consecutive night shifts");
     }
 
     Constraint atLeast48HoursAfterTwoConsecutiveNightShifts(ConstraintFactory constraintFactory) {
