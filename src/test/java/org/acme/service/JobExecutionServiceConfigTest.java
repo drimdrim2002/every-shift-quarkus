@@ -44,11 +44,13 @@ class JobExecutionServiceConfigTest {
     void extractScoreFieldsMapsBusinessSoftScoresAfterNightPriorityLevels() {
         BendableScore score = BendableScore.of(
                 new int[] { 0 },
-                new int[] { -7, -30, -120, -5400, 240 });
+                new int[] { -7, -30, -120, -3, -5400, 240 });
 
         Map<String, Object> fields = JobExecutionService.extractScoreFields(score);
 
         assertEquals(0, fields.get("hardScore"));
+        assertEquals(-7, fields.get("night48RestSoftScore"));
+        assertEquals(-30, fields.get("night32RestSoftScore"));
         assertEquals(-120, fields.get("undesiredSoftScore"));
         assertEquals(-5400, fields.get("fairSoftScore"));
         assertEquals(240, fields.get("desiredSoftScore"));

@@ -22,6 +22,8 @@ public class JobExecution {
     private String errorMessage;
     private Integer hardScore;
     private Integer softScore;            // 레거시 단일 soft 점수 (읽기 호환)
+    private Integer night48RestSoftScore;
+    private Integer night32RestSoftScore;
     private Integer undesiredSoftScore;
     private Integer fairSoftScore;
     private Integer desiredSoftScore;
@@ -102,6 +104,22 @@ public class JobExecution {
 
     public void setSoftScore(Integer softScore) {
         this.softScore = softScore;
+    }
+
+    public Integer getNight48RestSoftScore() {
+        return night48RestSoftScore;
+    }
+
+    public void setNight48RestSoftScore(Integer night48RestSoftScore) {
+        this.night48RestSoftScore = night48RestSoftScore;
+    }
+
+    public Integer getNight32RestSoftScore() {
+        return night32RestSoftScore;
+    }
+
+    public void setNight32RestSoftScore(Integer night32RestSoftScore) {
+        this.night32RestSoftScore = night32RestSoftScore;
     }
 
     public Integer getUndesiredSoftScore() {

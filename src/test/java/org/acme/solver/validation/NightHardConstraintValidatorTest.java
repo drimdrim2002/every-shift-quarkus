@@ -19,7 +19,7 @@ class NightHardConstraintValidatorTest {
     private final NightHardConstraintValidator validator = new NightHardConstraintValidator();
 
     @Test
-    void validate_throwsWhenThreeConsecutiveNightShiftsExist() {
+    void validate_allowsThreeConsecutiveNightShifts() {
         Employee employee = employee("emp-1", "테스터");
 
         Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
@@ -28,6 +28,21 @@ class NightHardConstraintValidatorTest {
                         shift(1L, "N", LocalDateTime.of(2026, 2, 1, 0, 0), LocalDateTime.of(2026, 2, 1, 8, 0), employee),
                         shift(2L, "N", LocalDateTime.of(2026, 2, 2, 0, 0), LocalDateTime.of(2026, 2, 2, 8, 0), employee),
                         shift(3L, "N", LocalDateTime.of(2026, 2, 3, 0, 0), LocalDateTime.of(2026, 2, 3, 8, 0), employee)));
+
+        assertDoesNotThrow(() -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
+    }
+
+    @Test
+    void validate_throwsWhenFourConsecutiveNightShiftsExist() {
+        Employee employee = employee("emp-1", "테스터");
+
+        Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
+                employee,
+                List.of(
+                        shift(1L, "N", LocalDateTime.of(2026, 2, 1, 0, 0), LocalDateTime.of(2026, 2, 1, 8, 0), employee),
+                        shift(2L, "N", LocalDateTime.of(2026, 2, 2, 0, 0), LocalDateTime.of(2026, 2, 2, 8, 0), employee),
+                        shift(3L, "N", LocalDateTime.of(2026, 2, 3, 0, 0), LocalDateTime.of(2026, 2, 3, 8, 0), employee),
+                        shift(4L, "N", LocalDateTime.of(2026, 2, 4, 0, 0), LocalDateTime.of(2026, 2, 4, 8, 0), employee)));
 
         assertThrows(ValidationException.class,
                 () -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));

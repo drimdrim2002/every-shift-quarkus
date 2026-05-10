@@ -13,8 +13,8 @@ class SolverRunnerTerminationPolicyTest {
         solverRunner.minIterations = 2;
         solverRunner.maxIterations = 30;
 
-        BendableScore previousScore = BendableScore.parseScore("[0]hard/[0/0/0/-11/0]soft");
-        BendableScore currentScore = BendableScore.parseScore("[0]hard/[0/0/0/-10/0]soft");
+        BendableScore previousScore = BendableScore.parseScore("[0]hard/[0/0/0/0/-11/0]soft");
+        BendableScore currentScore = BendableScore.parseScore("[0]hard/[0/0/0/0/-10/0]soft");
 
         SolverRunner.TerminationReason reason = solverRunner.determineTerminationReason(
                 2,
@@ -32,8 +32,8 @@ class SolverRunnerTerminationPolicyTest {
         solverRunner.minIterations = 2;
         solverRunner.maxIterations = 3;
 
-        BendableScore previousScore = BendableScore.parseScore("[0]hard/[0/0/0/-11/0]soft");
-        BendableScore currentScore = BendableScore.parseScore("[0]hard/[0/0/0/-10/0]soft");
+        BendableScore previousScore = BendableScore.parseScore("[0]hard/[0/0/0/0/-11/0]soft");
+        BendableScore currentScore = BendableScore.parseScore("[0]hard/[0/0/0/0/-10/0]soft");
 
         SolverRunner.TerminationReason reason = solverRunner.determineTerminationReason(
                 3,
