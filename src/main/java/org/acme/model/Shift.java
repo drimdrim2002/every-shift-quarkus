@@ -22,6 +22,7 @@ public class Shift {
     Employee employee;
 
     boolean pinned;
+    int fairnessBurdenScore;
 
     public Shift() {
     }
@@ -115,6 +116,14 @@ public class Shift {
 
     public void setPinned(boolean pinned) {
         this.pinned = pinned;
+    }
+
+    public int getFairnessBurdenScore() {
+        return fairnessBurdenScore;
+    }
+
+    public void setFairnessBurdenScore(int fairnessBurdenScore) {
+        this.fairnessBurdenScore = Math.max(0, fairnessBurdenScore);
     }
 
     @Override

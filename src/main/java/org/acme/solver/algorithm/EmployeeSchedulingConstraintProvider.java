@@ -254,6 +254,20 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 .asConstraint("Fair shift distribution");
     }
 
+    Constraint yearlyNightHolidayBurdenFairness(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Shift.class)
+                .filter(shift -> shift.getFairnessBurdenScore() > 0)
+                .groupBy(Shift::getEmployee, ConstraintCollectors.sum(Shift::getFairnessBurdenScore))
+                .penalize(ONE_SOFT_FAIR,
+                        (employee, currentBurden) -> {
+                            int totalBurden = employee.getYearlyNightWorkCount()
+                                    + employee.getYearlyHolidayWorkCount()
+                                    + currentBurden;
+                            return totalBurden * totalBurden;
+                        })
+                .asConstraint("Yearly night/holiday burden fairness");
+    }
+
     private static String resolveShiftType(Shift shift) {
         if (shift.getShiftCode() == null) {
             return SHIFT_TYPE_UNKNOWN;
