@@ -13,25 +13,13 @@ import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
 import org.junit.jupiter.api.Test;
 import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
-import org.optaplanner.core.api.score.stream.Constraint;
-import org.optaplanner.core.api.score.stream.ConstraintFactory;
 import org.optaplanner.test.api.score.stream.ConstraintVerifier;
 
 class EmployeeSchedulingConstraintProviderTest {
 
     ConstraintVerifier<EmployeeSchedulingConstraintProvider, EmployeeSchedule> constraintVerifier = ConstraintVerifier
             .build(
-                    new EmployeeSchedulingConstraintProvider() {
-                        @Override
-                        public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
-                            Constraint[] constraints = super.defineConstraints(constraintFactory);
-                            Constraint[] constraintsWithBurdenFairness = new Constraint[constraints.length + 1];
-                            System.arraycopy(constraints, 0, constraintsWithBurdenFairness, 0, constraints.length);
-                            constraintsWithBurdenFairness[constraints.length] =
-                                    yearlyNightHolidayBurdenFairness(constraintFactory);
-                            return constraintsWithBurdenFairness;
-                        }
-                    }, EmployeeSchedule.class, Shift.class);
+                    new EmployeeSchedulingConstraintProvider(), EmployeeSchedule.class, Shift.class);
 
     @Test
     void oneShiftPerDay() {
