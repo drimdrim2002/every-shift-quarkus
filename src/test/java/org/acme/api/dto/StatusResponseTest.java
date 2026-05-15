@@ -79,6 +79,7 @@ class StatusResponseTest {
         job.setNight48RestSoftScore(-7);
         job.setNight32RestSoftScore(-30);
         job.setUndesiredSoftScore(-120);
+        job.setBurdenFairnessSoftScore(-81);
         job.setFairSoftScore(-5400);
         job.setDesiredSoftScore(240);
 
@@ -89,6 +90,7 @@ class StatusResponseTest {
         Assertions.assertEquals(-7, response.score().night48RestSoftScore());
         Assertions.assertEquals(-30, response.score().night32RestSoftScore());
         Assertions.assertEquals(-120, response.score().undesiredSoftScore());
+        Assertions.assertEquals(-81, response.score().burdenFairnessSoftScore());
         Assertions.assertEquals(-5400, response.score().fairSoftScore());
         Assertions.assertEquals(240, response.score().desiredSoftScore());
         Assertions.assertNull(response.score().legacySoftScoreTotal());
@@ -109,6 +111,7 @@ class StatusResponseTest {
         Assertions.assertNull(response.score().night48RestSoftScore());
         Assertions.assertNull(response.score().night32RestSoftScore());
         Assertions.assertNull(response.score().undesiredSoftScore());
+        Assertions.assertNull(response.score().burdenFairnessSoftScore());
         Assertions.assertNull(response.score().fairSoftScore());
         Assertions.assertNull(response.score().desiredSoftScore());
         Assertions.assertEquals(-6121, response.score().legacySoftScoreTotal());
@@ -129,6 +132,7 @@ class StatusResponseTest {
         Assertions.assertEquals(-7, response.score().night48RestSoftScore());
         Assertions.assertNull(response.score().night32RestSoftScore());
         Assertions.assertNull(response.score().undesiredSoftScore());
+        Assertions.assertNull(response.score().burdenFairnessSoftScore());
         Assertions.assertNull(response.score().fairSoftScore());
         Assertions.assertNull(response.score().desiredSoftScore());
         Assertions.assertNull(response.score().legacySoftScoreTotal());
@@ -148,6 +152,20 @@ class StatusResponseTest {
 
         Assertions.assertTrue(json.contains("\"night48_rest_soft_score\":-7"));
         Assertions.assertTrue(json.contains("\"night32_rest_soft_score\":-30"));
+    }
+
+    @Test
+    void testFrom_SerializesBurdenFairnessScoreJsonName() throws Exception {
+        JobExecution job = new JobExecution();
+        job.setId("test-id");
+        job.setStatus(ExecutionStatus.COMPLETED);
+        job.setHardScore(0);
+        job.setBurdenFairnessSoftScore(-81);
+
+        StatusResponse response = StatusResponse.from(job, objectMapper);
+        String json = objectMapper.writeValueAsString(response);
+
+        Assertions.assertTrue(json.contains("\"burden_fairness_soft_score\":-81"));
     }
 
     @Test

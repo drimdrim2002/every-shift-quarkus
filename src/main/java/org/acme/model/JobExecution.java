@@ -25,6 +25,7 @@ public class JobExecution {
     private Integer night48RestSoftScore;
     private Integer night32RestSoftScore;
     private Integer undesiredSoftScore;
+    private Integer burdenFairnessSoftScore;
     private Integer fairSoftScore;
     private Integer desiredSoftScore;
     private Long createdAt;               // Timestamp (epoch millis)
@@ -128,6 +129,14 @@ public class JobExecution {
 
     public void setUndesiredSoftScore(Integer undesiredSoftScore) {
         this.undesiredSoftScore = undesiredSoftScore;
+    }
+
+    public Integer getBurdenFairnessSoftScore() {
+        return burdenFairnessSoftScore;
+    }
+
+    public void setBurdenFairnessSoftScore(Integer burdenFairnessSoftScore) {
+        this.burdenFairnessSoftScore = burdenFairnessSoftScore;
     }
 
     public Integer getFairSoftScore() {
