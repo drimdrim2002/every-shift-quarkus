@@ -184,11 +184,12 @@ public class DtoConverterTest {
     }
 
     private void assertBurden(EmployeeSchedule schedule, LocalDate logicalDate, String shiftCode, int expected) {
-        Shift shift = schedule.getShiftList().stream()
+        List<Shift> matches = schedule.getShiftList().stream()
                 .filter(candidate -> shiftCode.equals(candidate.getShiftCode()))
                 .filter(candidate -> ShiftDateMatcher.resolveLogicalDate(candidate).equals(logicalDate))
-                .findFirst()
-                .orElseThrow();
+                .toList();
+        assertEquals(1, matches.size(), "Expected exactly one shift for " + logicalDate + " " + shiftCode);
+        Shift shift = matches.get(0);
         assertEquals(expected, shift.getFairnessBurdenScore());
     }
 }

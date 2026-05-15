@@ -3,6 +3,7 @@ package org.acme.converter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,18 +124,21 @@ public class EmployeeScheduleBuilder {
                         return;
                 }
 
-                List<PlanningRequest.YearlyEmployeeStatsInfo> validStats = yearlyEmployeeStats.stream()
-                                .filter(stats -> stats != null)
-                                .filter(stats -> stats.employeeId() != null)
-                                .filter(stats -> employeeMap.containsKey(stats.employeeId()))
-                                .toList();
+                Map<String, PlanningRequest.YearlyEmployeeStatsInfo> effectiveStatsByEmployeeId =
+                                new LinkedHashMap<>();
+                for (PlanningRequest.YearlyEmployeeStatsInfo stats : yearlyEmployeeStats) {
+                        if (stats == null || stats.employeeId() == null || !employeeMap.containsKey(stats.employeeId())) {
+                                continue;
+                        }
+                        effectiveStatsByEmployeeId.put(stats.employeeId(), stats);
+                }
 
-                int maxOffRequestCount = validStats.stream()
+                int maxOffRequestCount = effectiveStatsByEmployeeId.values().stream()
                                 .mapToInt(stats -> Math.max(0, stats.offRequestCount()))
                                 .max()
                                 .orElse(0);
 
-                for (PlanningRequest.YearlyEmployeeStatsInfo stats : validStats) {
+                for (PlanningRequest.YearlyEmployeeStatsInfo stats : effectiveStatsByEmployeeId.values()) {
                         Employee employee = employeeMap.get(stats.employeeId());
                         employee.setYearlyNightWorkCount(stats.nightWorkCount());
                         employee.setYearlyHolidayWorkCount(stats.holidayWorkCount());
