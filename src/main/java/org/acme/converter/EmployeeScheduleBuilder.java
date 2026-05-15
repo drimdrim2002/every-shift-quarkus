@@ -126,6 +126,10 @@ public class EmployeeScheduleBuilder {
 
                 Map<String, PlanningRequest.YearlyEmployeeStatsInfo> effectiveStatsByEmployeeId =
                                 new LinkedHashMap<>();
+                for (String employeeId : employeeMap.keySet()) {
+                        effectiveStatsByEmployeeId.put(employeeId,
+                                        new PlanningRequest.YearlyEmployeeStatsInfo(employeeId, 0, 0, 0));
+                }
                 for (PlanningRequest.YearlyEmployeeStatsInfo stats : yearlyEmployeeStats) {
                         if (stats == null || stats.employeeId() == null || !employeeMap.containsKey(stats.employeeId())) {
                                 continue;

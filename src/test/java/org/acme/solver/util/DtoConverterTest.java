@@ -170,7 +170,7 @@ public class DtoConverterTest {
         assertEquals(4, e1.getYearlyHolidayWorkCount());
         assertEquals(1, e1.getYearlyOffRequestCount());
         assertEquals(0, e2.getYearlyNightWorkCount());
-        assertEquals(1, e2.getOffRequestPenaltyWeight());
+        assertEquals(2, e2.getOffRequestPenaltyWeight());
 
         assertBurden(schedule, LocalDate.of(2025, 12, 4), "N", 0);
         assertBurden(schedule, LocalDate.of(2025, 12, 5), "N", 2);
