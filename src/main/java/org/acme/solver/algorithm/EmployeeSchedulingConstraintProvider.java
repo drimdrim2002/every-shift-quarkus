@@ -20,15 +20,16 @@ import org.optaplanner.core.api.score.stream.Joiners;
 public class EmployeeSchedulingConstraintProvider implements ConstraintProvider {
 
     private static final int HARD_LEVELS = 1;
-    private static final int SOFT_LEVELS = 6;
+    private static final int SOFT_LEVELS = 7;
 
     private static final int HARD_LEVEL_INDEX = 0;
     private static final int SOFT_NIGHT_48H_REST_INDEX = 0;
     private static final int SOFT_NIGHT_32H_REST_INDEX = 1;
     private static final int SOFT_UNDESIRED_INDEX = 2;
     private static final int SOFT_THREE_CONSECUTIVE_NIGHT_INDEX = 3;
-    private static final int SOFT_FAIR_INDEX = 4;
-    private static final int SOFT_DESIRED_INDEX = 5;
+    private static final int SOFT_BURDEN_FAIRNESS_INDEX = 4;
+    private static final int SOFT_FAIR_INDEX = 5;
+    private static final int SOFT_DESIRED_INDEX = 6;
 
     private static final BendableScore ONE_HARD = BendableScore.ofHard(HARD_LEVELS, SOFT_LEVELS, HARD_LEVEL_INDEX,
             1);
@@ -40,6 +41,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
             SOFT_UNDESIRED_INDEX, 1);
     private static final BendableScore ONE_SOFT_THREE_CONSECUTIVE_NIGHT = BendableScore.ofSoft(HARD_LEVELS,
             SOFT_LEVELS, SOFT_THREE_CONSECUTIVE_NIGHT_INDEX, 1);
+    private static final BendableScore ONE_SOFT_BURDEN_FAIRNESS = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
+            SOFT_BURDEN_FAIRNESS_INDEX, 1);
     private static final BendableScore ONE_SOFT_FAIR = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
             SOFT_FAIR_INDEX, 1);
     private static final BendableScore ONE_SOFT_DESIRED = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
@@ -83,12 +86,14 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 noFourConsecutiveNightShifts(constraintFactory),
                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
                 unavailableEmployee(constraintFactory),
-                // Soft constraints (우선순위: night48 > night32 > undesired > 3-consecutive-night > fair > desired)
+                // Soft constraints (우선순위: night48 > night32 > undesired > 3-consecutive-night > burden > fair > desired)
                 atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
                 atLeast32HoursFromNightToNextDayShift(constraintFactory),
                 undesiredDayForEmployee(constraintFactory),
                 minimizeThreeConsecutiveNightShifts(constraintFactory),
-                fairShiftDistribution(constraintFactory), desiredDayForEmployee(constraintFactory)};
+                yearlyNightHolidayBurdenFairness(constraintFactory),
+                fairShiftDistribution(constraintFactory),
+                desiredDayForEmployee(constraintFactory)};
     }
 
     Constraint requiredSkill(ConstraintFactory constraintFactory) {
@@ -240,7 +245,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                         .matchesActualOrLogicalDate(shift, availability.getDate()))
                 // A shift is penalized at most once, even if multiple undesired dates match.
                 .groupBy((shift, availability) -> shift)
-                .penalize(ONE_SOFT_UNDESIRED, EmployeeSchedulingConstraintProvider::getShiftDurationInMinutes)
+                .penalize(ONE_SOFT_UNDESIRED,
+                        shift -> getShiftDurationInMinutes(shift) * shift.getEmployee().getOffRequestPenaltyWeight())
                 .asConstraint("Undesired day for employee");
     }
 
@@ -258,7 +264,7 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
         return constraintFactory.forEach(Shift.class)
                 .filter(shift -> shift.getFairnessBurdenScore() > 0)
                 .groupBy(Shift::getEmployee, ConstraintCollectors.sum(Shift::getFairnessBurdenScore))
-                .penalize(ONE_SOFT_FAIR,
+                .penalize(ONE_SOFT_BURDEN_FAIRNESS,
                         (employee, currentBurden) -> {
                             int totalBurden = employee.getYearlyNightWorkCount()
                                     + employee.getYearlyHolidayWorkCount()

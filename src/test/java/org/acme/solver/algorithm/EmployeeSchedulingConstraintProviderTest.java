@@ -9,17 +9,21 @@ import java.util.Set;
 import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
 import org.acme.model.Employee;
-import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
 import org.junit.jupiter.api.Test;
+import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
+import org.optaplanner.core.api.domain.solution.PlanningScore;
+import org.optaplanner.core.api.domain.solution.PlanningSolution;
+import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
+import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.optaplanner.test.api.score.stream.ConstraintVerifier;
 
 class EmployeeSchedulingConstraintProviderTest {
 
-    ConstraintVerifier<EmployeeSchedulingConstraintProvider, EmployeeSchedule> constraintVerifier = ConstraintVerifier
+    ConstraintVerifier<EmployeeSchedulingConstraintProvider, SevenSoftLevelEmployeeSchedule> constraintVerifier = ConstraintVerifier
             .build(
-                    new EmployeeSchedulingConstraintProvider(), EmployeeSchedule.class, Shift.class);
+                    new EmployeeSchedulingConstraintProvider(), SevenSoftLevelEmployeeSchedule.class, Shift.class);
 
     @Test
     void oneShiftPerDay() {
@@ -386,7 +390,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, 0, -41, 0 }));
     }
 
     @Test
@@ -401,7 +405,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -41, 0 }));
     }
 
     @Test
@@ -416,7 +420,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextEveningShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -45, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, 0, -45, 0 }));
     }
 
     @Test
@@ -431,7 +435,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextNightShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -90, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, 0, -90, 0 }));
     }
 
     @Test
@@ -446,7 +450,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night3, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -41, 0 }));
     }
 
     @Test
@@ -461,7 +465,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night3, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -960, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -960, 0, 0, 0, -41, 0 }));
     }
 
     @Test
@@ -471,7 +475,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, -2560, 0 }));
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, 0, -2560, 0 }));
     }
 
     @Test
@@ -481,7 +485,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -2250, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -2250, 0 }));
     }
 
     @Test
@@ -491,7 +495,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, -2560, 0 }));
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, 0, -2560, 0 }));
     }
 
     @Test
@@ -507,7 +511,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(combine(employee1MarchNightShifts, employee1AprilNightShifts, employee2MarchNightShifts))
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -4810, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -4810, 0 }));
     }
 
     @Test
@@ -520,7 +524,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift, availability)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -480, 0, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -480, 0, 0, -1, 0 }));
     }
 
     @Test
@@ -534,6 +538,19 @@ class EmployeeSchedulingConstraintProviderTest {
         constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
                 .given(nightShift, availability)
                 .penalizesBy(480);
+    }
+
+    @Test
+    void undesiredDayForEmployee_MultipliesByOffRequestPenaltyWeight() {
+        Employee employee = createEmployee("E1");
+        employee.setOffRequestPenaltyWeight(4);
+        LocalDate date = LocalDate.of(2025, 12, 1);
+        Shift shift = createShift(1L, employee, date, 9, 17);
+        Availability availability = new Availability(employee, date, AvailabilityType.UNDESIRED);
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::undesiredDayForEmployee)
+                .given(shift, availability)
+                .penalizesBy(1920); // 480 minutes * weight 4
     }
 
     @Test
@@ -623,7 +640,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -1, 0 }));
     }
 
     @Test
@@ -687,6 +704,19 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
+    void softScoreLevels_BurdenFairnessOnly() {
+        Employee employee = createEmployee("E1");
+        employee.setYearlyNightWorkCount(2);
+        employee.setYearlyHolidayWorkCount(3);
+        Shift shift = createShift(1L, employee, LocalDate.of(2025, 12, 5), 9, 17);
+        shift.setFairnessBurdenScore(4);
+
+        constraintVerifier.verifyThat()
+                .given(shift)
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -81, -1, 0 }));
+    }
+
+    @Test
     void softScoreLevels_DesiredAndFair() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
@@ -695,7 +725,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift, availability)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -1, 480 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -1, 480 }));
     }
 
     private Employee createEmployee(String id) {
@@ -755,5 +785,22 @@ class EmployeeSchedulingConstraintProviderTest {
             shifts.addAll(List.of(shiftGroup));
         }
         return shifts.toArray();
+    }
+
+    @PlanningSolution
+    static class SevenSoftLevelEmployeeSchedule {
+
+        @ProblemFactCollectionProperty
+        List<Availability> availabilityList;
+
+        @ProblemFactCollectionProperty
+        @ValueRangeProvider
+        List<Employee> employeeList;
+
+        @PlanningEntityCollectionProperty
+        List<Shift> shiftList;
+
+        @PlanningScore(bendableHardLevelsSize = 1, bendableSoftLevelsSize = 7)
+        BendableScore score;
     }
 }
