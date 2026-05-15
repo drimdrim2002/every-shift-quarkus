@@ -1,0 +1,127 @@
+{
+  "organization": {
+    "id": "ORG1",
+    "name": "Fairness Test Hospital",
+    "type": "hospital",
+    "shifts": [
+      {
+        "id": "SHIFT_D",
+        "code": "D",
+        "name": "Day",
+        "start_time": "08:00:00",
+        "end_time": "16:00:00"
+      },
+      {
+        "id": "SHIFT_E",
+        "code": "E",
+        "name": "Evening",
+        "start_time": "16:00:00",
+        "end_time": "00:00:00"
+      },
+      {
+        "id": "SHIFT_N",
+        "code": "N",
+        "name": "Night",
+        "start_time": "00:00:00",
+        "end_time": "08:00:00"
+      }
+    ],
+    "lastHistoricalDate": "2025-12-04",
+    "firstDraftDate": "2025-12-05",
+    "publishLength": 0,
+    "draftLength": 5
+  },
+  "employees": [
+    {
+      "employee_id": "E1",
+      "name": "Employee One",
+      "available_shifts": [
+        "D",
+        "E",
+        "N"
+      ],
+      "skill_set": [
+        "ALL"
+      ]
+    },
+    {
+      "employee_id": "E2",
+      "name": "Employee Two",
+      "available_shifts": [
+        "D",
+        "E",
+        "N"
+      ],
+      "skill_set": [
+        "ALL"
+      ]
+    }
+  ],
+  "history": [
+    {
+      "employee_id": "E1",
+      "shift_id": "SHIFT_N",
+      "date": "2025-12-04",
+      "is_locked": true
+    }
+  ],
+  "undesirable": [],
+  "requirements": [
+    {
+      "shiftId": "SHIFT_N",
+      "dayIndex": 0,
+      "employeeCount": 1
+    },
+    {
+      "shiftId": "SHIFT_D",
+      "dayIndex": 1,
+      "employeeCount": 1
+    },
+    {
+      "shiftId": "SHIFT_E",
+      "dayIndex": 1,
+      "employeeCount": 1
+    },
+    {
+      "shiftId": "SHIFT_N",
+      "dayIndex": 1,
+      "employeeCount": 1
+    },
+    {
+      "shiftId": "SHIFT_D",
+      "dayIndex": 2,
+      "employeeCount": 1
+    },
+    {
+      "shiftId": "SHIFT_E",
+      "dayIndex": 2,
+      "employeeCount": 1
+    },
+    {
+      "shiftId": "SHIFT_N",
+      "dayIndex": 2,
+      "employeeCount": 1
+    },
+    {
+      "shiftId": "SHIFT_N",
+      "dayIndex": 3,
+      "employeeCount": 1
+    }
+  ],
+  "publicHolidays": [
+    {
+      "date": "2025-12-08",
+      "dayOfWeek": "MONDAY",
+      "dayName": "Monday",
+      "kind": "PUBLIC_HOLIDAY"
+    }
+  ],
+  "yearlyEmployeeStats": [
+    {
+      "employee_id": "E1",
+      "nightWorkCount": 7,
+      "holidayWorkCount": 4,
+      "offRequestCount": 1
+    }
+  ]
+}

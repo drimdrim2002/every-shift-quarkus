@@ -14,8 +14,10 @@ import java.util.stream.Collectors;
 import org.acme.api.dto.PlanningRequest;
 import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
+import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
+import org.acme.solver.ShiftDateMatcher;
 import org.acme.test.JsonLoader;
 import org.acme.util.DtoConverter;
 import org.junit.jupiter.api.Test;
@@ -147,5 +149,46 @@ public class DtoConverterTest {
 
         assertEquals(1, matchCount,
                 "Duplicate undesirable entries for same employee/date should be deduplicated to one availability");
+    }
+
+    @Test
+    public void testFairnessInputsPopulateEmployeeStatsAndBurdenScores() throws IOException {
+        PlanningRequest request = JsonLoader.load("/json/fairness.json", PlanningRequest.class);
+
+        EmployeeSchedule schedule = dtoConverter.convert(request);
+
+        Employee e1 = schedule.getEmployeeList().stream()
+                .filter(employee -> employee.getId().equals("E1"))
+                .findFirst()
+                .orElseThrow();
+        Employee e2 = schedule.getEmployeeList().stream()
+                .filter(employee -> employee.getId().equals("E2"))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(7, e1.getYearlyNightWorkCount());
+        assertEquals(4, e1.getYearlyHolidayWorkCount());
+        assertEquals(1, e1.getYearlyOffRequestCount());
+        assertEquals(0, e2.getYearlyNightWorkCount());
+        assertEquals(1, e2.getOffRequestPenaltyWeight());
+
+        assertBurden(schedule, LocalDate.of(2025, 12, 4), "N", 0);
+        assertBurden(schedule, LocalDate.of(2025, 12, 5), "N", 2);
+        assertBurden(schedule, LocalDate.of(2025, 12, 6), "D", 1);
+        assertBurden(schedule, LocalDate.of(2025, 12, 6), "E", 1);
+        assertBurden(schedule, LocalDate.of(2025, 12, 6), "N", 2);
+        assertBurden(schedule, LocalDate.of(2025, 12, 7), "D", 1);
+        assertBurden(schedule, LocalDate.of(2025, 12, 7), "E", 1);
+        assertBurden(schedule, LocalDate.of(2025, 12, 7), "N", 1);
+        assertBurden(schedule, LocalDate.of(2025, 12, 8), "N", 2);
+    }
+
+    private void assertBurden(EmployeeSchedule schedule, LocalDate logicalDate, String shiftCode, int expected) {
+        Shift shift = schedule.getShiftList().stream()
+                .filter(candidate -> shiftCode.equals(candidate.getShiftCode()))
+                .filter(candidate -> ShiftDateMatcher.resolveLogicalDate(candidate).equals(logicalDate))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(expected, shift.getFairnessBurdenScore());
     }
 }
