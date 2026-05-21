@@ -82,7 +82,6 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 atLeast12HoursBetweenTwoShifts(constraintFactory),
                 noFourConsecutiveNightShifts(constraintFactory),
                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
-                unavailableEmployee(constraintFactory),
                 // Soft constraints (우선순위: night48 > night32 > undesired > 3-consecutive-night > fair > desired)
                 atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
                 atLeast32HoursFromNightToNextDayShift(constraintFactory),
@@ -203,18 +202,6 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 .forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee),
                         Joiners.equal(shift -> shift.getStart().toLocalDate()))
                 .penalize(ONE_HARD).asConstraint("Max one shift per day");
-    }
-
-    Constraint unavailableEmployee(ConstraintFactory constraintFactory) {
-        return constraintFactory.forEach(Shift.class)
-                .join(Availability.class,
-                        Joiners.equal((Shift shift) -> shift.getStart().toLocalDate(),
-                                Availability::getDate),
-                        Joiners.equal(Shift::getEmployee, Availability::getEmployee))
-                .filter((shift, availability) -> availability
-                        .getAvailabilityType() == AvailabilityType.UNAVAILABLE)
-                .penalize(ONE_HARD, (shift, availability) -> getShiftDurationInMinutes(shift))
-                .asConstraint("Unavailable employee");
     }
 
     Constraint desiredDayForEmployee(ConstraintFactory constraintFactory) {
