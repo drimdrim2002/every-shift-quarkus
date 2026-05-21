@@ -1,12 +1,8 @@
 package org.acme.solver.validation;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.acme.model.Availability;
-import org.acme.model.AvailabilityType;
 import org.acme.model.Employee;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
@@ -14,7 +10,6 @@ import org.slf4j.Logger;
 
 /**
  * 직원 가용성 검증을 수행합니다.
- * - UNAVAILABLE 날짜에 시프트가 배정되지 않았는지 확인
  */
 public class AvailabilityValidator {
 
@@ -27,29 +22,7 @@ public class AvailabilityValidator {
      * @throws ValidationException 검증 실패 시
      */
     public void validate(EmployeeSchedule schedule, Map<Employee, List<Shift>> shiftsByEmployee, Logger logger) {
-        // UNAVAILABLE 날짜를 맵으로 변환
-        Map<String, Map<LocalDate, AvailabilityType>> availabilityMap = new HashMap<>();
-        for (Availability availability : schedule.getAvailabilityList()) {
-            availabilityMap
-                    .computeIfAbsent(availability.getEmployee().getId(), k -> new HashMap<>())
-                    .put(availability.getDate(), availability.getAvailabilityType());
-        }
-
-        for (Map.Entry<Employee, List<Shift>> entry : shiftsByEmployee.entrySet()) {
-            Employee employee = entry.getKey();
-            Map<LocalDate, AvailabilityType> employeeAvailability = availabilityMap.getOrDefault(employee.getId(),
-                    new HashMap<>());
-
-            for (Shift shift : entry.getValue()) {
-                LocalDate shiftDate = shift.getStart().toLocalDate();
-                AvailabilityType availabilityType = employeeAvailability.get(shiftDate);
-
-                if (availabilityType == AvailabilityType.UNAVAILABLE) {
-                    throw new ValidationException(
-                            "Employee '%s' is UNAVAILABLE on %s but assigned to shift %d at %s",
-                            employee.getName(), shiftDate, shift.getId(), shift.getLocation());
-                }
-            }
-        }
+        // UNAVAILABLE 타입이 제거되어 별도의 가용성 위반 검증은 불필요합니다.
+        // DESIRED / UNDESIRED는 OptaPlanner 제약조건으로 처리됩니다.
     }
 }
