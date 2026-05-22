@@ -184,48 +184,50 @@ public class RequestValidator {
             }
         }
 
-        // 2. 필수 스킬 가용성 검증
-        // 시프트 ID 별 요구 스킬 정보 매핑 구성
-        Map<String, String> shiftIdToRequiredSkill = new HashMap<>();
+        // 2. 필수 스킬 및 시프트 가용성 검증
+        // 시프트 ID 별 시프트 정의 정보 매핑 구성
+        Map<String, PlanningRequest.ShiftInfo> shiftInfoById = new HashMap<>();
         if (request.organization().shifts() != null) {
             for (PlanningRequest.ShiftInfo shift : request.organization().shifts()) {
-                shiftIdToRequiredSkill.put(shift.id(), shift.code());
+                shiftInfoById.put(shift.id(), shift);
             }
         }
 
-        // 일자별/스킬별 요구 정원 집계
-        Map<LocalDate, Map<String, Integer>> dailySkillReqs = new HashMap<>();
+        // 일자별/시프트 ID별 요구 정원 집계
+        Map<LocalDate, Map<String, Integer>> dailyShiftReqs = new HashMap<>();
         for (PlanningRequest.RequirementInfo req : request.requirements()) {
             LocalDate targetDate = startDate.plusDays(req.dayIndex());
-            String requiredSkill = shiftIdToRequiredSkill.get(req.shiftId());
-            if (requiredSkill != null) {
-                dailySkillReqs.computeIfAbsent(targetDate, k -> new HashMap<>())
-                              .merge(requiredSkill, req.employeeCount(), Integer::sum);
-            }
+            dailyShiftReqs.computeIfAbsent(targetDate, k -> new HashMap<>())
+                          .merge(req.shiftId(), req.employeeCount(), Integer::sum);
         }
 
-        // 일자별/스킬별 가용 직원 수 검증
-        for (Map.Entry<LocalDate, Map<String, Integer>> entry : dailySkillReqs.entrySet()) {
+        // 일자별/시프트 ID별 가용 직원 수 검증
+        for (Map.Entry<LocalDate, Map<String, Integer>> entry : dailyShiftReqs.entrySet()) {
             LocalDate date = entry.getKey();
-            for (Map.Entry<String, Integer> skillEntry : entry.getValue().entrySet()) {
-                String skill = skillEntry.getKey();
-                int requiredCount = skillEntry.getValue();
+            for (Map.Entry<String, Integer> shiftEntry : entry.getValue().entrySet()) {
+                String shiftId = shiftEntry.getKey();
+                int requiredCount = shiftEntry.getValue();
 
-                // requiredSkill이 null이거나 "ALL"인 경우는 제외 (누구나 수행 가능)
-                if (skill == null || "ALL".equalsIgnoreCase(skill)) {
+                PlanningRequest.ShiftInfo shift = shiftInfoById.get(shiftId);
+                if (shift == null) {
                     continue;
                 }
 
-                // 해당 날짜에 해당 스킬 혹은 "ALL"을 보유한 가용 직원 수 집계
-                long availableEmployeesWithSkill = request.employees().stream()
-                    .filter(emp -> emp.skillSet() != null && 
-                                   (emp.skillSet().contains(skill) || emp.skillSet().contains("ALL")))
+                String skill = shift.code();
+
+                // 해당 날짜에 해당 시프트를 할당받을 수 있는(available_shifts에 포함되어 있거나, skill_set에 해당 스킬 혹은 "ALL"을 가진) 가용 직원 수 집계
+                long availableEmployees = request.employees().stream()
+                    .filter(emp -> 
+                        (emp.availableShifts() != null && emp.availableShifts().contains(shiftId)) ||
+                        (emp.availableShifts() != null && emp.availableShifts().contains(skill)) ||
+                        (emp.skillSet() != null && (emp.skillSet().contains(skill) || emp.skillSet().contains("ALL")))
+                    )
                     .count();
 
-                if (requiredCount > availableEmployeesWithSkill) {
+                if (requiredCount > availableEmployees) {
                     feasibilityErrors.add(String.format(
                         "[%s] '%s' 보유 가용 인원(%d명)이 요구되는 전문 근무 정원(%d명)보다 부족합니다.",
-                        date, skill, availableEmployeesWithSkill, requiredCount
+                        date, skill, availableEmployees, requiredCount
                     ));
                 }
             }
