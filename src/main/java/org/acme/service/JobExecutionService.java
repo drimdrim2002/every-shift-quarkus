@@ -234,8 +234,9 @@ public class JobExecutionService {
         scoreFields.put("night48RestSoftScore", score.softScore(0));
         scoreFields.put("night32RestSoftScore", score.softScore(1));
         scoreFields.put("undesiredSoftScore", score.softScore(2));
-        scoreFields.put("fairSoftScore", score.softScore(4));
-        scoreFields.put("desiredSoftScore", score.softScore(5));
+        scoreFields.put("burdenFairnessSoftScore", score.softScore(4));
+        scoreFields.put("fairSoftScore", score.softScore(5));
+        scoreFields.put("desiredSoftScore", score.softScore(6));
         return scoreFields;
     }
 

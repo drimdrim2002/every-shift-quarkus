@@ -27,7 +27,29 @@ public record PlanningRequest(
         List<AssignmentInfo> undesirable,
 
         // 기존 Map<LocalDate, Map<String, Integer>> 구조에서 확장성 있는 List 구조로 변경
-        List<RequirementInfo> requirements) {
+        List<RequirementInfo> requirements,
+
+        List<PublicHolidayInfo> publicHolidays,
+
+        List<YearlyEmployeeStatsInfo> yearlyEmployeeStats) {
+
+    public PlanningRequest {
+        if (publicHolidays == null) {
+            publicHolidays = List.of();
+        }
+        if (yearlyEmployeeStats == null) {
+            yearlyEmployeeStats = List.of();
+        }
+    }
+
+    public PlanningRequest(
+            OrganizationInfo organization,
+            List<EmployeeInfo> employees,
+            List<AssignmentInfo> history,
+            List<AssignmentInfo> undesirable,
+            List<RequirementInfo> requirements) {
+        this(organization, employees, history, undesirable, requirements, List.of(), List.of());
+    }
 
     // 1. 조직 도메인
     @RegisterForReflection
@@ -102,5 +124,21 @@ public record PlanningRequest(
             String shiftId,
             int dayIndex,
             int employeeCount) {
+    }
+
+    @RegisterForReflection
+    public record PublicHolidayInfo(
+            @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
+            String dayOfWeek,
+            String dayName,
+            String kind) {
+    }
+
+    @RegisterForReflection
+    public record YearlyEmployeeStatsInfo(
+            @JsonProperty("employee_id") String employeeId,
+            int nightWorkCount,
+            int holidayWorkCount,
+            int offRequestCount) {
     }
 }

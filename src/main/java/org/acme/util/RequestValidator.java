@@ -85,6 +85,34 @@ public class RequestValidator {
             errors.add("Requirements are required");
         }
 
+        if (request.publicHolidays() != null) {
+            for (int i = 0; i < request.publicHolidays().size(); i++) {
+                PlanningRequest.PublicHolidayInfo publicHoliday = request.publicHolidays().get(i);
+                if (publicHoliday == null) {
+                    errors.add("publicHolidays[" + i + "] cannot be null");
+                    continue;
+                }
+                if (publicHoliday.date() == null) {
+                    errors.add("publicHolidays[" + i + "].date is required");
+                }
+            }
+        }
+
+        if (request.yearlyEmployeeStats() != null) {
+            for (int i = 0; i < request.yearlyEmployeeStats().size(); i++) {
+                PlanningRequest.YearlyEmployeeStatsInfo yearlyStats = request.yearlyEmployeeStats().get(i);
+                if (yearlyStats == null) {
+                    errors.add("yearlyEmployeeStats[" + i + "] cannot be null");
+                    continue;
+                }
+                if (yearlyStats.employeeId() == null || yearlyStats.employeeId().isBlank()) {
+                    errors.add("yearlyEmployeeStats[" + i + "].employee_id is required");
+                } else if (!knownEmployeeIds.isEmpty() && !knownEmployeeIds.contains(yearlyStats.employeeId())) {
+                    errors.add("yearlyEmployeeStats[" + i + "].employee_id must exist in employees list");
+                }
+            }
+        }
+
         if (!errors.isEmpty()) {
             throw new ValidationException("Validation failed: " + String.join(", ", errors));
         }

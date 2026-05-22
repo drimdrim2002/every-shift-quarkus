@@ -197,6 +197,7 @@ GET /api/status/{id}
     "night48_rest_soft_score": -7,
     "night32_rest_soft_score": -30,
     "undesired_soft_score": -120,
+    "burden_fairness_soft_score": -81,
     "fair_soft_score": -5400,
     "desired_soft_score": 240,
     "legacy_soft_score_total": null
@@ -223,9 +224,12 @@ GET /api/status/{id}
 - `night48_rest_soft_score`: Soft 1순위, 2연속 Night 후 다음 근무까지 48시간 휴식 부족분
 - `night32_rest_soft_score`: Soft 2순위, Night 후 다음 Day shift까지 32시간 휴식 부족분
 - `undesired_soft_score`: Soft 3순위, Off/비선호 요청일 배정 페널티
-- `fair_soft_score`: Soft 4순위, 근무 유형별 분배 균형
-- `desired_soft_score`: Soft 5순위, 선호일 배정 보상
+- `burden_fairness_soft_score`: Soft 5순위, 연간 야간/휴일 누적 부담 균형
+- `fair_soft_score`: Soft 6순위, 근무 유형별 분배 균형
+- `desired_soft_score`: Soft 7순위, 선호일 배정 보상
 - `legacy_soft_score_total`: 구버전 문서 호환용 단일 soft 점수
+
+Soft 4순위인 3연속 Night 최소화 점수는 현재 별도 API 필드로 노출하지 않습니다.
 
 ---
 
@@ -243,6 +247,7 @@ type StatusScoreV2 = {
   night48_rest_soft_score: number | null;
   night32_rest_soft_score: number | null;
   undesired_soft_score: number | null;
+  burden_fairness_soft_score: number | null;
   fair_soft_score: number | null;
   desired_soft_score: number | null;
   legacy_soft_score_total: number | null;
@@ -258,6 +263,7 @@ type ParsedStatusScore = {
   night48Rest: number | null;
   night32Rest: number | null;
   undesired: number | null;
+  burdenFairness: number | null;
   fair: number | null;
   desired: number | null;
   legacyTotal: number | null;
@@ -270,6 +276,7 @@ function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | unde
     ("night48_rest_soft_score" in score ||
       "night32_rest_soft_score" in score ||
       "undesired_soft_score" in score ||
+      "burden_fairness_soft_score" in score ||
       "fair_soft_score" in score ||
       "desired_soft_score" in score ||
       "legacy_soft_score_total" in score)
@@ -279,6 +286,7 @@ function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | unde
       night48Rest: score.night48_rest_soft_score ?? null,
       night32Rest: score.night32_rest_soft_score ?? null,
       undesired: score.undesired_soft_score ?? null,
+      burdenFairness: score.burden_fairness_soft_score ?? null,
       fair: score.fair_soft_score ?? null,
       desired: score.desired_soft_score ?? null,
       legacyTotal: score.legacy_soft_score_total ?? null,
@@ -292,6 +300,7 @@ function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | unde
       night48Rest: null,
       night32Rest: null,
       undesired: null,
+      burdenFairness: null,
       fair: null,
       desired: null,
       legacyTotal: score.soft_score ?? null,
@@ -304,6 +313,7 @@ function parseStatusScore(score: StatusScoreV2 | StatusScoreLegacy | null | unde
     night48Rest: null,
     night32Rest: null,
     undesired: null,
+    burdenFairness: null,
     fair: null,
     desired: null,
     legacyTotal: null,

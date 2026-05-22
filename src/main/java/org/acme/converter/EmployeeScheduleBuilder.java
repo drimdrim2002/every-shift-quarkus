@@ -3,6 +3,7 @@ package org.acme.converter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,7 @@ public class EmployeeScheduleBuilder {
         private final HistoryPhaseProcessor historyPhaseProcessor = new HistoryPhaseProcessor();
         private final HistoricGapPhaseProcessor historicGapPhaseProcessor = new HistoricGapPhaseProcessor();
         private final UndesirablePhaseProcessor undesirablePhaseProcessor = new UndesirablePhaseProcessor();
+        private final FairnessBurdenCalculator fairnessBurdenCalculator = new FairnessBurdenCalculator();
 
         /**
          * PlanningRequest를 EmployeeSchedule로 변환합니다.
@@ -45,6 +47,7 @@ public class EmployeeScheduleBuilder {
         public EmployeeSchedule build(PlanningRequest request) {
                 // 1. Prepare Reference Data
                 Map<String, Employee> employeeMap = mapEmployees(request.employees());
+                applyYearlyEmployeeStats(employeeMap, request.yearlyEmployeeStats());
                 ScheduleState scheduleState = mapScheduleState(request.organization());
 
                 Map<String, PlanningRequest.ShiftInfo> shiftInfoByCode = request.organization().shifts().stream()
@@ -88,6 +91,8 @@ public class EmployeeScheduleBuilder {
                                 shiftIdGenerator, availabilityIdGenerator, phase3Result);
 
                 // 6. Construct Final Schedule
+                fairnessBurdenCalculator.apply(finalShiftList, scheduleState, request.publicHolidays());
+
                 EmployeeSchedule schedule = new EmployeeSchedule();
                 schedule.setEmployeeList(new ArrayList<>(employeeMap.values()));
                 schedule.setScheduleState(scheduleState);
@@ -107,6 +112,44 @@ public class EmployeeScheduleBuilder {
                         map.put(e.employeeId(), new Employee(e.employeeId(), e.name(), e.availableShifts(), skills));
                 }
                 return map;
+        }
+
+        /**
+         * 요청에 포함된 연간 직원 통계를 직원 모델에 반영합니다.
+         */
+        private void applyYearlyEmployeeStats(
+                        Map<String, Employee> employeeMap,
+                        List<PlanningRequest.YearlyEmployeeStatsInfo> yearlyEmployeeStats) {
+                if (yearlyEmployeeStats == null) {
+                        return;
+                }
+
+                Map<String, PlanningRequest.YearlyEmployeeStatsInfo> effectiveStatsByEmployeeId =
+                                new LinkedHashMap<>();
+                for (String employeeId : employeeMap.keySet()) {
+                        effectiveStatsByEmployeeId.put(employeeId,
+                                        new PlanningRequest.YearlyEmployeeStatsInfo(employeeId, 0, 0, 0));
+                }
+                for (PlanningRequest.YearlyEmployeeStatsInfo stats : yearlyEmployeeStats) {
+                        if (stats == null || stats.employeeId() == null || !employeeMap.containsKey(stats.employeeId())) {
+                                continue;
+                        }
+                        effectiveStatsByEmployeeId.put(stats.employeeId(), stats);
+                }
+
+                int maxOffRequestCount = effectiveStatsByEmployeeId.values().stream()
+                                .mapToInt(stats -> Math.max(0, stats.offRequestCount()))
+                                .max()
+                                .orElse(0);
+
+                for (PlanningRequest.YearlyEmployeeStatsInfo stats : effectiveStatsByEmployeeId.values()) {
+                        Employee employee = employeeMap.get(stats.employeeId());
+                        employee.setYearlyNightWorkCount(stats.nightWorkCount());
+                        employee.setYearlyHolidayWorkCount(stats.holidayWorkCount());
+                        employee.setYearlyOffRequestCount(stats.offRequestCount());
+                        employee.setOffRequestPenaltyWeight(
+                                        maxOffRequestCount - employee.getYearlyOffRequestCount() + 1);
+                }
         }
 
         /**

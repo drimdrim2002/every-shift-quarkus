@@ -15,6 +15,11 @@ public class Employee {
 
     Set<String> availableShift;
 
+    int yearlyNightWorkCount;
+    int yearlyHolidayWorkCount;
+    int yearlyOffRequestCount;
+    int offRequestPenaltyWeight = 1;
+
 
     public Employee() {
 
@@ -65,6 +70,38 @@ public class Employee {
 
     public void setAvailableShift(Set<String> availableShift) {
         this.availableShift = availableShift;
+    }
+
+    public int getYearlyNightWorkCount() {
+        return yearlyNightWorkCount;
+    }
+
+    public void setYearlyNightWorkCount(int yearlyNightWorkCount) {
+        this.yearlyNightWorkCount = Math.max(0, yearlyNightWorkCount);
+    }
+
+    public int getYearlyHolidayWorkCount() {
+        return yearlyHolidayWorkCount;
+    }
+
+    public void setYearlyHolidayWorkCount(int yearlyHolidayWorkCount) {
+        this.yearlyHolidayWorkCount = Math.max(0, yearlyHolidayWorkCount);
+    }
+
+    public int getYearlyOffRequestCount() {
+        return yearlyOffRequestCount;
+    }
+
+    public void setYearlyOffRequestCount(int yearlyOffRequestCount) {
+        this.yearlyOffRequestCount = Math.max(0, yearlyOffRequestCount);
+    }
+
+    public int getOffRequestPenaltyWeight() {
+        return offRequestPenaltyWeight;
+    }
+
+    public void setOffRequestPenaltyWeight(int offRequestPenaltyWeight) {
+        this.offRequestPenaltyWeight = Math.max(1, offRequestPenaltyWeight);
     }
 
     @Override
