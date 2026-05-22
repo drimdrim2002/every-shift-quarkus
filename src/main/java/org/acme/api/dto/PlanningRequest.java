@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -137,8 +138,8 @@ public record PlanningRequest(
     @RegisterForReflection
     public record YearlyEmployeeStatsInfo(
             @JsonProperty("employee_id") String employeeId,
-            int nightWorkCount,
-            int holidayWorkCount,
-            int offRequestCount) {
+            @JsonProperty("night_shift_count") @JsonAlias("nightWorkCount") int nightWorkCount,
+            @JsonProperty("weekend_holiday_work_count") @JsonAlias("holidayWorkCount") int holidayWorkCount,
+            @JsonProperty("approved_off_request_count") @JsonAlias("offRequestCount") int offRequestCount) {
     }
 }
