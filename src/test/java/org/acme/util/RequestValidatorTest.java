@@ -160,4 +160,29 @@ class RequestValidatorTest {
 
         assertTrue(exception.getMessage().contains("2개 이상의 근무가 중복 고정(Locked)되어 있습니다."));
     }
+
+    @Test
+    void validateRejectsLockedAndUndesirableConflict() {
+        // Given: E1 직원이 2025-12-01을 Undesirable(휴가)로 신청했으나, 동시에 같은 날짜에 Locked(고정) 근무도 들어옴
+        PlanningRequest.OrganizationInfo organization = new PlanningRequest.OrganizationInfo(
+                "org-1", "테스트 조직", "hospital",
+                List.of(new PlanningRequest.ShiftInfo("shift-d", "D", "Day", LocalTime.of(9, 0), LocalTime.of(17, 0))),
+                LocalDate.of(2025, 11, 30), 0, LocalDate.of(2025, 12, 1), 5);
+
+        PlanningRequest.EmployeeInfo employee = new PlanningRequest.EmployeeInfo("E1", "E1", Set.of("D"), Set.of());
+        
+        // 모순 관계 설정
+        PlanningRequest.AssignmentInfo locked = new PlanningRequest.AssignmentInfo("E1", "shift-d", LocalDate.of(2025, 12, 1), true);
+        PlanningRequest.AssignmentInfo undesirable = new PlanningRequest.AssignmentInfo("E1", "shift-d", LocalDate.of(2025, 12, 1), false);
+
+        PlanningRequest request = new PlanningRequest(
+                organization, List.of(employee), List.of(locked), List.of(undesirable), List.of(new PlanningRequest.RequirementInfo("shift-d", 0, 1)));
+
+        // When & Then
+        RequestValidator.ValidationException exception = assertThrows(
+                RequestValidator.ValidationException.class,
+                () -> RequestValidator.validate(request));
+
+        assertTrue(exception.getMessage().contains("비선호/휴가를 신청했으나, 동시에 고정 근무(Locked)가 지정되어 데이터에 모순이 존재합니다."));
+    }
 }

@@ -163,6 +163,27 @@ public class RequestValidator {
             }
         }
 
+        // 1.9 휴가와 고정 근무 충돌 검증
+        if (request.undesirable() != null) {
+            for (PlanningRequest.AssignmentInfo undes : request.undesirable()) {
+                String empId = undes.employeeId();
+                LocalDate date = undes.date();
+                
+                if (employeePinnedDates.containsKey(empId) && employeePinnedDates.get(empId).contains(date)) {
+                    String empName = request.employees().stream()
+                            .filter(e -> e.employeeId().equals(empId))
+                            .map(PlanningRequest.EmployeeInfo::name)
+                            .findFirst()
+                            .orElse(empId);
+                            
+                    feasibilityErrors.add(String.format(
+                        "직원 '%s'은 %s에 비선호/휴가를 신청했으나, 동시에 고정 근무(Locked)가 지정되어 데이터에 모순이 존재합니다.",
+                        empName, date
+                    ));
+                }
+            }
+        }
+
         // 2. 필수 스킬 가용성 검증
         // 시프트 ID 별 요구 스킬 정보 매핑 구성
         Map<String, String> shiftIdToRequiredSkill = new HashMap<>();
