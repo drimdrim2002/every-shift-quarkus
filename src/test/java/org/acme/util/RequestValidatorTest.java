@@ -112,4 +112,27 @@ class RequestValidatorTest {
                 List.of(),
                 List.of(requirement));
     }
+
+    @Test
+    void validateRejectsMissingRequiredSkills() {
+        // Given: ICU 스킬 근무 1명이 필요한데, 직원은 ICU 스킬이 없는 일반 직원만 있음
+        PlanningRequest.OrganizationInfo organization = new PlanningRequest.OrganizationInfo(
+                "org-1", "테스트 조직", "hospital",
+                List.of(new PlanningRequest.ShiftInfo("shift-icu", "ICU", "ICU Shift", LocalTime.of(9, 0), LocalTime.of(17, 0))),
+                LocalDate.of(2025, 11, 30), 0, LocalDate.of(2025, 12, 1), 5);
+        
+        // E1은 D 스킬만 보유 (ICU 없음)
+        PlanningRequest.EmployeeInfo employee = new PlanningRequest.EmployeeInfo("E1", "E1", Set.of("D"), Set.of());
+        PlanningRequest.RequirementInfo req = new PlanningRequest.RequirementInfo("shift-icu", 0, 1);
+
+        PlanningRequest request = new PlanningRequest(
+                organization, List.of(employee), List.of(), List.of(), List.of(req));
+
+        // When & Then
+        RequestValidator.ValidationException exception = assertThrows(
+                RequestValidator.ValidationException.class,
+                () -> RequestValidator.validate(request));
+
+        assertTrue(exception.getMessage().contains("보유 가용 인원(0명)이 요구되는 전문 근무 정원(1명)보다 부족합니다."));
+    }
 }

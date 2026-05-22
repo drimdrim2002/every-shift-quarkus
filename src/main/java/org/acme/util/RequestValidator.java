@@ -135,8 +135,56 @@ public class RequestValidator {
             dailyRequiredCount.put(targetDate, dailyRequiredCount.getOrDefault(targetDate, 0) + req.employeeCount());
         }
 
-        // 2. 가용 용량 초과 일자 검색 및 예외 처리
         List<String> feasibilityErrors = new ArrayList<>();
+
+        // 2. 필수 스킬 가용성 검증
+        // 시프트 ID 별 요구 스킬 정보 매핑 구성
+        Map<String, String> shiftIdToRequiredSkill = new HashMap<>();
+        if (request.organization().shifts() != null) {
+            for (PlanningRequest.ShiftInfo shift : request.organization().shifts()) {
+                shiftIdToRequiredSkill.put(shift.id(), shift.code());
+            }
+        }
+
+        // 일자별/스킬별 요구 정원 집계
+        Map<LocalDate, Map<String, Integer>> dailySkillReqs = new HashMap<>();
+        for (PlanningRequest.RequirementInfo req : request.requirements()) {
+            LocalDate targetDate = startDate.plusDays(req.dayIndex());
+            String requiredSkill = shiftIdToRequiredSkill.get(req.shiftId());
+            if (requiredSkill != null) {
+                dailySkillReqs.computeIfAbsent(targetDate, k -> new HashMap<>())
+                              .merge(requiredSkill, req.employeeCount(), Integer::sum);
+            }
+        }
+
+        // 일자별/스킬별 가용 직원 수 검증
+        for (Map.Entry<LocalDate, Map<String, Integer>> entry : dailySkillReqs.entrySet()) {
+            LocalDate date = entry.getKey();
+            for (Map.Entry<String, Integer> skillEntry : entry.getValue().entrySet()) {
+                String skill = skillEntry.getKey();
+                int requiredCount = skillEntry.getValue();
+
+                // requiredSkill이 null이거나 "ALL"인 경우는 제외 (누구나 수행 가능)
+                if (skill == null || "ALL".equalsIgnoreCase(skill)) {
+                    continue;
+                }
+
+                // 해당 날짜에 해당 스킬 혹은 "ALL"을 보유한 가용 직원 수 집계
+                long availableEmployeesWithSkill = request.employees().stream()
+                    .filter(emp -> emp.skillSet() != null && 
+                                   (emp.skillSet().contains(skill) || emp.skillSet().contains("ALL")))
+                    .count();
+
+                if (requiredCount > availableEmployeesWithSkill) {
+                    feasibilityErrors.add(String.format(
+                        "[%s] '%s' 보유 가용 인원(%d명)이 요구되는 전문 근무 정원(%d명)보다 부족합니다.",
+                        date, skill, availableEmployeesWithSkill, requiredCount
+                    ));
+                }
+            }
+        }
+
+        // 3. 가용 용량 초과 일자 검색 및 예외 처리
         for (Map.Entry<LocalDate, Integer> entry : dailyRequiredCount.entrySet()) {
             LocalDate date = entry.getKey();
             int requiredCount = entry.getValue();
