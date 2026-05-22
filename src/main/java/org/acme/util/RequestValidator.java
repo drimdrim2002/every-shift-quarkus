@@ -2,9 +2,12 @@ package org.acme.util;
 
 import org.acme.api.dto.PlanningRequest;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -115,6 +118,39 @@ public class RequestValidator {
 
         if (!errors.isEmpty()) {
             throw new ValidationException("Validation failed: " + String.join(", ", errors));
+        }
+
+        // 추가 비즈니스 Feasibility 검증
+        validateSolverFeasibility(request);
+    }
+
+    private static void validateSolverFeasibility(PlanningRequest request) throws ValidationException {
+        int totalEmployees = request.employees().size();
+        LocalDate startDate = request.organization().firstDraftDate();
+        
+        // 1. 일자별 요구 시프트 근무 정원 집계
+        Map<LocalDate, Integer> dailyRequiredCount = new HashMap<>();
+        for (PlanningRequest.RequirementInfo req : request.requirements()) {
+            LocalDate targetDate = startDate.plusDays(req.dayIndex());
+            dailyRequiredCount.put(targetDate, dailyRequiredCount.getOrDefault(targetDate, 0) + req.employeeCount());
+        }
+
+        // 2. 가용 용량 초과 일자 검색 및 예외 처리
+        List<String> feasibilityErrors = new ArrayList<>();
+        for (Map.Entry<LocalDate, Integer> entry : dailyRequiredCount.entrySet()) {
+            LocalDate date = entry.getKey();
+            int requiredCount = entry.getValue();
+            
+            if (requiredCount > totalEmployees) {
+                feasibilityErrors.add(String.format(
+                    "[%s] 가용한 총 직원 수(%d명)보다 요구되는 근무 정원(%d명)이 더 많아 스케줄을 생성할 수 없습니다.",
+                    date, totalEmployees, requiredCount
+                ));
+            }
+        }
+
+        if (!feasibilityErrors.isEmpty()) {
+            throw new ValidationException("비즈니스 정합성 모순 발견: " + String.join(" | ", feasibilityErrors));
         }
     }
 

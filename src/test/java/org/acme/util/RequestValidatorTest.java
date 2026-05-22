@@ -60,6 +60,29 @@ class RequestValidatorTest {
         assertTrue(exception.getMessage().contains("publicHolidays[0].date is required"));
     }
 
+    @Test
+    void validateRejectsInsufficientEmployeeCapacity() {
+        // Given: 직원은 E1 1명 뿐인데, dayIndex 0에 2명의 시프트(requirements)를 요구함
+        PlanningRequest.OrganizationInfo organization = new PlanningRequest.OrganizationInfo(
+                "org-1", "테스트 조직", "hospital",
+                List.of(new PlanningRequest.ShiftInfo("shift-d", "D", "Day", LocalTime.of(9, 0), LocalTime.of(17, 0))),
+                LocalDate.of(2025, 11, 30), 0, LocalDate.of(2025, 12, 1), 5);
+        
+        PlanningRequest.EmployeeInfo employee = new PlanningRequest.EmployeeInfo("E1", "E1", Set.of("D"), Set.of());
+        PlanningRequest.RequirementInfo req1 = new PlanningRequest.RequirementInfo("shift-d", 0, 1);
+        PlanningRequest.RequirementInfo req2 = new PlanningRequest.RequirementInfo("shift-d", 0, 1); // 같은날 2명 요구
+
+        PlanningRequest request = new PlanningRequest(
+                organization, List.of(employee), List.of(), List.of(), List.of(req1, req2));
+
+        // When & Then: 예외가 터져야 함
+        RequestValidator.ValidationException exception = assertThrows(
+                RequestValidator.ValidationException.class,
+                () -> RequestValidator.validate(request));
+
+        assertTrue(exception.getMessage().contains("가용한 총 직원 수(1명)보다 요구되는 근무 정원(2명)이 더 많아"));
+    }
+
     private PlanningRequest baseRequest() {
         PlanningRequest.OrganizationInfo organization = new PlanningRequest.OrganizationInfo(
                 "org-1",
