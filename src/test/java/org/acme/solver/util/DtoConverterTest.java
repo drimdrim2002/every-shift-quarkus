@@ -153,7 +153,7 @@ public class DtoConverterTest {
 
     @Test
     public void testFairnessInputsPopulateEmployeeStatsAndBurdenScores() throws IOException {
-        PlanningRequest request = JsonLoader.load("/json/fairness.json", PlanningRequest.class);
+        PlanningRequest request = JsonLoader.load("/json/fairness_test.json", PlanningRequest.class);
 
         EmployeeSchedule schedule = dtoConverter.convert(request);
 
