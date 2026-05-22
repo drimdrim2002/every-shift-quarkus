@@ -137,6 +137,32 @@ public class RequestValidator {
 
         List<String> feasibilityErrors = new ArrayList<>();
 
+        // 1.7 중복 고정(Locked) 근무 검증
+        Map<String, Set<LocalDate>> employeePinnedDates = new HashMap<>();
+        if (request.history() != null) {
+            for (PlanningRequest.AssignmentInfo assignment : request.history()) {
+                if (assignment.isLocked()) {
+                    String empId = assignment.employeeId();
+                    LocalDate date = assignment.date();
+                    
+                    employeePinnedDates.computeIfAbsent(empId, k -> new HashSet<>());
+                    if (employeePinnedDates.get(empId).contains(date)) {
+                        String empName = request.employees().stream()
+                                .filter(e -> e.employeeId().equals(empId))
+                                .map(PlanningRequest.EmployeeInfo::name)
+                                .findFirst()
+                                .orElse(empId);
+                                
+                        feasibilityErrors.add(String.format(
+                            "직원 '%s'은 %s에 2개 이상의 근무가 중복 고정(Locked)되어 있습니다. 이중 지정을 해제해 주세요.",
+                            empName, date
+                        ));
+                    }
+                    employeePinnedDates.get(empId).add(date);
+                }
+            }
+        }
+
         // 2. 필수 스킬 가용성 검증
         // 시프트 ID 별 요구 스킬 정보 매핑 구성
         Map<String, String> shiftIdToRequiredSkill = new HashMap<>();

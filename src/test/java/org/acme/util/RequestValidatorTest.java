@@ -135,4 +135,29 @@ class RequestValidatorTest {
 
         assertTrue(exception.getMessage().contains("보유 가용 인원(0명)이 요구되는 전문 근무 정원(1명)보다 부족합니다."));
     }
+
+    @Test
+    void validateRejectsDoublePinnedShifts() {
+        // Given: E1 직원이 2025-12-01에 Day 시프트와 Night 시프트 둘 다 Locked(Pinned)되어 입력됨
+        PlanningRequest.OrganizationInfo organization = new PlanningRequest.OrganizationInfo(
+                "org-1", "테스트 조직", "hospital",
+                List.of(new PlanningRequest.ShiftInfo("shift-d", "D", "Day", LocalTime.of(9, 0), LocalTime.of(17, 0))),
+                LocalDate.of(2025, 11, 30), 0, LocalDate.of(2025, 12, 1), 5);
+
+        PlanningRequest.EmployeeInfo employee = new PlanningRequest.EmployeeInfo("E1", "E1", Set.of("D"), Set.of());
+        
+        // 동일날짜(2025-12-01)에 2개의 Locked 배치
+        PlanningRequest.AssignmentInfo locked1 = new PlanningRequest.AssignmentInfo("E1", "shift-d", LocalDate.of(2025, 12, 1), true);
+        PlanningRequest.AssignmentInfo locked2 = new PlanningRequest.AssignmentInfo("E1", "shift-d", LocalDate.of(2025, 12, 1), true);
+
+        PlanningRequest request = new PlanningRequest(
+                organization, List.of(employee), List.of(locked1, locked2), List.of(), List.of(new PlanningRequest.RequirementInfo("shift-d", 0, 1)));
+
+        // When & Then
+        RequestValidator.ValidationException exception = assertThrows(
+                RequestValidator.ValidationException.class,
+                () -> RequestValidator.validate(request));
+
+        assertTrue(exception.getMessage().contains("2개 이상의 근무가 중복 고정(Locked)되어 있습니다."));
+    }
 }
