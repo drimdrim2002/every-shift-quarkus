@@ -686,7 +686,7 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
-    void yearlyNightHolidayBurdenFairness_UsesYearlyAndCurrentBurden() {
+    void currentPeriodBurdenFairness_UsesCurrentBurdenOnly() {
         Employee employee = createEmployee("E1");
         employee.setYearlyNightWorkCount(2);
         employee.setYearlyHolidayWorkCount(3);
@@ -694,9 +694,9 @@ class EmployeeSchedulingConstraintProviderTest {
         Shift shift = createShift(1L, employee, LocalDate.of(2025, 12, 25), 9, 17);
         shift.setFairnessBurdenScore(4);
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::yearlyNightHolidayBurdenFairness)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::currentPeriodBurdenFairness)
                 .given(shift)
-                .penalizesBy(81); // (2 + 3 + 4)^2
+                .penalizesBy(16); // 4^2 (current burden only)
     }
 
     @Test
@@ -709,7 +709,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -81, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -16, -1, 0 }));
     }
 
     @Test

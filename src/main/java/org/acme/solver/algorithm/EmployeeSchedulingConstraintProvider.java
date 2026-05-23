@@ -91,7 +91,7 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 atLeast32HoursFromNightToNextDayShift(constraintFactory),
                                 undesiredDayForEmployee(constraintFactory),
                                 minimizeThreeConsecutiveNightShifts(constraintFactory),
-                                yearlyNightHolidayBurdenFairness(constraintFactory),
+                                currentPeriodBurdenFairness(constraintFactory),
                                 fairShiftDistribution(constraintFactory),
                                 desiredDayForEmployee(constraintFactory) };
         }
@@ -267,18 +267,13 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 .asConstraint("Fair shift distribution");
         }
 
-        Constraint yearlyNightHolidayBurdenFairness(ConstraintFactory constraintFactory) {
+        Constraint currentPeriodBurdenFairness(ConstraintFactory constraintFactory) {
                 return constraintFactory.forEach(Shift.class)
                                 .filter(shift -> shift.getFairnessBurdenScore() > 0)
                                 .groupBy(Shift::getEmployee, ConstraintCollectors.sum(Shift::getFairnessBurdenScore))
                                 .penalize(ONE_SOFT_BURDEN_FAIRNESS,
-                                                (employee, currentBurden) -> {
-                                                        int totalBurden = employee.getYearlyNightWorkCount()
-                                                                        + employee.getYearlyHolidayWorkCount()
-                                                                        + currentBurden;
-                                                        return totalBurden * totalBurden;
-                                                })
-                                .asConstraint("Yearly night/holiday burden fairness");
+                                                (employee, currentBurden) -> currentBurden * currentBurden)
+                                .asConstraint("Current period burden fairness");
         }
 
         private static String resolveShiftType(Shift shift) {
