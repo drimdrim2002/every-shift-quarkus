@@ -138,7 +138,6 @@ public class SolverRunner {
 
         EmployeeSchedule problem = employeeScheduleBuilder.build(request);
         EmployeeSchedule bestSolution = null;
-        BendableScore previousScore = null;
 
         long startTime = System.currentTimeMillis();
         long deadlineEpochMs = startTime + Duration.ofMinutes(maxTotalMinutes).toMillis();
@@ -154,6 +153,9 @@ public class SolverRunner {
             // Solver 생성
             Solver<EmployeeSchedule> solver = createSolver(Duration.ofSeconds(iterationSeconds));
 
+            // 루프 시작 시점의 이전 최고 점수 기록
+            BendableScore previousBestScore = (bestSolution != null) ? bestSolution.getScore() : null;
+
             // Warm start: 이전 해가 있으면 초기해로 설정
             if (bestSolution != null) {
                 problem = solutionClonerUtil.cloneSolution(bestSolution);
@@ -162,8 +164,6 @@ public class SolverRunner {
             // 실행
             EmployeeSchedule currentSolution = solver.solve(problem);
             BendableScore currentScore = currentSolution.getScore();
-
-            LOG.info("Iteration {} check: currentScore={}, previousScore={}", iteration, currentScore, previousScore);
 
             // 더 나은 해이거나 첫 실행이면 bestSolution 업데이트
             if (bestSolution == null || currentScore.compareTo(bestSolution.getScore()) >= 0) {
@@ -176,16 +176,19 @@ public class SolverRunner {
                 }
             }
 
+            BendableScore currentBestScore = bestSolution.getScore();
+            LOG.info("Iteration {} check: currentBestScore={}, previousBestScore={}", iteration, currentBestScore, previousBestScore);
+
             TerminationReason terminationReason = determineTerminationReason(
                     iteration,
-                    currentScore,
-                    previousScore,
+                    currentBestScore,
+                    previousBestScore,
                     System.currentTimeMillis(),
                     deadlineEpochMs);
 
             if (terminationReason != TerminationReason.CONTINUE) {
                 if (terminationReason == TerminationReason.CONVERGED) {
-                    LOG.info("Converged after {} iterations. Score: {}", iteration, currentScore);
+                    LOG.info("Converged after {} iterations. Score: {}", iteration, currentBestScore);
                 } else if (terminationReason == TerminationReason.DEADLINE_REACHED) {
                     long elapsedMs = System.currentTimeMillis() - startTime;
                     LOG.info("Max time limit reached after {} iterations (elapsed={}ms)", iteration, elapsedMs);
@@ -194,8 +197,6 @@ public class SolverRunner {
                 }
                 break;
             }
-
-            previousScore = currentScore;
         }
 
         return bestSolution;
