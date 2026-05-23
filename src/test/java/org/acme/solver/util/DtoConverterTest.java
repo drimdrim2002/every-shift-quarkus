@@ -179,8 +179,8 @@ public class DtoConverterTest {
         assertBurden(schedule, LocalDate.of(2025, 12, 6), "N", 2);
         assertBurden(schedule, LocalDate.of(2025, 12, 7), "D", 1);
         assertBurden(schedule, LocalDate.of(2025, 12, 7), "E", 1);
-        assertBurden(schedule, LocalDate.of(2025, 12, 7), "N", 1);
-        assertBurden(schedule, LocalDate.of(2025, 12, 8), "N", 2);
+        assertBurden(schedule, LocalDate.of(2025, 12, 7), "N", 2);
+        assertBurden(schedule, LocalDate.of(2025, 12, 8), "N", 1);
     }
 
     private void assertBurden(EmployeeSchedule schedule, LocalDate logicalDate, String shiftCode, int expected) {

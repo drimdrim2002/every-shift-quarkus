@@ -84,16 +84,16 @@ public class FairnessBurdenCalculator {
     }
 
     private boolean hasHolidayComponent(LocalDate date, String shiftCode, Set<LocalDate> publicHolidayDates) {
-        if (publicHolidayDates != null && publicHolidayDates.contains(date)) {
-            return true;
-        }
-
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
         if ("N".equals(shiftCode)) {
-            return dayOfWeek == DayOfWeek.FRIDAY || dayOfWeek == DayOfWeek.SATURDAY;
+            LocalDate nextDay = date.plusDays(1);
+            boolean isNextDayHoliday = publicHolidayDates != null && publicHolidayDates.contains(nextDay);
+            boolean isNextDayWeekend = nextDay.getDayOfWeek() == DayOfWeek.SATURDAY || nextDay.getDayOfWeek() == DayOfWeek.SUNDAY;
+            return isNextDayHoliday || isNextDayWeekend;
         }
         if ("D".equals(shiftCode) || "E".equals(shiftCode)) {
-            return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+            boolean isCurrentDayHoliday = publicHolidayDates != null && publicHolidayDates.contains(date);
+            boolean isCurrentDayWeekend = date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY;
+            return isCurrentDayHoliday || isCurrentDayWeekend;
         }
         return false;
     }
