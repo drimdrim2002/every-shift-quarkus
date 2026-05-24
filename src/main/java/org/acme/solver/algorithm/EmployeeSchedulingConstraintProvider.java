@@ -20,16 +20,15 @@ import org.optaplanner.core.api.score.stream.Joiners;
 public class EmployeeSchedulingConstraintProvider implements ConstraintProvider {
 
         private static final int HARD_LEVELS = 1;
-        private static final int SOFT_LEVELS = 7;
+        private static final int SOFT_LEVELS = 6;
 
         private static final int HARD_LEVEL_INDEX = 0;
         private static final int SOFT_NIGHT_48H_REST_INDEX = 0;
         private static final int SOFT_NIGHT_32H_REST_INDEX = 1;
         private static final int SOFT_UNDESIRED_INDEX = 2;
         private static final int SOFT_THREE_CONSECUTIVE_NIGHT_INDEX = 3;
-        private static final int SOFT_BURDEN_FAIRNESS_INDEX = 4;
-        private static final int SOFT_FAIR_INDEX = 5;
-        private static final int SOFT_DESIRED_INDEX = 6;
+        private static final int SOFT_FAIRNESS_INDEX = 4;
+        private static final int SOFT_DESIRED_INDEX = 5;
 
         private static final BendableScore ONE_HARD = BendableScore.ofHard(HARD_LEVELS, SOFT_LEVELS, HARD_LEVEL_INDEX,
                         1);
@@ -41,10 +40,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                         SOFT_UNDESIRED_INDEX, 1);
         private static final BendableScore ONE_SOFT_THREE_CONSECUTIVE_NIGHT = BendableScore.ofSoft(HARD_LEVELS,
                         SOFT_LEVELS, SOFT_THREE_CONSECUTIVE_NIGHT_INDEX, 1);
-        private static final BendableScore ONE_SOFT_BURDEN_FAIRNESS = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
-                        SOFT_BURDEN_FAIRNESS_INDEX, 1);
-        private static final BendableScore ONE_SOFT_FAIR = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
-                        SOFT_FAIR_INDEX, 1);
+        private static final BendableScore ONE_SOFT_FAIRNESS = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
+                        SOFT_FAIRNESS_INDEX, 1);
         private static final BendableScore ONE_SOFT_DESIRED = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
                         SOFT_DESIRED_INDEX, 1);
 
@@ -86,13 +83,14 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 noFourConsecutiveNightShifts(constraintFactory),
                                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
                                 // Soft constraints (우선순위: night48 > night32 > undesired > 3-consecutive-night >
-                                // burden > fair > desired)
+                                // fairness 통합 > desired)
                                 atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
                                 atLeast32HoursFromNightToNextDayShift(constraintFactory),
                                 undesiredDayForEmployee(constraintFactory),
                                 minimizeThreeConsecutiveNightShifts(constraintFactory),
-                                currentPeriodBurdenFairness(constraintFactory),
-                                fairShiftDistribution(constraintFactory),
+                                nightShiftFairness(constraintFactory),
+                                holidayBurdenFairness(constraintFactory),
+                                dayEveningShiftFairness(constraintFactory),
                                 desiredDayForEmployee(constraintFactory) };
         }
 
@@ -257,23 +255,33 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 .asConstraint("Undesired day for employee");
         }
 
-        Constraint fairShiftDistribution(ConstraintFactory constraintFactory) {
+        Constraint nightShiftFairness(ConstraintFactory constraintFactory) {
                 return constraintFactory.forEach(Shift.class)
-                                .groupBy(Shift::getEmployee, EmployeeSchedulingConstraintProvider::resolveShiftType,
-                                                ConstraintCollectors.count())
-                                .penalize(ONE_SOFT_FAIR,
-                                                (employee, shiftType, shiftCount) -> getFairWeightByShiftType(shiftType)
-                                                                * shiftCount * shiftCount)
-                                .asConstraint("Fair shift distribution");
+                                .filter(EmployeeSchedulingConstraintProvider::isNightShift)
+                                .groupBy(Shift::getEmployee, ConstraintCollectors.sum(Shift::getNightBurdenScore))
+                                .penalize(ONE_SOFT_FAIRNESS,
+                                                (employee, nightCount) -> nightCount * nightCount)
+                                .asConstraint("Night shift fairness");
         }
 
-        Constraint currentPeriodBurdenFairness(ConstraintFactory constraintFactory) {
+        Constraint holidayBurdenFairness(ConstraintFactory constraintFactory) {
                 return constraintFactory.forEach(Shift.class)
-                                .filter(shift -> shift.getFairnessBurdenScore() > 0)
-                                .groupBy(Shift::getEmployee, ConstraintCollectors.sum(Shift::getFairnessBurdenScore))
-                                .penalize(ONE_SOFT_BURDEN_FAIRNESS,
-                                                (employee, currentBurden) -> currentBurden * currentBurden)
-                                .asConstraint("Current period burden fairness");
+                                .filter(shift -> shift.getHolidayBurdenScore() > 0)
+                                .groupBy(Shift::getEmployee, ConstraintCollectors.sum(Shift::getHolidayBurdenScore))
+                                .penalize(ONE_SOFT_FAIRNESS,
+                                                (employee, holidayCount) -> holidayCount * holidayCount)
+                                .asConstraint("Holiday burden fairness");
+        }
+
+        Constraint dayEveningShiftFairness(ConstraintFactory constraintFactory) {
+                return constraintFactory.forEach(Shift.class)
+                                .filter(shift -> !isNightShift(shift))
+                                .groupBy(Shift::getEmployee, EmployeeSchedulingConstraintProvider::resolveShiftType,
+                                                ConstraintCollectors.count())
+                                .penalize(ONE_SOFT_FAIRNESS,
+                                                (employee, shiftType, shiftCount) -> getFairWeightByShiftType(shiftType)
+                                                                * shiftCount * shiftCount)
+                                .asConstraint("Day/evening shift fairness");
         }
 
         private static String resolveShiftType(Shift shift) {

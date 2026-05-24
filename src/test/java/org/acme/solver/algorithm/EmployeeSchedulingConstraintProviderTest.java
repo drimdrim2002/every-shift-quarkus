@@ -386,7 +386,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -5, 0 }));
     }
 
     @Test
@@ -401,7 +401,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -5, 0 }));
     }
 
     @Test
@@ -416,7 +416,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextEveningShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, 0, -45, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -9, 0 }));
     }
 
     @Test
@@ -431,7 +431,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night2, nextNightShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, 0, -90, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -9, 0 }));
     }
 
     @Test
@@ -446,7 +446,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night3, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -5, 0 }));
     }
 
     @Test
@@ -461,7 +461,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night3, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -960, 0, 0, 0, -41, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -960, 0, 0, -5, 0 }));
     }
 
     @Test
@@ -471,7 +471,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, 0, -2560, 0 }));
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, -256, 0 }));
     }
 
     @Test
@@ -481,7 +481,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -2250, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -225, 0 }));
     }
 
     @Test
@@ -491,7 +491,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, 0, -2560, 0 }));
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, -256, 0 }));
     }
 
     @Test
@@ -507,11 +507,10 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(combine(employee1MarchNightShifts, employee1AprilNightShifts, employee2MarchNightShifts))
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -4810, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -481, 0 }));
     }
 
     @Test
-
     void softScoreLevels_UndesiredAndFair() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
@@ -520,7 +519,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift, availability)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -480, 0, 0, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -480, 0, -1, 0 }));
     }
 
     @Test
@@ -636,65 +635,68 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -1, 0 }));
     }
 
     @Test
-    void fairShiftDistribution_EveningWeight() {
+    void dayEveningShiftFairness_EveningWeight() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
         Shift eveningShift = createShift(1L, employee, date.atTime(16, 0), date.plusDays(1).atTime(0, 0), "E");
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::dayEveningShiftFairness)
                 .given(eveningShift)
                 .penalizesBy(5);
     }
 
     @Test
-    void fairShiftDistribution_NightWeight() {
+    void nightShiftFairness_NightWeight() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
         Shift nightShift = createShift(1L, employee, date.atTime(0, 0), date.atTime(8, 0), "N");
+        nightShift.setNightBurdenScore(1);
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightShiftFairness)
                 .given(nightShift)
-                .penalizesBy(10);
+                .penalizesBy(1);
     }
 
     @Test
-    void fairShiftDistribution_NightQuadraticPenalty() {
+    void nightShiftFairness_NightQuadraticPenalty() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
         Shift nightShift1 = createShift(1L, employee, date.atTime(0, 0), date.atTime(8, 0), "N");
+        nightShift1.setNightBurdenScore(1);
         Shift nightShift2 = createShift(2L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0),
                 "N");
+        nightShift2.setNightBurdenScore(1);
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::nightShiftFairness)
                 .given(nightShift1, nightShift2)
-                .penalizesBy(40);
+                .penalizesBy(4);
     }
 
     @Test
-    void fairShiftDistribution_UnknownCodeFallbackWeight() {
+    void dayEveningShiftFairness_UnknownCodeFallbackWeight() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
         Shift unknownShift = createShift(1L, employee, date.atTime(9, 0), date.atTime(17, 0), "X");
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::fairShiftDistribution)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::dayEveningShiftFairness)
                 .given(unknownShift)
                 .penalizesBy(1);
     }
 
     @Test
-    void currentPeriodBurdenFairness_UsesCurrentBurdenOnly() {
+    void holidayBurdenFairness_UsesCurrentBurdenOnly() {
         Employee employee = createEmployee("E1");
         employee.setYearlyNightWorkCount(2);
         employee.setYearlyHolidayWorkCount(3);
 
         Shift shift = createShift(1L, employee, LocalDate.of(2025, 12, 25), 9, 17);
-        shift.setFairnessBurdenScore(4);
+        shift.setHolidayBurdenScore(4);
 
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::currentPeriodBurdenFairness)
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::holidayBurdenFairness)
                 .given(shift)
                 .penalizesBy(16); // 4^2 (current burden only)
     }
@@ -705,11 +707,11 @@ class EmployeeSchedulingConstraintProviderTest {
         employee.setYearlyNightWorkCount(2);
         employee.setYearlyHolidayWorkCount(3);
         Shift shift = createShift(1L, employee, LocalDate.of(2025, 12, 5), 9, 17);
-        shift.setFairnessBurdenScore(4);
+        shift.setHolidayBurdenScore(4);
 
         constraintVerifier.verifyThat()
                 .given(shift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -16, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -17, 0 }));
     }
 
     @Test
@@ -721,7 +723,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift, availability)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, 0, -1, 480 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -1, 480 }));
     }
 
     private Employee createEmployee(String id) {
@@ -759,6 +761,9 @@ class EmployeeSchedulingConstraintProviderTest {
         shift.setEnd(end);
         shift.setShiftCode(shiftCode);
         shift.setRequiredSkill("ALL");
+        if ("N".equals(shiftCode)) {
+            shift.setNightBurdenScore(1);
+        }
         return shift;
     }
 

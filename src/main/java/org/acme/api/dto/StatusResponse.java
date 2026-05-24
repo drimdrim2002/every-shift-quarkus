@@ -36,9 +36,11 @@ public record StatusResponse(
             @JsonProperty("night48_rest_soft_score") Integer night48RestSoftScore,
             @JsonProperty("night32_rest_soft_score") Integer night32RestSoftScore,
             @JsonProperty("undesired_soft_score") Integer undesiredSoftScore,
+            @JsonProperty("three_consecutive_night_soft_score") Integer threeConsecutiveNightSoftScore,
+            @JsonProperty("fairness_soft_score") Integer fairnessSoftScore,
+            @JsonProperty("desired_soft_score") Integer desiredSoftScore,
             @JsonProperty("burden_fairness_soft_score") Integer burdenFairnessSoftScore,
             @JsonProperty("fair_soft_score") Integer fairSoftScore,
-            @JsonProperty("desired_soft_score") Integer desiredSoftScore,
             @JsonProperty("legacy_soft_score_total") Integer legacySoftScoreTotal) {
     }
 
@@ -55,13 +57,17 @@ public record StatusResponse(
                     job.getNight48RestSoftScore(),
                     job.getNight32RestSoftScore(),
                     job.getUndesiredSoftScore(),
+                    job.getThreeConsecutiveNightSoftScore(),
+                    job.getFairnessSoftScore(),
+                    job.getDesiredSoftScore(),
                     job.getBurdenFairnessSoftScore(),
                     job.getFairSoftScore(),
-                    job.getDesiredSoftScore(),
                     null);
         } else if (job.getHardScore() != null || job.getSoftScore() != null) {
             scoreInfo = new ScoreInfo(
                     job.getHardScore(),
+                    null,
+                    null,
                     null,
                     null,
                     null,
@@ -88,9 +94,11 @@ public record StatusResponse(
         return job.getNight48RestSoftScore() != null
                 || job.getNight32RestSoftScore() != null
                 || job.getUndesiredSoftScore() != null
+                || job.getThreeConsecutiveNightSoftScore() != null
+                || job.getFairnessSoftScore() != null
+                || job.getDesiredSoftScore() != null
                 || job.getBurdenFairnessSoftScore() != null
-                || job.getFairSoftScore() != null
-                || job.getDesiredSoftScore() != null;
+                || job.getFairSoftScore() != null;
     }
 
     /**

@@ -234,9 +234,12 @@ public class JobExecutionService {
         scoreFields.put("night48RestSoftScore", score.softScore(0));
         scoreFields.put("night32RestSoftScore", score.softScore(1));
         scoreFields.put("undesiredSoftScore", score.softScore(2));
+        scoreFields.put("threeConsecutiveNightSoftScore", score.softScore(3));
+        scoreFields.put("fairnessSoftScore", score.softScore(4));
+        scoreFields.put("desiredSoftScore", score.softScore(5));
+        // 하위 호환을 위해 기존 필드도 병행 저장
         scoreFields.put("burdenFairnessSoftScore", score.softScore(4));
-        scoreFields.put("fairSoftScore", score.softScore(5));
-        scoreFields.put("desiredSoftScore", score.softScore(6));
+        scoreFields.put("fairSoftScore", score.softScore(4));
         return scoreFields;
     }
 

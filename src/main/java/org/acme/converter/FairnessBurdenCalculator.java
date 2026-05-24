@@ -27,7 +27,7 @@ public class FairnessBurdenCalculator {
         Set<LocalDate> publicHolidayDates = toPublicHolidayDates(publicHolidays);
         for (Shift shift : shifts) {
             if (shift != null) {
-                shift.setFairnessBurdenScore(calculate(shift, scheduleState, publicHolidayDates));
+                calculate(shift, scheduleState, publicHolidayDates);
             }
         }
     }
@@ -53,11 +53,11 @@ public class FairnessBurdenCalculator {
             return 0;
         }
 
-        int burden = "N".equals(shiftCode) ? 1 : 0;
-        if (hasHolidayComponent(burdenDate, shiftCode, publicHolidayDates)) {
-            burden++;
-        }
-        return burden;
+        int nightScore = "N".equals(shiftCode) ? 1 : 0;
+        int holidayScore = hasHolidayComponent(burdenDate, shiftCode, publicHolidayDates) ? 1 : 0;
+        shift.setNightBurdenScore(nightScore);
+        shift.setHolidayBurdenScore(holidayScore);
+        return nightScore + holidayScore;
     }
 
     private Set<LocalDate> toPublicHolidayDates(Iterable<PlanningRequest.PublicHolidayInfo> publicHolidays) {

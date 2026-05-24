@@ -22,7 +22,8 @@ public class Shift {
     Employee employee;
 
     boolean pinned;
-    int fairnessBurdenScore;
+    int nightBurdenScore;
+    int holidayBurdenScore;
 
     public Shift() {
     }
@@ -118,12 +119,20 @@ public class Shift {
         this.pinned = pinned;
     }
 
-    public int getFairnessBurdenScore() {
-        return fairnessBurdenScore;
+    public int getNightBurdenScore() {
+        return nightBurdenScore;
     }
 
-    public void setFairnessBurdenScore(int fairnessBurdenScore) {
-        this.fairnessBurdenScore = Math.max(0, fairnessBurdenScore);
+    public void setNightBurdenScore(int nightBurdenScore) {
+        this.nightBurdenScore = Math.max(0, nightBurdenScore);
+    }
+
+    public int getHolidayBurdenScore() {
+        return holidayBurdenScore;
+    }
+
+    public void setHolidayBurdenScore(int holidayBurdenScore) {
+        this.holidayBurdenScore = Math.max(0, holidayBurdenScore);
     }
 
     @Override

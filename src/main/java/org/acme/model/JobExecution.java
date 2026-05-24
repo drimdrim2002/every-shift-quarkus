@@ -25,8 +25,10 @@ public class JobExecution {
     private Integer night48RestSoftScore;
     private Integer night32RestSoftScore;
     private Integer undesiredSoftScore;
-    private Integer burdenFairnessSoftScore;
-    private Integer fairSoftScore;
+    private Integer burdenFairnessSoftScore; // @Deprecated: use fairnessSoftScore
+    private Integer fairSoftScore; // @Deprecated: use fairnessSoftScore
+    private Integer fairnessSoftScore;
+    private Integer threeConsecutiveNightSoftScore;
     private Integer desiredSoftScore;
     private Long createdAt;               // Timestamp (epoch millis)
     private Long startedAt;
@@ -145,6 +147,22 @@ public class JobExecution {
 
     public void setFairSoftScore(Integer fairSoftScore) {
         this.fairSoftScore = fairSoftScore;
+    }
+
+    public Integer getFairnessSoftScore() {
+        return fairnessSoftScore;
+    }
+
+    public void setFairnessSoftScore(Integer fairnessSoftScore) {
+        this.fairnessSoftScore = fairnessSoftScore;
+    }
+
+    public Integer getThreeConsecutiveNightSoftScore() {
+        return threeConsecutiveNightSoftScore;
+    }
+
+    public void setThreeConsecutiveNightSoftScore(Integer threeConsecutiveNightSoftScore) {
+        this.threeConsecutiveNightSoftScore = threeConsecutiveNightSoftScore;
     }
 
     public Integer getDesiredSoftScore() {

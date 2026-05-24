@@ -79,9 +79,11 @@ class StatusResponseTest {
         job.setNight48RestSoftScore(-7);
         job.setNight32RestSoftScore(-30);
         job.setUndesiredSoftScore(-120);
+        job.setThreeConsecutiveNightSoftScore(-3);
+        job.setFairnessSoftScore(-5409);
+        job.setDesiredSoftScore(240);
         job.setBurdenFairnessSoftScore(-81);
         job.setFairSoftScore(-5400);
-        job.setDesiredSoftScore(240);
 
         StatusResponse response = StatusResponse.from(job, objectMapper);
 
@@ -90,9 +92,11 @@ class StatusResponseTest {
         Assertions.assertEquals(-7, response.score().night48RestSoftScore());
         Assertions.assertEquals(-30, response.score().night32RestSoftScore());
         Assertions.assertEquals(-120, response.score().undesiredSoftScore());
+        Assertions.assertEquals(-3, response.score().threeConsecutiveNightSoftScore());
+        Assertions.assertEquals(-5409, response.score().fairnessSoftScore());
+        Assertions.assertEquals(240, response.score().desiredSoftScore());
         Assertions.assertEquals(-81, response.score().burdenFairnessSoftScore());
         Assertions.assertEquals(-5400, response.score().fairSoftScore());
-        Assertions.assertEquals(240, response.score().desiredSoftScore());
         Assertions.assertNull(response.score().legacySoftScoreTotal());
     }
 
@@ -132,9 +136,11 @@ class StatusResponseTest {
         Assertions.assertEquals(-7, response.score().night48RestSoftScore());
         Assertions.assertNull(response.score().night32RestSoftScore());
         Assertions.assertNull(response.score().undesiredSoftScore());
+        Assertions.assertNull(response.score().threeConsecutiveNightSoftScore());
+        Assertions.assertNull(response.score().fairnessSoftScore());
+        Assertions.assertNull(response.score().desiredSoftScore());
         Assertions.assertNull(response.score().burdenFairnessSoftScore());
         Assertions.assertNull(response.score().fairSoftScore());
-        Assertions.assertNull(response.score().desiredSoftScore());
         Assertions.assertNull(response.score().legacySoftScoreTotal());
     }
 

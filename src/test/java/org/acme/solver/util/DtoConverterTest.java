@@ -190,6 +190,7 @@ public class DtoConverterTest {
                 .toList();
         assertEquals(1, matches.size(), "Expected exactly one shift for " + logicalDate + " " + shiftCode);
         Shift shift = matches.get(0);
-        assertEquals(expected, shift.getFairnessBurdenScore());
+        int totalBurden = shift.getNightBurdenScore() + shift.getHolidayBurdenScore();
+        assertEquals(expected, totalBurden);
     }
 }
