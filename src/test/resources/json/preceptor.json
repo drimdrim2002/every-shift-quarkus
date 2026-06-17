@@ -1,0 +1,1233 @@
+{
+    "organization": {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "name": "세브란스병원",
+        "type": "hospital22",
+        "shifts": [
+            {
+                "id": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+                "code": "D",
+                "name": "Day",
+                "start_time": "08:00:00",
+                "end_time": "16:00:00"
+            },
+            {
+                "id": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+                "code": "E",
+                "name": "Evening",
+                "start_time": "16:00:00",
+                "end_time": "00:00:00"
+            },
+            {
+                "id": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+                "code": "N",
+                "name": "Night",
+                "start_time": "00:00:00",
+                "end_time": "08:00:00"
+            }
+        ],
+        "lastHistoricalDate": "2026-04-30",
+        "firstDraftDate": "2026-05-01",
+        "publishLength": 0,
+        "draftLength": 31
+    },
+    "employees": [
+        {
+            "employee_id": "3182f905-b322-48e7-92cf-739792d67005",
+            "name": "고소영",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "ac3a6b14-ef05-405a-9ed0-4ad523fee7d1",
+            "name": "권은비",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": "c1418b9f-f001-4db0-966d-5a289ac26923"
+        },
+        {
+            "employee_id": "19d61452-d8ca-48fc-afa7-fe4297f71c76",
+            "name": "김고은",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "6060ab38-b5d8-4dc1-b6f2-05dc4a97f687",
+            "name": "김나빈",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "e3e1be49-3ea7-41a1-a2dd-3ce5d6a6b123",
+            "name": "김수연",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "7007ce68-3fa8-4f0d-9a83-001d454394ba",
+            "name": "김예은",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "c4ea3832-3e88-439f-b97d-3f5daa7cbf46",
+            "name": "남보미",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": "81d143fc-9884-47ed-96c3-dacd5c7f2e19"
+        },
+        {
+            "employee_id": "74194151-48b7-4c7c-badf-f3c1daaf1e54",
+            "name": "남재연",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": "bc362c18-02ff-4585-9d3d-5ad60ba19f5c"
+        },
+        {
+            "employee_id": "69602aac-2856-4d57-9326-d5f9d81face2",
+            "name": "남지현",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "87d86be2-13eb-4d3e-93af-88fcbc452f06",
+            "name": "소한지",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "ce6792f1-0732-4a96-a965-f4833ca3996d",
+            "name": "엄세영",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "9e56b04f-7649-49d1-a7d4-03dbf59ae491",
+            "name": "유은형",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "c1418b9f-f001-4db0-966d-5a289ac26923",
+            "name": "이다혜Q",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "6ca61800-1374-4113-a303-4298602d78da",
+            "name": "이민아",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "c5593537-7023-4873-83ef-6105d3573aff",
+            "name": "이민지",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": "dd60c87c-2290-4e5f-b0c5-f10ccce97be6"
+        },
+        {
+            "employee_id": "c63f6ffb-f629-4dab-bb37-dcfdea3083de",
+            "name": "이소현",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "dd60c87c-2290-4e5f-b0c5-f10ccce97be6",
+            "name": "정다래Q",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "81d143fc-9884-47ed-96c3-dacd5c7f2e19",
+            "name": "정유나Q",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        },
+        {
+            "employee_id": "bc362c18-02ff-4585-9d3d-5ad60ba19f5c",
+            "name": "최진실Q",
+            "available_shifts": [
+                "D",
+                "E",
+                "N"
+            ],
+            "skill_set": [
+                "ALL"
+            ],
+            "preceptor_id": null
+        }
+    ],
+    "history": [],
+    "undesirable": [
+        {
+            "employee_id": "7007ce68-3fa8-4f0d-9a83-001d454394ba",
+            "date": "2026-05-01",
+            "is_locked": false
+        },
+        {
+            "employee_id": "7007ce68-3fa8-4f0d-9a83-001d454394ba",
+            "date": "2026-05-27",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c63f6ffb-f629-4dab-bb37-dcfdea3083de",
+            "date": "2026-05-01",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c63f6ffb-f629-4dab-bb37-dcfdea3083de",
+            "date": "2026-05-06",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c63f6ffb-f629-4dab-bb37-dcfdea3083de",
+            "date": "2026-05-15",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6060ab38-b5d8-4dc1-b6f2-05dc4a97f687",
+            "date": "2026-05-02",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6060ab38-b5d8-4dc1-b6f2-05dc4a97f687",
+            "date": "2026-05-11",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6060ab38-b5d8-4dc1-b6f2-05dc4a97f687",
+            "date": "2026-05-23",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6060ab38-b5d8-4dc1-b6f2-05dc4a97f687",
+            "date": "2026-05-27",
+            "is_locked": false
+        },
+        {
+            "employee_id": "ac3a6b14-ef05-405a-9ed0-4ad523fee7d1",
+            "date": "2026-05-02",
+            "is_locked": false
+        },
+        {
+            "employee_id": "ac3a6b14-ef05-405a-9ed0-4ad523fee7d1",
+            "date": "2026-05-12",
+            "is_locked": false
+        },
+        {
+            "employee_id": "ac3a6b14-ef05-405a-9ed0-4ad523fee7d1",
+            "date": "2026-05-29",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c1418b9f-f001-4db0-966d-5a289ac26923",
+            "date": "2026-05-02",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c1418b9f-f001-4db0-966d-5a289ac26923",
+            "date": "2026-05-12",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c1418b9f-f001-4db0-966d-5a289ac26923",
+            "date": "2026-05-29",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6ca61800-1374-4113-a303-4298602d78da",
+            "date": "2026-05-03",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6ca61800-1374-4113-a303-4298602d78da",
+            "date": "2026-05-13",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6ca61800-1374-4113-a303-4298602d78da",
+            "date": "2026-05-22",
+            "is_locked": false
+        },
+        {
+            "employee_id": "6ca61800-1374-4113-a303-4298602d78da",
+            "date": "2026-05-26",
+            "is_locked": false
+        },
+        {
+            "employee_id": "74194151-48b7-4c7c-badf-f3c1daaf1e54",
+            "date": "2026-05-03",
+            "is_locked": false
+        },
+        {
+            "employee_id": "74194151-48b7-4c7c-badf-f3c1daaf1e54",
+            "date": "2026-05-09",
+            "is_locked": false
+        },
+        {
+            "employee_id": "74194151-48b7-4c7c-badf-f3c1daaf1e54",
+            "date": "2026-05-18",
+            "is_locked": false
+        },
+        {
+            "employee_id": "bc362c18-02ff-4585-9d3d-5ad60ba19f5c",
+            "date": "2026-05-03",
+            "is_locked": false
+        },
+        {
+            "employee_id": "bc362c18-02ff-4585-9d3d-5ad60ba19f5c",
+            "date": "2026-05-09",
+            "is_locked": false
+        },
+        {
+            "employee_id": "bc362c18-02ff-4585-9d3d-5ad60ba19f5c",
+            "date": "2026-05-18",
+            "is_locked": false
+        },
+        {
+            "employee_id": "19d61452-d8ca-48fc-afa7-fe4297f71c76",
+            "date": "2026-05-04",
+            "is_locked": false
+        },
+        {
+            "employee_id": "19d61452-d8ca-48fc-afa7-fe4297f71c76",
+            "date": "2026-05-22",
+            "is_locked": false
+        },
+        {
+            "employee_id": "19d61452-d8ca-48fc-afa7-fe4297f71c76",
+            "date": "2026-05-30",
+            "is_locked": false
+        },
+        {
+            "employee_id": "87d86be2-13eb-4d3e-93af-88fcbc452f06",
+            "date": "2026-05-04",
+            "is_locked": false
+        },
+        {
+            "employee_id": "87d86be2-13eb-4d3e-93af-88fcbc452f06",
+            "date": "2026-05-28",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c5593537-7023-4873-83ef-6105d3573aff",
+            "date": "2026-05-05",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c5593537-7023-4873-83ef-6105d3573aff",
+            "date": "2026-05-14",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c5593537-7023-4873-83ef-6105d3573aff",
+            "date": "2026-05-19",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c5593537-7023-4873-83ef-6105d3573aff",
+            "date": "2026-05-26",
+            "is_locked": false
+        },
+        {
+            "employee_id": "dd60c87c-2290-4e5f-b0c5-f10ccce97be6",
+            "date": "2026-05-05",
+            "is_locked": false
+        },
+        {
+            "employee_id": "dd60c87c-2290-4e5f-b0c5-f10ccce97be6",
+            "date": "2026-05-14",
+            "is_locked": false
+        },
+        {
+            "employee_id": "dd60c87c-2290-4e5f-b0c5-f10ccce97be6",
+            "date": "2026-05-19",
+            "is_locked": false
+        },
+        {
+            "employee_id": "dd60c87c-2290-4e5f-b0c5-f10ccce97be6",
+            "date": "2026-05-26",
+            "is_locked": false
+        },
+        {
+            "employee_id": "81d143fc-9884-47ed-96c3-dacd5c7f2e19",
+            "date": "2026-05-07",
+            "is_locked": false
+        },
+        {
+            "employee_id": "81d143fc-9884-47ed-96c3-dacd5c7f2e19",
+            "date": "2026-05-08",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c4ea3832-3e88-439f-b97d-3f5daa7cbf46",
+            "date": "2026-05-07",
+            "is_locked": false
+        },
+        {
+            "employee_id": "c4ea3832-3e88-439f-b97d-3f5daa7cbf46",
+            "date": "2026-05-08",
+            "is_locked": false
+        },
+        {
+            "employee_id": "69602aac-2856-4d57-9326-d5f9d81face2",
+            "date": "2026-05-09",
+            "is_locked": false
+        },
+        {
+            "employee_id": "69602aac-2856-4d57-9326-d5f9d81face2",
+            "date": "2026-05-17",
+            "is_locked": false
+        },
+        {
+            "employee_id": "69602aac-2856-4d57-9326-d5f9d81face2",
+            "date": "2026-05-30",
+            "is_locked": false
+        },
+        {
+            "employee_id": "3182f905-b322-48e7-92cf-739792d67005",
+            "date": "2026-05-10",
+            "is_locked": false
+        },
+        {
+            "employee_id": "3182f905-b322-48e7-92cf-739792d67005",
+            "date": "2026-05-20",
+            "is_locked": false
+        },
+        {
+            "employee_id": "3182f905-b322-48e7-92cf-739792d67005",
+            "date": "2026-05-21",
+            "is_locked": false
+        },
+        {
+            "employee_id": "9e56b04f-7649-49d1-a7d4-03dbf59ae491",
+            "date": "2026-05-16",
+            "is_locked": false
+        },
+        {
+            "employee_id": "ce6792f1-0732-4a96-a965-f4833ca3996d",
+            "date": "2026-05-24",
+            "is_locked": false
+        },
+        {
+            "employee_id": "ce6792f1-0732-4a96-a965-f4833ca3996d",
+            "date": "2026-05-25",
+            "is_locked": false
+        },
+        {
+            "employee_id": "e3e1be49-3ea7-41a1-a2dd-3ce5d6a6b123",
+            "date": "2026-05-31",
+            "is_locked": false
+        }
+    ],
+    "requirements": [
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 0,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 0,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 0,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 1,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 1,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 1,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 2,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 2,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 2,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 3,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 3,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 3,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 4,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 4,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 4,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 5,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 5,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 5,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 6,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 6,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 6,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 7,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 7,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 7,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 8,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 8,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 8,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 9,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 9,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 9,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 10,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 10,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 10,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 11,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 11,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 11,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 12,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 12,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 12,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 13,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 13,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 13,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 14,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 14,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 14,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 15,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 15,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 15,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 16,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 16,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 16,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 17,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 17,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 17,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 18,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 18,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 18,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 19,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 19,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 19,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 20,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 20,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 20,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 21,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 21,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 21,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 22,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 22,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 22,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 23,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 23,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 23,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 24,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 24,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 24,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 25,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 25,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 25,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 26,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 26,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 26,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 27,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 27,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 27,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 28,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 28,
+            "employeeCount": 4
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 28,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 29,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 29,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 29,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "a5bcb7c0-b9b1-408d-9add-fd08c13b951c",
+            "dayIndex": 30,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "9ba021e7-1c4a-4f38-a577-ffc6dbcda56d",
+            "dayIndex": 30,
+            "employeeCount": 3
+        },
+        {
+            "shiftId": "493edb73-a7a0-4751-8bc1-92745c8bf729",
+            "dayIndex": 30,
+            "employeeCount": 3
+        }
+    ],
+    "publicHolidays": [
+        {
+            "date": "2026-05-01",
+            "dayOfWeek": 5,
+            "dayName": "금",
+            "kind": "publicHoliday"
+        },
+        {
+            "date": "2026-05-02",
+            "dayOfWeek": 6,
+            "dayName": "토",
+            "kind": "saturday"
+        },
+        {
+            "date": "2026-05-03",
+            "dayOfWeek": 0,
+            "dayName": "일",
+            "kind": "sunday"
+        },
+        {
+            "date": "2026-05-05",
+            "dayOfWeek": 2,
+            "dayName": "화",
+            "kind": "publicHoliday"
+        },
+        {
+            "date": "2026-05-08",
+            "dayOfWeek": 5,
+            "dayName": "금",
+            "kind": "friday"
+        },
+        {
+            "date": "2026-05-09",
+            "dayOfWeek": 6,
+            "dayName": "토",
+            "kind": "saturday"
+        },
+        {
+            "date": "2026-05-10",
+            "dayOfWeek": 0,
+            "dayName": "일",
+            "kind": "sunday"
+        },
+        {
+            "date": "2026-05-15",
+            "dayOfWeek": 5,
+            "dayName": "금",
+            "kind": "friday"
+        },
+        {
+            "date": "2026-05-16",
+            "dayOfWeek": 6,
+            "dayName": "토",
+            "kind": "saturday"
+        },
+        {
+            "date": "2026-05-17",
+            "dayOfWeek": 0,
+            "dayName": "일",
+            "kind": "sunday"
+        },
+        {
+            "date": "2026-05-22",
+            "dayOfWeek": 5,
+            "dayName": "금",
+            "kind": "friday"
+        },
+        {
+            "date": "2026-05-23",
+            "dayOfWeek": 6,
+            "dayName": "토",
+            "kind": "saturday"
+        },
+        {
+            "date": "2026-05-24",
+            "dayOfWeek": 0,
+            "dayName": "일",
+            "kind": "publicHoliday"
+        },
+        {
+            "date": "2026-05-25",
+            "dayOfWeek": 1,
+            "dayName": "월",
+            "kind": "publicHoliday"
+        },
+        {
+            "date": "2026-05-29",
+            "dayOfWeek": 5,
+            "dayName": "금",
+            "kind": "friday"
+        },
+        {
+            "date": "2026-05-30",
+            "dayOfWeek": 6,
+            "dayName": "토",
+            "kind": "saturday"
+        },
+        {
+            "date": "2026-05-31",
+            "dayOfWeek": 0,
+            "dayName": "일",
+            "kind": "sunday"
+        }
+    ],
+    "yearlyEmployeeStats": [
+        {
+            "employee_id": "3182f905-b322-48e7-92cf-739792d67005",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "ac3a6b14-ef05-405a-9ed0-4ad523fee7d1",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "19d61452-d8ca-48fc-afa7-fe4297f71c76",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "6060ab38-b5d8-4dc1-b6f2-05dc4a97f687",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "e3e1be49-3ea7-41a1-a2dd-3ce5d6a6b123",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "7007ce68-3fa8-4f0d-9a83-001d454394ba",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "c4ea3832-3e88-439f-b97d-3f5daa7cbf46",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "74194151-48b7-4c7c-badf-f3c1daaf1e54",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "69602aac-2856-4d57-9326-d5f9d81face2",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "87d86be2-13eb-4d3e-93af-88fcbc452f06",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "ce6792f1-0732-4a96-a965-f4833ca3996d",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "9e56b04f-7649-49d1-a7d4-03dbf59ae491",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "c1418b9f-f001-4db0-966d-5a289ac26923",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "6ca61800-1374-4113-a303-4298602d78da",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "c5593537-7023-4873-83ef-6105d3573aff",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "c63f6ffb-f629-4dab-bb37-dcfdea3083de",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "dd60c87c-2290-4e5f-b0c5-f10ccce97be6",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "81d143fc-9884-47ed-96c3-dacd5c7f2e19",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        },
+        {
+            "employee_id": "bc362c18-02ff-4585-9d3d-5ad60ba19f5c",
+            "night_shift_count": 0,
+            "weekend_holiday_work_count": 0,
+            "approved_off_request_count": 0
+        }
+    ]
+}

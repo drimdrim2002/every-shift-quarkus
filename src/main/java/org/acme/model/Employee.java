@@ -19,6 +19,7 @@ public class Employee {
     int yearlyHolidayWorkCount;
     int yearlyOffRequestCount;
     int offRequestPenaltyWeight = 1;
+    String preceptorId;
 
 
     public Employee() {
@@ -110,5 +111,13 @@ public class Employee {
                 "name='" + name + '\'' +
                 ", id='" + id + '\'' +
                 '}';
+    }
+
+    public String getPreceptorId() {
+        return preceptorId;
+    }
+
+    public void setPreceptorId(String preceptorId) {
+        this.preceptorId = preceptorId;
     }
 }

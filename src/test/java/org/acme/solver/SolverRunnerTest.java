@@ -156,4 +156,55 @@ public class SolverRunnerTest {
         }
         return shift.getShiftCode().trim().toUpperCase(Locale.ROOT);
     }
+
+    @Test
+    public void testPreceptorConstraint() throws IOException {
+        // Load preceptor.json content
+        String jsonInput = JsonLoader.loadAsString("/json/preceptor.json");
+
+        // Run the solver
+        EmployeeSchedule solution = solverRunner.runWithResult(jsonInput);
+
+        assertNotNull(solution.getScore(), "Score should not be null");
+        // Verify Hard Score is 0 (all hard constraints satisfied)
+        assertEquals(0, solution.getScore().hardScore(0), "All hard constraints including preceptor matching must be satisfied");
+
+        // Verify preceptor matching
+        Map<String, org.acme.model.Employee> employeeMap = solution.getEmployeeList().stream()
+                .collect(Collectors.toMap(org.acme.model.Employee::getId, e -> e));
+
+        Map<String, List<Shift>> shiftsByEmployeeId = solution.getShiftList().stream()
+                .filter(shift -> shift.getEmployee() != null)
+                .collect(Collectors.groupingBy(shift -> shift.getEmployee().getId()));
+
+        for (org.acme.model.Employee employee : solution.getEmployeeList()) {
+            if (employee.getPreceptorId() != null) {
+                org.acme.model.Employee preceptor = employeeMap.get(employee.getPreceptorId());
+                assertNotNull(preceptor, "Preceptor should exist in the employee list");
+
+                List<Shift> precepteeShifts = shiftsByEmployeeId.getOrDefault(employee.getId(), List.of());
+                List<Shift> preceptorShifts = shiftsByEmployeeId.getOrDefault(preceptor.getId(), List.of());
+
+                // Map of Date -> ShiftCode for both
+                Map<LocalDate, String> precepteeMap = precepteeShifts.stream()
+                        .collect(Collectors.toMap(s -> s.getStart().toLocalDate(), Shift::getShiftCode));
+                Map<LocalDate, String> preceptorMap = preceptorShifts.stream()
+                        .collect(Collectors.toMap(s -> s.getStart().toLocalDate(), Shift::getShiftCode));
+
+                // All preceptee shifts must have a matching preceptor shift
+                for (Map.Entry<LocalDate, String> entry : precepteeMap.entrySet()) {
+                    assertEquals(entry.getValue(), preceptorMap.get(entry.getKey()),
+                            String.format("Preceptor %s and Preceptee %s must work the same shift on %s",
+                                    preceptor.getName(), employee.getName(), entry.getKey()));
+                }
+
+                // All preceptor shifts must have a matching preceptee shift
+                for (Map.Entry<LocalDate, String> entry : preceptorMap.entrySet()) {
+                    assertEquals(entry.getValue(), precepteeMap.get(entry.getKey()),
+                            String.format("Preceptor %s and Preceptee %s must work the same shift on %s",
+                                    preceptor.getName(), employee.getName(), entry.getKey()));
+                }
+            }
+        }
+    }
 }

@@ -109,7 +109,9 @@ public class EmployeeScheduleBuilder {
                 for (PlanningRequest.EmployeeInfo e : employees) {
                         Set<String> skills = new HashSet<>(e.skillSet());
                         skills.add("ALL");
-                        map.put(e.employeeId(), new Employee(e.employeeId(), e.name(), e.availableShifts(), skills));
+                        Employee employee = new Employee(e.employeeId(), e.name(), e.availableShifts(), skills);
+                        employee.setPreceptorId(e.preceptorId());
+                        map.put(e.employeeId(), employee);
                 }
                 return map;
         }

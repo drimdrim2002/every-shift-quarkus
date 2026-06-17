@@ -726,6 +726,94 @@ class EmployeeSchedulingConstraintProviderTest {
                 .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -1, 480 }));
     }
 
+    @Test
+    void precepteeMustWorkSameShiftAsPreceptor_Matching() {
+        Employee preceptor = createEmployee("Preceptor");
+        Employee preceptee = createEmployee("Preceptee");
+        preceptee.setPreceptorId(preceptor.getId());
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift precepteeShift = createShift(1L, preceptee, date, 8, 16, "D");
+        Shift preceptorShift = createShift(2L, preceptor, date, 8, 16, "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::precepteeMustWorkSameShiftAsPreceptor)
+                .given(preceptor, preceptee, precepteeShift, preceptorShift)
+                .penalizesBy(0);
+    }
+
+    @Test
+    void precepteeMustWorkSameShiftAsPreceptor_Mismatch() {
+        Employee preceptor = createEmployee("Preceptor");
+        Employee preceptee = createEmployee("Preceptee");
+        preceptee.setPreceptorId(preceptor.getId());
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift precepteeShift = createShift(1L, preceptee, date, 8, 16, "D");
+        Shift preceptorShift = createShift(2L, preceptor, date, 16, 0, "E");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::precepteeMustWorkSameShiftAsPreceptor)
+                .given(preceptor, preceptee, precepteeShift, preceptorShift)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void precepteeMustWorkSameShiftAsPreceptor_NoPreceptorShift() {
+        Employee preceptor = createEmployee("Preceptor");
+        Employee preceptee = createEmployee("Preceptee");
+        preceptee.setPreceptorId(preceptor.getId());
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift precepteeShift = createShift(1L, preceptee, date, 8, 16, "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::precepteeMustWorkSameShiftAsPreceptor)
+                .given(preceptor, preceptee, precepteeShift)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void preceptorMustWorkSameShiftAsPreceptee_Matching() {
+        Employee preceptor = createEmployee("Preceptor");
+        Employee preceptee = createEmployee("Preceptee");
+        preceptee.setPreceptorId(preceptor.getId());
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift preceptorShift = createShift(1L, preceptor, date, 8, 16, "D");
+        Shift precepteeShift = createShift(2L, preceptee, date, 8, 16, "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::preceptorMustWorkSameShiftAsPreceptee)
+                .given(preceptor, preceptee, preceptorShift, precepteeShift)
+                .penalizesBy(0);
+    }
+
+    @Test
+    void preceptorMustWorkSameShiftAsPreceptee_Mismatch() {
+        Employee preceptor = createEmployee("Preceptor");
+        Employee preceptee = createEmployee("Preceptee");
+        preceptee.setPreceptorId(preceptor.getId());
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift preceptorShift = createShift(1L, preceptor, date, 8, 16, "D");
+        Shift precepteeShift = createShift(2L, preceptee, date, 16, 0, "E");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::preceptorMustWorkSameShiftAsPreceptee)
+                .given(preceptor, preceptee, preceptorShift, precepteeShift)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void preceptorMustWorkSameShiftAsPreceptee_NoPrecepteeShift() {
+        Employee preceptor = createEmployee("Preceptor");
+        Employee preceptee = createEmployee("Preceptee");
+        preceptee.setPreceptorId(preceptor.getId());
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        Shift preceptorShift = createShift(1L, preceptor, date, 8, 16, "D");
+
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::preceptorMustWorkSameShiftAsPreceptee)
+                .given(preceptor, preceptee, preceptorShift)
+                .penalizesBy(1);
+    }
+
     private Employee createEmployee(String id) {
         Employee employee = new Employee();
         employee.setId(id);

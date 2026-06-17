@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import org.acme.model.Availability;
 import org.acme.model.AvailabilityType;
+import org.acme.model.Employee;
 import org.acme.model.Shift;
 import org.acme.solver.ShiftDateMatcher;
 import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
@@ -82,6 +83,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 atLeast12HoursBetweenTwoShifts(constraintFactory),
                                 noFourConsecutiveNightShifts(constraintFactory),
                                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
+                                precepteeMustWorkSameShiftAsPreceptor(constraintFactory),
+                                preceptorMustWorkSameShiftAsPreceptee(constraintFactory),
                                 // Soft constraints (우선순위: night48 > night32 > undesired > 3-consecutive-night >
                                 // fairness 통합 > desired)
                                 atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
@@ -224,6 +227,30 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 .forEachUniquePair(Shift.class, Joiners.equal(Shift::getEmployee),
                                                 Joiners.equal(shift -> shift.getStart().toLocalDate()))
                                 .penalize(ONE_HARD).asConstraint("Max one shift per day");
+        }
+
+        Constraint precepteeMustWorkSameShiftAsPreceptor(ConstraintFactory constraintFactory) {
+                return constraintFactory.forEach(Shift.class)
+                                .filter(shift -> shift.getEmployee() != null && shift.getEmployee().getPreceptorId() != null)
+                                .ifNotExists(Shift.class,
+                                                Joiners.equal(shift -> shift.getStart().toLocalDate(), shift -> shift.getStart().toLocalDate()),
+                                                Joiners.equal(Shift::getShiftCode),
+                                                Joiners.equal(shift -> shift.getEmployee().getPreceptorId(), shift -> shift.getEmployee().getId()))
+                                .penalize(ONE_HARD)
+                                .asConstraint("Preceptee must work same shift as preceptor");
+        }
+
+        Constraint preceptorMustWorkSameShiftAsPreceptee(ConstraintFactory constraintFactory) {
+                return constraintFactory.forEach(Shift.class)
+                                .filter(shift -> shift.getEmployee() != null)
+                                .join(Employee.class,
+                                                Joiners.equal(shift -> shift.getEmployee().getId(), Employee::getPreceptorId))
+                                .ifNotExists(Shift.class,
+                                                Joiners.equal((preceptorShift, preceptee) -> preceptorShift.getStart().toLocalDate(), shift -> shift.getStart().toLocalDate()),
+                                                Joiners.equal((preceptorShift, preceptee) -> preceptorShift.getShiftCode(), Shift::getShiftCode),
+                                                Joiners.equal((preceptorShift, preceptee) -> preceptee.getId(), shift -> shift.getEmployee().getId()))
+                                .penalize(ONE_HARD)
+                                .asConstraint("Preceptor must work same shift as preceptee");
         }
 
         Constraint desiredDayForEmployee(ConstraintFactory constraintFactory) {

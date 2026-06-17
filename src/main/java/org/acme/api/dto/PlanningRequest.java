@@ -92,7 +92,9 @@ public record PlanningRequest(
 
             @JsonProperty("available_shifts") Set<String> availableShifts,
 
-            @JsonProperty("skill_set") Set<String> skillSet) {
+            @JsonProperty("skill_set") Set<String> skillSet,
+
+            @JsonProperty("preceptor_id") String preceptorId) {
         public EmployeeInfo {
             if (name == null) {
                 name = employeeId;
@@ -104,6 +106,10 @@ public record PlanningRequest(
             if (availableShifts == null) {
                 availableShifts = new HashSet<>();
             }
+        }
+
+        public EmployeeInfo(String employeeId, String name, Set<String> availableShifts, Set<String> skillSet) {
+            this(employeeId, name, availableShifts, skillSet, null);
         }
     }
 
