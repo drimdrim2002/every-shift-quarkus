@@ -94,14 +94,14 @@ echo "🚦 사전 점검 시작..."
 preflight_checks
 
 echo "🚀 [1/3] 빌드 및 이미지 푸시 시작 (Tag: ${IMAGE_TAG})..."
-run_cmd ./mvnw clean package -Dmaven.test.skip=true "-Dquarkus.container-image.image=${IMAGE_NAME}"
+run_cmd ./mvnw clean package -Dmaven.test.skip=true -Dmaven.compiler.useIncrementalCompilation=false "-Dquarkus.container-image.image=${IMAGE_NAME}"
 
 echo "🤖 [2/3] Cloud Run Job 배포 중..."
 run_cmd gcloud run jobs deploy "${JOB_NAME}" \
   --image "${IMAGE_NAME}" \
   --region "${REGION}" \
   --set-env-vars "APP_MODE=JOB,APP_SOLVER_RUN_LOCALLY=false,GCP_FIRESTORE_COLLECTION=${FIRESTORE_COLLECTION}" \
-  --tasks 1 --task-timeout 900s --memory 4Gi --cpu 4
+  --tasks 1 --task-timeout 900s --memory 4Gi --cpu 8
 
 echo "🌐 [3/3] Cloud Run Service 배포 중..."
 run_cmd gcloud run deploy "${SERVICE_NAME}" \

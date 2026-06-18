@@ -21,26 +21,20 @@ import org.optaplanner.core.api.score.stream.Joiners;
 public class EmployeeSchedulingConstraintProvider implements ConstraintProvider {
 
         private static final int HARD_LEVELS = 1;
-        private static final int SOFT_LEVELS = 6;
+        private static final int SOFT_LEVELS = 4;
 
         private static final int HARD_LEVEL_INDEX = 0;
-        private static final int SOFT_NIGHT_48H_REST_INDEX = 0;
-        private static final int SOFT_NIGHT_32H_REST_INDEX = 1;
-        private static final int SOFT_UNDESIRED_INDEX = 2;
-        private static final int SOFT_THREE_CONSECUTIVE_NIGHT_INDEX = 3;
-        private static final int SOFT_FAIRNESS_INDEX = 4;
-        private static final int SOFT_DESIRED_INDEX = 5;
+        private static final int SOFT_NIGHT_32H_REST_INDEX = 0;
+        private static final int SOFT_UNDESIRED_INDEX = 1;
+        private static final int SOFT_FAIRNESS_INDEX = 2;
+        private static final int SOFT_DESIRED_INDEX = 3;
 
         private static final BendableScore ONE_HARD = BendableScore.ofHard(HARD_LEVELS, SOFT_LEVELS, HARD_LEVEL_INDEX,
                         1);
-        private static final BendableScore ONE_SOFT_NIGHT_48H_REST = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
-                        SOFT_NIGHT_48H_REST_INDEX, 1);
         private static final BendableScore ONE_SOFT_NIGHT_32H_REST = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
                         SOFT_NIGHT_32H_REST_INDEX, 1);
         private static final BendableScore ONE_SOFT_UNDESIRED = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
                         SOFT_UNDESIRED_INDEX, 1);
-        private static final BendableScore ONE_SOFT_THREE_CONSECUTIVE_NIGHT = BendableScore.ofSoft(HARD_LEVELS,
-                        SOFT_LEVELS, SOFT_THREE_CONSECUTIVE_NIGHT_INDEX, 1);
         private static final BendableScore ONE_SOFT_FAIRNESS = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
                         SOFT_FAIRNESS_INDEX, 1);
         private static final BendableScore ONE_SOFT_DESIRED = BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS,
@@ -85,12 +79,10 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 max15NightShiftsPerMonth(constraintFactory), oneShiftPerDay(constraintFactory),
                                 precepteeMustWorkSameShiftAsPreceptor(constraintFactory),
                                 preceptorMustWorkSameShiftAsPreceptee(constraintFactory),
-                                // Soft constraints (우선순위: night48 > night32 > undesired > 3-consecutive-night >
-                                // fairness 통합 > desired)
-                                atLeast48HoursAfterTwoConsecutiveNightShifts(constraintFactory),
+                                atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts(constraintFactory),
+                                // Soft constraints (우선순위: night32 > undesired > fairness 통합 > desired)
                                 atLeast32HoursFromNightToNextDayShift(constraintFactory),
                                 undesiredDayForEmployee(constraintFactory),
-                                minimizeThreeConsecutiveNightShifts(constraintFactory),
                                 nightShiftFairness(constraintFactory),
                                 holidayBurdenFairness(constraintFactory),
                                 dayEveningShiftFairness(constraintFactory),
@@ -167,33 +159,24 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                 .asConstraint("At least 32 hours from night to next day shift");
         }
 
-        Constraint minimizeThreeConsecutiveNightShifts(ConstraintFactory constraintFactory) {
-                return constraintFactory.forEach(Shift.class)
-                                .filter(EmployeeSchedulingConstraintProvider::isNightShift)
-                                .join(Shift.class, Joiners.equal(Shift::getEmployee))
-                                .filter((firstNight, secondNight) -> isNightShift(secondNight)
-                                                && getNightLogicalDate(secondNight)
-                                                                .equals(getNightLogicalDate(firstNight).plusDays(1)))
-                                .join(Shift.class,
-                                                Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(),
-                                                                Shift::getEmployee))
-                                .filter((firstNight, secondNight, thirdNight) -> isNightShift(thirdNight)
-                                                && getNightLogicalDate(thirdNight)
-                                                                .equals(getNightLogicalDate(firstNight).plusDays(2)))
-                                .penalize(ONE_SOFT_THREE_CONSECUTIVE_NIGHT)
-                                .asConstraint("Minimize three consecutive night shifts");
-        }
 
-        Constraint atLeast48HoursAfterTwoConsecutiveNightShifts(ConstraintFactory constraintFactory) {
+
+        Constraint atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts(ConstraintFactory constraintFactory) {
                 return constraintFactory.forEach(Shift.class)
                                 .filter(EmployeeSchedulingConstraintProvider::isNightShift)
                                 .join(Shift.class, Joiners.equal(Shift::getEmployee))
                                 .filter((firstNight, secondNight) -> isNightShift(secondNight)
                                                 && getNightLogicalDate(secondNight)
                                                                 .equals(getNightLogicalDate(firstNight).plusDays(1)))
+                                // If there is a third consecutive night shift, wait until that ends to require the 48h rest
+                                .ifNotExists(Shift.class,
+                                                Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(), Shift::getEmployee),
+                                                Joiners.filtering((firstNight, secondNight, nextNight) -> 
+                                                        isNightShift(nextNight) && 
+                                                        getNightLogicalDate(nextNight).equals(getNightLogicalDate(secondNight).plusDays(1))
+                                                ))
                                 .join(Shift.class,
-                                                Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(),
-                                                                Shift::getEmployee))
+                                                Joiners.equal((firstNight, secondNight) -> firstNight.getEmployee(), Shift::getEmployee))
                                 .filter((firstNight, secondNight,
                                                 nextShift) -> !nextShift.getStart().isBefore(secondNight.getEnd()))
                                 .groupBy((firstNight, secondNight, nextShift) -> secondNight,
@@ -202,11 +185,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                                                                                 .getStart()))
                                 .filter((secondNight, nextShiftStart) -> getMinutesBetween(secondNight.getEnd(),
                                                 nextShiftStart) < MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES)
-                                .penalize(ONE_SOFT_NIGHT_48H_REST,
-                                                (secondNight, nextShiftStart) -> MIN_REST_AFTER_TWO_CONSECUTIVE_NIGHTS_MINUTES
-                                                                - getMinutesBetween(secondNight.getEnd(),
-                                                                                nextShiftStart))
-                                .asConstraint("At least 48 hours after two consecutive night shifts");
+                                .penalize(ONE_HARD)
+                                .asConstraint("At least 48 hours after two or more consecutive night shifts");
         }
 
         Constraint max15NightShiftsPerMonth(ConstraintFactory constraintFactory) {

@@ -40,12 +40,9 @@ public class SolverRunnerTest {
         assertNotNull(solution.getScore(), "Score should not be null");
 
         int expectedUndesiredSoftScore = calculateUndesiredSoftScore(solution);
-        assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(2),
-                "softScore(2) should match actual undesired penalty minutes from the solved schedule");
+        assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(1),
+                "softScore(1) should match actual undesired penalty minutes from the solved schedule");
 
-        int expectedThreeConsecutiveNightSoftScore = -countThreeConsecutiveNightWindows(solution);
-        assertEquals(expectedThreeConsecutiveNightSoftScore, solution.getScore().softScore(3),
-                "softScore(3) should match three-consecutive-night window count");
 
         int fourConsecutiveNightViolations = countFourConsecutiveNightViolations(solution);
         assertEquals(0, fourConsecutiveNightViolations,
@@ -83,35 +80,6 @@ public class SolverRunnerTest {
         }
 
         return -penaltyMinutes;
-    }
-
-    private int countThreeConsecutiveNightWindows(EmployeeSchedule schedule) {
-        if (schedule.getShiftList() == null) {
-            return 0;
-        }
-
-        Map<String, List<Shift>> shiftsByEmployeeId = schedule.getShiftList().stream()
-                .filter(shift -> shift.getEmployee() != null)
-                .collect(Collectors.groupingBy(shift -> shift.getEmployee().getId()));
-
-        int violations = 0;
-        for (List<Shift> shifts : shiftsByEmployeeId.values()) {
-            List<LocalDate> nightLogicalDates = shifts.stream()
-                    .filter(this::isNightShift)
-                    .map(ShiftDateMatcher::resolveLogicalDate)
-                    .sorted()
-                    .toList();
-            for (int i = 0; i <= nightLogicalDates.size() - 3; i++) {
-                LocalDate first = nightLogicalDates.get(i);
-                LocalDate second = nightLogicalDates.get(i + 1);
-                LocalDate third = nightLogicalDates.get(i + 2);
-                if (second.equals(first.plusDays(1)) && third.equals(first.plusDays(2))) {
-                    violations++;
-                }
-            }
-        }
-
-        return violations;
     }
 
     private int countFourConsecutiveNightViolations(EmployeeSchedule schedule) {
@@ -167,7 +135,8 @@ public class SolverRunnerTest {
 
         assertNotNull(solution.getScore(), "Score should not be null");
         // Verify Hard Score is 0 (all hard constraints satisfied)
-        assertEquals(0, solution.getScore().hardScore(0), "All hard constraints including preceptor matching must be satisfied");
+        assertEquals(0, solution.getScore().hardScore(0),
+                "All hard constraints including preceptor matching must be satisfied");
 
         // Verify preceptor matching
         Map<String, org.acme.model.Employee> employeeMap = solution.getEmployeeList().stream()

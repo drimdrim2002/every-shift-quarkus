@@ -263,49 +263,6 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
-    void minimizeThreeConsecutiveNightShifts_PenalizesOneWindow() {
-        Employee employee = createEmployee("E1");
-        LocalDate date = LocalDate.of(2025, 1, 1);
-
-        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
-        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
-        Shift night3 = createShift(3L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
-
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::minimizeThreeConsecutiveNightShifts)
-                .given(night1, night2, night3)
-                .penalizesBy(1);
-    }
-
-    @Test
-    void minimizeThreeConsecutiveNightShifts_NoThreeConsecutive() {
-        Employee employee = createEmployee("E1");
-        LocalDate date = LocalDate.of(2025, 1, 1);
-
-        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
-        Shift night3 = createShift(2L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
-        Shift night4 = createShift(3L, employee, date.plusDays(4).atTime(0, 0), date.plusDays(4).atTime(8, 0), "N");
-
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::minimizeThreeConsecutiveNightShifts)
-                .given(night1, night3, night4)
-                .penalizesBy(0);
-    }
-
-    @Test
-    void minimizeThreeConsecutiveNightShifts_FourConsecutiveCreatesTwoWindows() {
-        Employee employee = createEmployee("E1");
-        LocalDate date = LocalDate.of(2025, 1, 1);
-
-        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
-        Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
-        Shift night3 = createShift(3L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
-        Shift night4 = createShift(4L, employee, date.plusDays(4).atTime(0, 0), date.plusDays(4).atTime(8, 0), "N");
-
-        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::minimizeThreeConsecutiveNightShifts)
-                .given(night1, night2, night3, night4)
-                .penalizesBy(2);
-    }
-
-    @Test
     void atLeast32HoursFromNightToNextDayShift_EdgeCase31h59m() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
@@ -375,78 +332,64 @@ class EmployeeSchedulingConstraintProviderTest {
     }
 
     @Test
-    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_EdgeCase47h59m() {
+    void atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts_EdgeCase47h59m() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
 
         Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
         Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
-        Shift nextDayShift = createShift(3L, employee, date.plusDays(4).atTime(7, 59), date.plusDays(4).atTime(15, 59),
-                "D");
+        Shift nextDayShift = createShift(3L, employee, date.plusDays(4).atTime(7, 59), date.plusDays(4).atTime(15, 59), "D");
 
-        constraintVerifier.verifyThat()
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts)
                 .given(night1, night2, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -5, 0 }));
+                .penalizesBy(1);
     }
 
     @Test
-    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_Exact48Hours() {
+    void atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts_Exact48Hours() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
 
         Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
         Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
-        Shift nextDayShift = createShift(3L, employee, date.plusDays(4).atTime(8, 0), date.plusDays(4).atTime(16, 0),
-                "D");
+        Shift nextDayShift = createShift(3L, employee, date.plusDays(4).atTime(8, 0), date.plusDays(4).atTime(16, 0), "D");
 
-        constraintVerifier.verifyThat()
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts)
                 .given(night1, night2, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -5, 0 }));
+                .penalizesBy(0);
     }
 
     @Test
-    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_AppliesToEveningShift() {
+    void atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts_AllowsThreeConsecutive() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
 
         Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
         Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
-        Shift nextEveningShift = createShift(3L, employee, date.plusDays(4).atTime(7, 59), date.plusDays(4).atTime(15, 59),
-                "E");
+        Shift night3 = createShift(3L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
 
-        constraintVerifier.verifyThat()
-                .given(night1, night2, nextEveningShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -9, 0 }));
+        // The second night should NOT trigger the 48 hour rule because there is a third night.
+        // And the third night doesn't trigger it yet because there's no next shift.
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts)
+                .given(night1, night2, night3)
+                .penalizesBy(0);
     }
 
     @Test
-    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_AppliesToNightShift() {
+    void atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts_ThreeConsecutiveFollowedByShortRest() {
         Employee employee = createEmployee("E1");
         LocalDate date = LocalDate.of(2025, 1, 1);
 
         Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
         Shift night2 = createShift(2L, employee, date.plusDays(2).atTime(0, 0), date.plusDays(2).atTime(8, 0), "N");
-        Shift nextNightShift = createShift(3L, employee, date.plusDays(4).atTime(7, 59), date.plusDays(4).atTime(15, 59),
-                "N");
+        Shift night3 = createShift(3L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
+        Shift nextDayShift = createShift(4L, employee, date.plusDays(5).atTime(7, 59), date.plusDays(5).atTime(15, 59), "D");
 
-        constraintVerifier.verifyThat()
-                .given(night1, night2, nextNightShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { -1, 0, 0, 0, -9, 0 }));
-    }
-
-    @Test
-    void twoConsecutiveNightShiftsRequire48HoursBeforeNextShift_LogicalDateGapDoesNotApply() {
-        Employee employee = createEmployee("E1");
-        LocalDate date = LocalDate.of(2025, 1, 1);
-
-        Shift night1 = createShift(1L, employee, date.plusDays(1).atTime(0, 0), date.plusDays(1).atTime(8, 0), "N");
-        Shift night3 = createShift(2L, employee, date.plusDays(3).atTime(0, 0), date.plusDays(3).atTime(8, 0), "N");
-        Shift nextDayShift = createShift(3L, employee, date.plusDays(5).atTime(7, 59), date.plusDays(5).atTime(15, 59),
-                "D");
-
-        constraintVerifier.verifyThat()
-                .given(night1, night3, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -5, 0 }));
+        // 3 consecutive nights. The third night ends at day 3 08:00. The next shift starts day 5 07:59 (47h 59m rest).
+        // It should penalize once.
+        constraintVerifier.verifyThat(EmployeeSchedulingConstraintProvider::atLeast48HoursAfterTwoOrMoreConsecutiveNightShifts)
+                .given(night1, night2, night3, nextDayShift)
+                .penalizesBy(1);
     }
 
     @Test
@@ -461,7 +404,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(night1, night3, nextDayShift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -960, 0, 0, -5, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { -960, 0, -5, 0 }));
     }
 
     @Test
@@ -471,7 +414,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, -256, 0 }));
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, -256, 0 }));
     }
 
     @Test
@@ -481,7 +424,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -225, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -225, 0 }));
     }
 
     @Test
@@ -491,7 +434,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given((Object[]) marchNightShifts)
-                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, 0, 0, -256, 0 }));
+                .scores(BendableScore.of(new int[] { -1 }, new int[] { 0, 0, -256, 0 }));
     }
 
     @Test
@@ -507,7 +450,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(combine(employee1MarchNightShifts, employee1AprilNightShifts, employee2MarchNightShifts))
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -481, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -481, 0 }));
     }
 
     @Test
@@ -519,7 +462,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift, availability)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -480, 0, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, -480, -1, 0 }));
     }
 
     @Test
@@ -635,7 +578,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -1, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -1, 0 }));
     }
 
     @Test
@@ -711,7 +654,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -17, 0 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -17, 0 }));
     }
 
     @Test
@@ -723,7 +666,7 @@ class EmployeeSchedulingConstraintProviderTest {
 
         constraintVerifier.verifyThat()
                 .given(shift, availability)
-                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, 0, 0, -1, 480 }));
+                .scores(BendableScore.of(new int[] { 0 }, new int[] { 0, 0, -1, 480 }));
     }
 
     @Test
