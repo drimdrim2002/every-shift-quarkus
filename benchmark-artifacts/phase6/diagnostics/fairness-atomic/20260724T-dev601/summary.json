@@ -1,0 +1,1947 @@
+{
+  "schema_version" : 1,
+  "dataset" : "fairness.json",
+  "opta_evaluation_limit" : 150000,
+  "pojo_evaluation_limit" : 100000,
+  "seed_partition" : "diagnostic-development: 601,602; excluded: 101..110,201/202,301/302",
+  "candidate_contract" : "transaction apply -> IncrementalScoreCalculator verifyAgainstFull -> rollback",
+  "witness_contract" : "hard>=incumbent.hard, soft0>=incumbent.soft0, soft1>=incumbent.soft1, soft2>incumbent.soft2; soft3 ignored",
+  "complete_bounds" : [ "모든 mutable shift × 모든 다른 employee의 1-reassign", "서로 다른 incumbent employee를 가진 모든 mutable shift pair의 2-swap", "같은 실제일의 mutable shift 중 incumbent employee가 모두 다른 모든 3-cycle", "같은 shift-type의 4일 연속 window 안 mutable shift 중 incumbent employee가 모두 다른 모든 3/4-cycle" ],
+  "results" : [ {
+    "seed" : 601,
+    "optaEvaluations" : 150000,
+    "pojoEvaluations" : 100000,
+    "optaElapsedMillis" : 4196,
+    "pojoElapsedMillis" : 17227,
+    "optaScore" : {
+      "hardScore" : 0,
+      "softScores" : [ 0, 0, -7628, 0 ]
+    },
+    "incumbentScore" : {
+      "hardScore" : 0,
+      "softScores" : [ 0, 0, -7628, 0 ]
+    },
+    "diffGraph" : [ {
+      "shiftIndex" : 0,
+      "shiftPlanningId" : 1,
+      "date" : [ 2026, 5, 1 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 1,
+      "shiftPlanningId" : 2,
+      "date" : [ 2026, 5, 1 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 3,
+      "shiftPlanningId" : 4,
+      "date" : [ 2026, 5, 1 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 4,
+      "shiftPlanningId" : 5,
+      "date" : [ 2026, 5, 1 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 5,
+      "shiftPlanningId" : 6,
+      "date" : [ 2026, 5, 1 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 6,
+      "shiftPlanningId" : 7,
+      "date" : [ 2026, 5, 1 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 7,
+      "shiftPlanningId" : 8,
+      "date" : [ 2026, 5, 2 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 8,
+      "shiftPlanningId" : 9,
+      "date" : [ 2026, 5, 2 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 9,
+      "shiftPlanningId" : 10,
+      "date" : [ 2026, 5, 2 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 10,
+      "shiftPlanningId" : 11,
+      "date" : [ 2026, 5, 2 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 11,
+      "shiftPlanningId" : 12,
+      "date" : [ 2026, 5, 2 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 13,
+      "shiftPlanningId" : 14,
+      "date" : [ 2026, 5, 2 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 15,
+      "shiftPlanningId" : 16,
+      "date" : [ 2026, 5, 2 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 16,
+      "shiftPlanningId" : 17,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 17,
+      "shiftPlanningId" : 18,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 18,
+      "shiftPlanningId" : 19,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 19,
+      "shiftPlanningId" : 20,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 20,
+      "shiftPlanningId" : 21,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 21,
+      "shiftPlanningId" : 22,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 22,
+      "shiftPlanningId" : 23,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 23,
+      "shiftPlanningId" : 24,
+      "date" : [ 2026, 5, 3 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 25,
+      "shiftPlanningId" : 26,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 26,
+      "shiftPlanningId" : 27,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 27,
+      "shiftPlanningId" : 28,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 28,
+      "shiftPlanningId" : 29,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 30,
+      "shiftPlanningId" : 31,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 31,
+      "shiftPlanningId" : 32,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 32,
+      "shiftPlanningId" : 33,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 33,
+      "shiftPlanningId" : 34,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 34,
+      "shiftPlanningId" : 35,
+      "date" : [ 2026, 5, 4 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 35,
+      "shiftPlanningId" : 36,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 36,
+      "shiftPlanningId" : 37,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 37,
+      "shiftPlanningId" : 38,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 38,
+      "shiftPlanningId" : 39,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 39,
+      "shiftPlanningId" : 40,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 40,
+      "shiftPlanningId" : 41,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 41,
+      "shiftPlanningId" : 42,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 42,
+      "shiftPlanningId" : 43,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 43,
+      "shiftPlanningId" : 44,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 44,
+      "shiftPlanningId" : 45,
+      "date" : [ 2026, 5, 5 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 45,
+      "shiftPlanningId" : 46,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 46,
+      "shiftPlanningId" : 47,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 47,
+      "shiftPlanningId" : 48,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 48,
+      "shiftPlanningId" : 49,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 49,
+      "shiftPlanningId" : 50,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 50,
+      "shiftPlanningId" : 51,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 51,
+      "shiftPlanningId" : 52,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 52,
+      "shiftPlanningId" : 53,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 53,
+      "shiftPlanningId" : 54,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 54,
+      "shiftPlanningId" : 55,
+      "date" : [ 2026, 5, 6 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 55,
+      "shiftPlanningId" : 56,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 56,
+      "shiftPlanningId" : 57,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 57,
+      "shiftPlanningId" : 58,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 58,
+      "shiftPlanningId" : 59,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 59,
+      "shiftPlanningId" : 60,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 60,
+      "shiftPlanningId" : 61,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 61,
+      "shiftPlanningId" : 62,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 62,
+      "shiftPlanningId" : 63,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 63,
+      "shiftPlanningId" : 64,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 64,
+      "shiftPlanningId" : 65,
+      "date" : [ 2026, 5, 7 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 65,
+      "shiftPlanningId" : 66,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 66,
+      "shiftPlanningId" : 67,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 67,
+      "shiftPlanningId" : 68,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 68,
+      "shiftPlanningId" : 69,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 69,
+      "shiftPlanningId" : 70,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 70,
+      "shiftPlanningId" : 71,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 71,
+      "shiftPlanningId" : 72,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 72,
+      "shiftPlanningId" : 73,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 73,
+      "shiftPlanningId" : 74,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 74,
+      "shiftPlanningId" : 75,
+      "date" : [ 2026, 5, 8 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 75,
+      "shiftPlanningId" : 76,
+      "date" : [ 2026, 5, 9 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 76,
+      "shiftPlanningId" : 77,
+      "date" : [ 2026, 5, 9 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 77,
+      "shiftPlanningId" : 78,
+      "date" : [ 2026, 5, 9 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 78,
+      "shiftPlanningId" : 79,
+      "date" : [ 2026, 5, 9 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 79,
+      "shiftPlanningId" : 80,
+      "date" : [ 2026, 5, 9 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 80,
+      "shiftPlanningId" : 81,
+      "date" : [ 2026, 5, 9 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 81,
+      "shiftPlanningId" : 82,
+      "date" : [ 2026, 5, 9 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 84,
+      "shiftPlanningId" : 85,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 85,
+      "shiftPlanningId" : 86,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 86,
+      "shiftPlanningId" : 87,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 87,
+      "shiftPlanningId" : 88,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 88,
+      "shiftPlanningId" : 89,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 89,
+      "shiftPlanningId" : 90,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 90,
+      "shiftPlanningId" : 91,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 91,
+      "shiftPlanningId" : 92,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 92,
+      "shiftPlanningId" : 93,
+      "date" : [ 2026, 5, 10 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 93,
+      "shiftPlanningId" : 94,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 94,
+      "shiftPlanningId" : 95,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 95,
+      "shiftPlanningId" : 96,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 96,
+      "shiftPlanningId" : 97,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 97,
+      "shiftPlanningId" : 98,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 99,
+      "shiftPlanningId" : 100,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 100,
+      "shiftPlanningId" : 101,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 101,
+      "shiftPlanningId" : 102,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 102,
+      "shiftPlanningId" : 103,
+      "date" : [ 2026, 5, 11 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 103,
+      "shiftPlanningId" : 104,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 105,
+      "shiftPlanningId" : 106,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 106,
+      "shiftPlanningId" : 107,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 107,
+      "shiftPlanningId" : 108,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 108,
+      "shiftPlanningId" : 109,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 109,
+      "shiftPlanningId" : 110,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 110,
+      "shiftPlanningId" : 111,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 111,
+      "shiftPlanningId" : 112,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 112,
+      "shiftPlanningId" : 113,
+      "date" : [ 2026, 5, 12 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 113,
+      "shiftPlanningId" : 114,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 114,
+      "shiftPlanningId" : 115,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 115,
+      "shiftPlanningId" : 116,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 116,
+      "shiftPlanningId" : 117,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 117,
+      "shiftPlanningId" : 118,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 119,
+      "shiftPlanningId" : 120,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 120,
+      "shiftPlanningId" : 121,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 121,
+      "shiftPlanningId" : 122,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 122,
+      "shiftPlanningId" : 123,
+      "date" : [ 2026, 5, 13 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 123,
+      "shiftPlanningId" : 124,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 124,
+      "shiftPlanningId" : 125,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 125,
+      "shiftPlanningId" : 126,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 126,
+      "shiftPlanningId" : 127,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 127,
+      "shiftPlanningId" : 128,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 128,
+      "shiftPlanningId" : 129,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 129,
+      "shiftPlanningId" : 130,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 130,
+      "shiftPlanningId" : 131,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 131,
+      "shiftPlanningId" : 132,
+      "date" : [ 2026, 5, 14 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 133,
+      "shiftPlanningId" : 134,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 134,
+      "shiftPlanningId" : 135,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 135,
+      "shiftPlanningId" : 136,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 136,
+      "shiftPlanningId" : 137,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 137,
+      "shiftPlanningId" : 138,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 138,
+      "shiftPlanningId" : 139,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 139,
+      "shiftPlanningId" : 140,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 140,
+      "shiftPlanningId" : 141,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 141,
+      "shiftPlanningId" : 142,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 142,
+      "shiftPlanningId" : 143,
+      "date" : [ 2026, 5, 15 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 143,
+      "shiftPlanningId" : 144,
+      "date" : [ 2026, 5, 16 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 144,
+      "shiftPlanningId" : 145,
+      "date" : [ 2026, 5, 16 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 145,
+      "shiftPlanningId" : 146,
+      "date" : [ 2026, 5, 16 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 147,
+      "shiftPlanningId" : 148,
+      "date" : [ 2026, 5, 16 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 148,
+      "shiftPlanningId" : 149,
+      "date" : [ 2026, 5, 16 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 149,
+      "shiftPlanningId" : 150,
+      "date" : [ 2026, 5, 16 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 150,
+      "shiftPlanningId" : 151,
+      "date" : [ 2026, 5, 16 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 153,
+      "shiftPlanningId" : 154,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 154,
+      "shiftPlanningId" : 155,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 155,
+      "shiftPlanningId" : 156,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 156,
+      "shiftPlanningId" : 157,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 157,
+      "shiftPlanningId" : 158,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 158,
+      "shiftPlanningId" : 159,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 159,
+      "shiftPlanningId" : 160,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 160,
+      "shiftPlanningId" : 161,
+      "date" : [ 2026, 5, 17 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 161,
+      "shiftPlanningId" : 162,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 162,
+      "shiftPlanningId" : 163,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 163,
+      "shiftPlanningId" : 164,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 164,
+      "shiftPlanningId" : 165,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 165,
+      "shiftPlanningId" : 166,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 166,
+      "shiftPlanningId" : 167,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 167,
+      "shiftPlanningId" : 168,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 168,
+      "shiftPlanningId" : 169,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 169,
+      "shiftPlanningId" : 170,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 170,
+      "shiftPlanningId" : 171,
+      "date" : [ 2026, 5, 18 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 171,
+      "shiftPlanningId" : 172,
+      "date" : [ 2026, 5, 19 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 172,
+      "shiftPlanningId" : 173,
+      "date" : [ 2026, 5, 19 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 173,
+      "shiftPlanningId" : 174,
+      "date" : [ 2026, 5, 19 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 174,
+      "shiftPlanningId" : 175,
+      "date" : [ 2026, 5, 19 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 176,
+      "shiftPlanningId" : 177,
+      "date" : [ 2026, 5, 19 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 180,
+      "shiftPlanningId" : 181,
+      "date" : [ 2026, 5, 19 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 181,
+      "shiftPlanningId" : 182,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 182,
+      "shiftPlanningId" : 183,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 183,
+      "shiftPlanningId" : 184,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 184,
+      "shiftPlanningId" : 185,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 185,
+      "shiftPlanningId" : 186,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 186,
+      "shiftPlanningId" : 187,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 187,
+      "shiftPlanningId" : 188,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 188,
+      "shiftPlanningId" : 189,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 189,
+      "shiftPlanningId" : 190,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 190,
+      "shiftPlanningId" : 191,
+      "date" : [ 2026, 5, 20 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 191,
+      "shiftPlanningId" : 192,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 192,
+      "shiftPlanningId" : 193,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 193,
+      "shiftPlanningId" : 194,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 194,
+      "shiftPlanningId" : 195,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 195,
+      "shiftPlanningId" : 196,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 196,
+      "shiftPlanningId" : 197,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 197,
+      "shiftPlanningId" : 198,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 198,
+      "shiftPlanningId" : 199,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 199,
+      "shiftPlanningId" : 200,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 200,
+      "shiftPlanningId" : 201,
+      "date" : [ 2026, 5, 21 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 201,
+      "shiftPlanningId" : 202,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 202,
+      "shiftPlanningId" : 203,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 203,
+      "shiftPlanningId" : 204,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 204,
+      "shiftPlanningId" : 205,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 205,
+      "shiftPlanningId" : 206,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 206,
+      "shiftPlanningId" : 207,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 207,
+      "shiftPlanningId" : 208,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 208,
+      "shiftPlanningId" : 209,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 209,
+      "shiftPlanningId" : 210,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 210,
+      "shiftPlanningId" : 211,
+      "date" : [ 2026, 5, 22 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 211,
+      "shiftPlanningId" : 212,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 212,
+      "shiftPlanningId" : 213,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 214,
+      "shiftPlanningId" : 215,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 215,
+      "shiftPlanningId" : 216,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 216,
+      "shiftPlanningId" : 217,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 217,
+      "shiftPlanningId" : 218,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 218,
+      "shiftPlanningId" : 219,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 219,
+      "shiftPlanningId" : 220,
+      "date" : [ 2026, 5, 23 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 220,
+      "shiftPlanningId" : 221,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 221,
+      "shiftPlanningId" : 222,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 222,
+      "shiftPlanningId" : 223,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 223,
+      "shiftPlanningId" : 224,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 224,
+      "shiftPlanningId" : 225,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 225,
+      "shiftPlanningId" : 226,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 226,
+      "shiftPlanningId" : 227,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 227,
+      "shiftPlanningId" : 228,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 228,
+      "shiftPlanningId" : 229,
+      "date" : [ 2026, 5, 24 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 229,
+      "shiftPlanningId" : 230,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 230,
+      "shiftPlanningId" : 231,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 231,
+      "shiftPlanningId" : 232,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 232,
+      "shiftPlanningId" : 233,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 234,
+      "shiftPlanningId" : 235,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 235,
+      "shiftPlanningId" : 236,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 236,
+      "shiftPlanningId" : 237,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 237,
+      "shiftPlanningId" : 238,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 238,
+      "shiftPlanningId" : 239,
+      "date" : [ 2026, 5, 25 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 239,
+      "shiftPlanningId" : 240,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 240,
+      "shiftPlanningId" : 241,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 241,
+      "shiftPlanningId" : 242,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 242,
+      "shiftPlanningId" : 243,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 243,
+      "shiftPlanningId" : 244,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 244,
+      "shiftPlanningId" : 245,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 246,
+      "shiftPlanningId" : 247,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 247,
+      "shiftPlanningId" : 248,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 248,
+      "shiftPlanningId" : 249,
+      "date" : [ 2026, 5, 26 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 249,
+      "shiftPlanningId" : 250,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 250,
+      "shiftPlanningId" : 251,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 252,
+      "shiftPlanningId" : 253,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 253,
+      "shiftPlanningId" : 254,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 254,
+      "shiftPlanningId" : 255,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 255,
+      "shiftPlanningId" : 256,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 256,
+      "shiftPlanningId" : 257,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 257,
+      "shiftPlanningId" : 258,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 258,
+      "shiftPlanningId" : 259,
+      "date" : [ 2026, 5, 27 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 259,
+      "shiftPlanningId" : 260,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7"
+    }, {
+      "shiftIndex" : 260,
+      "shiftPlanningId" : 261,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 261,
+      "shiftPlanningId" : 262,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 262,
+      "shiftPlanningId" : 263,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 263,
+      "shiftPlanningId" : 264,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 266,
+      "shiftPlanningId" : 267,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c4ec33e2-c20d-4f83-9787-25ece0708ae7",
+      "optaEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+    }, {
+      "shiftIndex" : 267,
+      "shiftPlanningId" : 268,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6"
+    }, {
+      "shiftIndex" : 268,
+      "shiftPlanningId" : 269,
+      "date" : [ 2026, 5, 28 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 269,
+      "shiftPlanningId" : 270,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 270,
+      "shiftPlanningId" : 271,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 271,
+      "shiftPlanningId" : 272,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c",
+      "optaEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a"
+    }, {
+      "shiftIndex" : 272,
+      "shiftPlanningId" : 273,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 273,
+      "shiftPlanningId" : 274,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 274,
+      "shiftPlanningId" : 275,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308"
+    }, {
+      "shiftIndex" : 275,
+      "shiftPlanningId" : 276,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 276,
+      "shiftPlanningId" : 277,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "b6f036b3-e315-4942-8e6e-f8ba4181626c"
+    }, {
+      "shiftIndex" : 277,
+      "shiftPlanningId" : 278,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 278,
+      "shiftPlanningId" : 279,
+      "date" : [ 2026, 5, 29 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 279,
+      "shiftPlanningId" : 280,
+      "date" : [ 2026, 5, 30 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2",
+      "optaEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d"
+    }, {
+      "shiftIndex" : 280,
+      "shiftPlanningId" : 281,
+      "date" : [ 2026, 5, 30 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 281,
+      "shiftPlanningId" : 282,
+      "date" : [ 2026, 5, 30 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "70dadfd4-a644-4e33-b67a-b851f98ba8d6",
+      "optaEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d"
+    }, {
+      "shiftIndex" : 284,
+      "shiftPlanningId" : 285,
+      "date" : [ 2026, 5, 30 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210",
+      "optaEmployee" : "4a35ba45-cc8a-4d54-8774-f809b5f7dc6c"
+    }, {
+      "shiftIndex" : 285,
+      "shiftPlanningId" : 286,
+      "date" : [ 2026, 5, 30 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754"
+    }, {
+      "shiftIndex" : 286,
+      "shiftPlanningId" : 287,
+      "date" : [ 2026, 5, 30 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa",
+      "optaEmployee" : "fe818f36-6b8e-4157-b2aa-2b63bc57b59a"
+    }, {
+      "shiftIndex" : 287,
+      "shiftPlanningId" : 288,
+      "date" : [ 2026, 5, 30 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "9cecfb81-8b87-41e8-b2dd-40bcdb70488d",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    }, {
+      "shiftIndex" : 288,
+      "shiftPlanningId" : 289,
+      "date" : [ 2026, 5, 31 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d",
+      "optaEmployee" : "167b6246-5f31-453e-9e95-f35f572ec210"
+    }, {
+      "shiftIndex" : 289,
+      "shiftPlanningId" : 290,
+      "date" : [ 2026, 5, 31 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6"
+    }, {
+      "shiftIndex" : 290,
+      "shiftPlanningId" : 291,
+      "date" : [ 2026, 5, 31 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "c7a955dc-f44a-4028-b010-81248d37689d",
+      "optaEmployee" : "29a160eb-6755-4324-8e27-53cda3f618e2"
+    }, {
+      "shiftIndex" : 293,
+      "shiftPlanningId" : 294,
+      "date" : [ 2026, 5, 31 ],
+      "shiftType" : "D",
+      "incumbentEmployee" : "9a8cb7c6-3d84-46d4-aa24-ea73b3474754",
+      "optaEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111"
+    }, {
+      "shiftIndex" : 294,
+      "shiftPlanningId" : 295,
+      "date" : [ 2026, 5, 31 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "c922da3a-8278-43c5-8f7f-e52c983da111",
+      "optaEmployee" : "7ad4f4e2-bbfb-448a-b9a0-7205ce683673"
+    }, {
+      "shiftIndex" : 296,
+      "shiftPlanningId" : 297,
+      "date" : [ 2026, 5, 31 ],
+      "shiftType" : "E",
+      "incumbentEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8",
+      "optaEmployee" : "581e315f-aaa6-4cec-9414-250150b3d1fa"
+    }, {
+      "shiftIndex" : 298,
+      "shiftPlanningId" : 299,
+      "date" : [ 2026, 6, 1 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "1c6d239c-9a99-41fe-a22e-54618aab2df6",
+      "optaEmployee" : "505cac82-68c4-48a9-ade2-16891aa707f8"
+    }, {
+      "shiftIndex" : 299,
+      "shiftPlanningId" : 300,
+      "date" : [ 2026, 6, 1 ],
+      "shiftType" : "N",
+      "incumbentEmployee" : "0536bbf3-626c-452b-b48a-18ec297cc21a",
+      "optaEmployee" : "613cb68a-1138-45f8-9133-5602d0feca8d"
+    } ],
+    "counts" : {
+      "reassign" : 5400,
+      "swap" : 42615,
+      "day3Cycle" : 6552,
+      "shiftTypeWindow3Cycle" : 26656,
+      "shiftTypeWindow4Cycle" : 218556
+    },
+    "witness" : {
+      "neighborhood" : "REASSIGN",
+      "changes" : [ {
+        "shiftIndex" : 184,
+        "shiftPlanningId" : 185,
+        "date" : [ 2026, 5, 20 ],
+        "shiftType" : "D",
+        "oldEmployee" : "96f5997d-b0a6-43eb-aa07-f14d1fe75308",
+        "newEmployee" : "6776b499-62a7-4c5a-acca-3cd8142219b2"
+      } ],
+      "before" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -7628, 0 ]
+      },
+      "after" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -7626, 0 ]
+      },
+      "delta" : [ 0, 0, 0, 2, 0 ],
+      "dateSpanDays" : 0
+    },
+    "rollbackFailures" : 0,
+    "scoreMismatches" : 0,
+    "enumerationElapsedMillis" : 105573
+  } ]
+}

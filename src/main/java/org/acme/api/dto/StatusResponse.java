@@ -51,7 +51,7 @@ public record StatusResponse(
      */
     public static StatusResponse from(JobExecution job, ObjectMapper objectMapper) {
         ScoreInfo scoreInfo = null;
-        if (hasBendableSoftScores(job)) {
+        if (hasStructuredScore(job)) {
             scoreInfo = new ScoreInfo(
                     job.getHardScore(),
                     job.getNight48RestSoftScore(),
@@ -90,7 +90,7 @@ public record StatusResponse(
                 epochToLocalDateTime(job.getCompletedAt()));
     }
 
-    private static boolean hasBendableSoftScores(JobExecution job) {
+    private static boolean hasStructuredScore(JobExecution job) {
         return job.getNight48RestSoftScore() != null
                 || job.getNight32RestSoftScore() != null
                 || job.getUndesiredSoftScore() != null

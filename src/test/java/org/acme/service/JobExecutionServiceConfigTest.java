@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Map;
 import java.util.Optional;
 
+import org.acme.solver.core.RosterScore;
 import org.junit.jupiter.api.Test;
-import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 
 class JobExecutionServiceConfigTest {
 
@@ -41,18 +41,16 @@ class JobExecutionServiceConfigTest {
     }
 
     @Test
-    void extractScoreFieldsMapsBusinessSoftScoresAfterNightPriorityLevels() {
-        BendableScore score = BendableScore.of(
-                new int[] { 0 },
-                new int[] { -7, -30, -120, -3, -5409, 240 });
+    void extractScoreFieldsPreservesCurrentBusinessAndLegacyAliases() {
+        RosterScore score = RosterScore.of(0, -30, -120, -5409, 240);
 
         Map<String, Object> fields = JobExecutionService.extractScoreFields(score);
 
         assertEquals(0, fields.get("hardScore"));
-        assertEquals(-7, fields.get("night48RestSoftScore"));
+        assertEquals(0, fields.get("night48RestSoftScore"));
         assertEquals(-30, fields.get("night32RestSoftScore"));
         assertEquals(-120, fields.get("undesiredSoftScore"));
-        assertEquals(-3, fields.get("threeConsecutiveNightSoftScore"));
+        assertEquals(0, fields.get("threeConsecutiveNightSoftScore"));
         assertEquals(-5409, fields.get("fairnessSoftScore"));
         assertEquals(240, fields.get("desiredSoftScore"));
         assertEquals(-5409, fields.get("burdenFairnessSoftScore"));

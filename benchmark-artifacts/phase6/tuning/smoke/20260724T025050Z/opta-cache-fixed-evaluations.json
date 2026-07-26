@@ -1,0 +1,22 @@
+{
+  "schema_version" : 1,
+  "profile" : "fixed-evaluations",
+  "cache_scope" : "동일 comparison 실행에서 후보별 OptaPlanner 중복 실행 방지; 다른 환경 재사용 금지",
+  "entries" : {
+    "fixed-evaluations|fairness.json|6cb434d4246d7f865f8f9990683822f0d5bdd889ec1378b8be5c3e0f6c138c51|301" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "fairness.json",
+      "inputSha256" : "6cb434d4246d7f865f8f9990683822f0d5bdd889ec1378b8be5c3e0f6c138c51",
+      "seed" : 301,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -7628, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 783,
+      "evaluations" : 20000,
+      "bestEvaluation" : 11754
+    }
+  }
+}

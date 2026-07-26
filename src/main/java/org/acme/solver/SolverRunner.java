@@ -6,15 +6,19 @@ import org.acme.api.dto.PlanningRequest;
 import org.acme.converter.EmployeeScheduleBuilder;
 import org.acme.export.ScheduleExportCoordinator;
 import org.acme.model.EmployeeSchedule;
-import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
+import org.acme.solver.adapter.EmployeeScheduleProjection;
+import org.acme.solver.adapter.PlanningProblemMapper;
+import org.acme.solver.core.PlanningProblem;
+import org.acme.solver.core.RosterScore;
+import org.acme.solver.core.RosterSolution;
+import org.acme.solver.core.SolveListener;
+import org.acme.solver.core.SolveOptions;
+import org.acme.solver.core.SolveResult;
+import org.acme.solver.core.SolverEngine;
+import org.acme.solver.core.TerminationReason;
 import org.acme.solver.output.SchedulePrinter;
 import org.acme.solver.validation.SolutionValidator;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
-import org.optaplanner.core.api.solver.Solver;
-import org.optaplanner.core.api.solver.SolverFactory;
-import org.optaplanner.core.config.solver.EnvironmentMode;
-import org.optaplanner.core.config.solver.SolverConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,19 +39,19 @@ public class SolverRunner {
     EmployeeScheduleBuilder employeeScheduleBuilder;
 
     @Inject
-    org.acme.util.SolutionClonerUtil solutionClonerUtil;
+    PlanningProblemMapper planningProblemMapper;
+
+    @Inject
+    EmployeeScheduleProjection employeeScheduleProjection;
+
+    @Inject
+    SolverEngine solverEngine;
 
     @Inject
     ScheduleExportCoordinator scheduleExportCoordinator;
 
     @ConfigProperty(name = "solver.termination.spent-limit", defaultValue = "10")
     long spentLimit;
-
-    @ConfigProperty(name = "solver.move-thread-count", defaultValue = "AUTO")
-    String moveThreadCount;
-
-    @ConfigProperty(name = "solver.environment-mode", defaultValue = "REPRODUCIBLE")
-    EnvironmentMode environmentMode;
 
     @ConfigProperty(name = "solver.random-seed", defaultValue = "0")
     long randomSeed;
@@ -61,6 +65,9 @@ public class SolverRunner {
     // Incremental Solver Configuration
     @ConfigProperty(name = "solver.incremental.enabled", defaultValue = "false")
     boolean incrementalEnabled;
+
+    @ConfigProperty(name = "solver.incremental.first-iteration-seconds", defaultValue = "60")
+    long firstIterationSeconds;
 
     @ConfigProperty(name = "solver.incremental.iteration-seconds", defaultValue = "30")
     long iterationSeconds;
@@ -120,10 +127,15 @@ public class SolverRunner {
     }
 
     public EmployeeSchedule solve(PlanningRequest request) {
-        // 1. Convert to Domain Model
-        EmployeeSchedule problem = employeeScheduleBuilder.build(request);
-        // 2. Solve with default termination
-        return createSolver(Duration.ofSeconds(spentLimit)).solve(problem);
+        EmployeeSchedule source = employeeScheduleBuilder.build(request);
+        PlanningProblem problem = planningProblemMapper.toPlanningProblem(source);
+        SolveOptions options = SolveOptions.builder()
+                .spentLimit(Duration.ofSeconds(spentLimit))
+                .randomSeed(randomSeed)
+                .build();
+        SolveResult<RosterSolution> result = solverEngine.solve(problem, options, SolveListener.noop());
+        RosterSolution solution = requireSolution(result);
+        return employeeScheduleProjection.toEmployeeSchedule(problem, solution);
     }
 
     /**
@@ -136,61 +148,72 @@ public class SolverRunner {
             return solve(request);
         }
 
-        EmployeeSchedule problem = employeeScheduleBuilder.build(request);
-        EmployeeSchedule bestSolution = null;
+        EmployeeSchedule source = employeeScheduleBuilder.build(request);
+        PlanningProblem problem = planningProblemMapper.toPlanningProblem(source);
+        RosterSolution bestSolution = null;
 
-        long startTime = System.currentTimeMillis();
-        long deadlineEpochMs = startTime + Duration.ofMinutes(maxTotalMinutes).toMillis();
+        long startNanos = System.nanoTime();
+        long deadlineNanos = saturatedAdd(startNanos, Duration.ofMinutes(maxTotalMinutes).toNanos());
         int iteration = 0;
 
-        LOG.info("Starting incremental solver: executionId={}, iterationSeconds={}, maxTotalMinutes={}, maxIterations={}",
-                executionId, iterationSeconds, maxTotalMinutes, maxIterations);
+        LOG.info("Starting incremental solver: executionId={}, firstIterationSeconds={}, iterationSeconds={}, maxTotalMinutes={}, maxIterations={}",
+                executionId, firstIterationSeconds, iterationSeconds, maxTotalMinutes, maxIterations);
 
         while (true) {
             iteration++;
             LOG.info("Iteration {} started", iteration);
 
-            // Solver 생성
-            Solver<EmployeeSchedule> solver = createSolver(Duration.ofSeconds(iterationSeconds));
+            long currentIterationSeconds = (iteration == 1) ? firstIterationSeconds : iterationSeconds;
 
             // 루프 시작 시점의 이전 최고 점수 기록
-            BendableScore previousBestScore = (bestSolution != null) ? bestSolution.getScore() : null;
+            RosterScore previousBestScore = (bestSolution != null) ? bestSolution.score() : null;
 
-            // Warm start: 이전 해가 있으면 초기해로 설정
+            SolveOptions.Builder optionsBuilder = SolveOptions.builder()
+                    .spentLimit(Duration.ofSeconds(currentIterationSeconds))
+                    .deadlineNanos(deadlineNanos)
+                    .randomSeed(randomSeed);
             if (bestSolution != null) {
-                problem = solutionClonerUtil.cloneSolution(bestSolution);
+                optionsBuilder.warmStart(bestSolution);
             }
 
-            // 실행
-            EmployeeSchedule currentSolution = solver.solve(problem);
-            BendableScore currentScore = currentSolution.getScore();
+            SolveListener listener = solution -> intermediateCallback.accept(
+                    employeeScheduleProjection.toEmployeeSchedule(problem, solution));
+            SolveResult<RosterSolution> solveResult = solverEngine.solve(
+                    problem,
+                    optionsBuilder.build(),
+                    listener);
+            RosterSolution currentSolution = solveResult.bestSolution();
+            if (currentSolution == null) {
+                if (bestSolution == null) {
+                    throw new IllegalStateException("complete solution 없이 solver가 종료되었습니다: "
+                            + solveResult.terminationReason());
+                }
+                LOG.info("Iteration {} ended without a new complete solution: {}",
+                        iteration, solveResult.terminationReason());
+                break;
+            }
+            RosterScore currentScore = currentSolution.score();
 
             // 더 나은 해이거나 첫 실행이면 bestSolution 업데이트
-            if (bestSolution == null || currentScore.compareTo(bestSolution.getScore()) >= 0) {
+            if (bestSolution == null || currentScore.compareTo(bestSolution.score()) >= 0) {
                 bestSolution = currentSolution;
-
-                try {
-                    intermediateCallback.accept(bestSolution);
-                } catch (Exception e) {
-                    LOG.warn("Intermediate callback failed but solver will continue", e);
-                }
             }
 
-            BendableScore currentBestScore = bestSolution.getScore();
+            RosterScore currentBestScore = bestSolution.score();
             LOG.info("Iteration {} check: currentBestScore={}, previousBestScore={}", iteration, currentBestScore, previousBestScore);
 
             TerminationReason terminationReason = determineTerminationReason(
                     iteration,
                     currentBestScore,
                     previousBestScore,
-                    System.currentTimeMillis(),
-                    deadlineEpochMs);
+                    System.nanoTime(),
+                    deadlineNanos);
 
             if (terminationReason != TerminationReason.CONTINUE) {
                 if (terminationReason == TerminationReason.CONVERGED) {
                     LOG.info("Converged after {} iterations. Score: {}", iteration, currentBestScore);
                 } else if (terminationReason == TerminationReason.DEADLINE_REACHED) {
-                    long elapsedMs = System.currentTimeMillis() - startTime;
+                    long elapsedMs = Duration.ofNanos(System.nanoTime() - startNanos).toMillis();
                     LOG.info("Max time limit reached after {} iterations (elapsed={}ms)", iteration, elapsedMs);
                 } else {
                     LOG.info("Max iteration limit reached after {} iterations", iteration);
@@ -199,14 +222,14 @@ public class SolverRunner {
             }
         }
 
-        return bestSolution;
+        return employeeScheduleProjection.toEmployeeSchedule(problem, bestSolution);
     }
 
     TerminationReason determineTerminationReason(int iteration,
-            BendableScore currentScore,
-            BendableScore previousScore,
-            long nowEpochMs,
-            long deadlineEpochMs) {
+            RosterScore currentScore,
+            RosterScore previousScore,
+            long nowNanos,
+            long deadlineNanos) {
         if (iteration >= minIterations && currentScore.equals(previousScore)) {
             return TerminationReason.CONVERGED;
         }
@@ -215,30 +238,27 @@ public class SolverRunner {
             return TerminationReason.MAX_ITERATIONS_REACHED;
         }
 
-        if (nowEpochMs >= deadlineEpochMs) {
+        if (nowNanos - deadlineNanos >= 0L) {
             return TerminationReason.DEADLINE_REACHED;
         }
 
         return TerminationReason.CONTINUE;
     }
 
-    private Solver<EmployeeSchedule> createSolver(Duration termination) {
-        SolverFactory<EmployeeSchedule> solverFactory = SolverFactory.create(new SolverConfig()
-                .withSolutionClass(EmployeeSchedule.class)
-                .withEntityClasses(org.acme.model.Shift.class)
-                .withConstraintProviderClass(EmployeeSchedulingConstraintProvider.class)
-                .withTerminationSpentLimit(termination)
-                .withMoveThreadCount(moveThreadCount)
-                .withEnvironmentMode(environmentMode)
-                .withRandomSeed(randomSeed));
-
-        return solverFactory.buildSolver();
+    private static RosterSolution requireSolution(SolveResult<RosterSolution> result) {
+        if (result.bestSolution() == null) {
+            throw new IllegalStateException("complete solution 없이 solver가 종료되었습니다: "
+                    + result.terminationReason());
+        }
+        return result.bestSolution();
     }
 
-    enum TerminationReason {
-        CONTINUE,
-        CONVERGED,
-        DEADLINE_REACHED,
-        MAX_ITERATIONS_REACHED
+    private static long saturatedAdd(long left, long right) {
+        try {
+            return Math.addExact(left, right);
+        } catch (ArithmeticException overflow) {
+            return Long.MAX_VALUE;
+        }
     }
+
 }

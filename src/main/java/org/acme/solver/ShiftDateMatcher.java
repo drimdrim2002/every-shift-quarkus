@@ -19,13 +19,36 @@ public final class ShiftDateMatcher {
     }
 
     public static boolean matchesActualOrLogicalDate(Shift shift, LocalDate targetDate) {
-        return overlapsActualDate(shift, targetDate) || targetDate.equals(resolveLogicalDate(shift));
+        return matchesActualOrLogicalDate(
+                shift.getStart(),
+                shift.getEnd(),
+                shift.getShiftCode(),
+                targetDate);
+    }
+
+    /**
+     * OptaPlanner 모델에 의존하지 않는 값 기반 날짜 매칭 정책입니다.
+     */
+    public static boolean matchesActualOrLogicalDate(
+            LocalDateTime start,
+            LocalDateTime end,
+            String shiftCode,
+            LocalDate targetDate) {
+        return overlapsActualDate(start, end, targetDate)
+                || targetDate.equals(resolveLogicalDate(start, shiftCode));
     }
 
     public static boolean overlapsActualDate(Shift shift, LocalDate targetDate) {
+        return overlapsActualDate(shift.getStart(), shift.getEnd(), targetDate);
+    }
+
+    public static boolean overlapsActualDate(
+            LocalDateTime start,
+            LocalDateTime end,
+            LocalDate targetDate) {
         LocalDateTime dayStart = targetDate.atStartOfDay();
         LocalDateTime dayEnd = dayStart.plusDays(1);
-        return shift.getStart().isBefore(dayEnd) && shift.getEnd().isAfter(dayStart);
+        return start.isBefore(dayEnd) && end.isAfter(dayStart);
     }
 
     /**
@@ -40,20 +63,24 @@ public final class ShiftDateMatcher {
      * - N 23:00~07:00 -> 논리일 = 시작일
      */
     public static LocalDate resolveLogicalDate(Shift shift) {
-        LocalDate actualStartDate = shift.getStart().toLocalDate();
-        if (!isNightShift(shift)) {
+        return resolveLogicalDate(shift.getStart(), shift.getShiftCode());
+    }
+
+    public static LocalDate resolveLogicalDate(LocalDateTime start, String shiftCode) {
+        LocalDate actualStartDate = start.toLocalDate();
+        if (!isNightShift(shiftCode)) {
             return actualStartDate;
         }
-        LocalTime startTime = shift.getStart().toLocalTime();
+        LocalTime startTime = start.toLocalTime();
         return startTime.isBefore(NIGHT_LOGICAL_DAY_CUTOFF)
                 ? actualStartDate.minusDays(1)
                 : actualStartDate;
     }
 
-    private static boolean isNightShift(Shift shift) {
-        if (shift.getShiftCode() == null) {
+    private static boolean isNightShift(String shiftCode) {
+        if (shiftCode == null) {
             return false;
         }
-        return SHIFT_TYPE_NIGHT.equals(shift.getShiftCode().trim().toUpperCase(Locale.ROOT));
+        return SHIFT_TYPE_NIGHT.equals(shiftCode.trim().toUpperCase(Locale.ROOT));
     }
 }

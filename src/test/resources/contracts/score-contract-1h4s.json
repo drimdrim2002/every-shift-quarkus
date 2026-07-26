@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "score_layout": {
+    "hard_levels": 1,
+    "soft_levels": 4,
+    "soft_order": [
+      "night32_rest",
+      "undesired",
+      "fairness",
+      "desired"
+    ]
+  },
+  "firestore": {
+    "hardScore": 0,
+    "night48RestSoftScore": 0,
+    "night32RestSoftScore": -30,
+    "undesiredSoftScore": -120,
+    "threeConsecutiveNightSoftScore": 0,
+    "fairnessSoftScore": -5409,
+    "desiredSoftScore": 240,
+    "burdenFairnessSoftScore": -5409,
+    "fairSoftScore": -5409
+  },
+  "api": {
+    "execution_id": "score-contract-snapshot",
+    "tenant_id": "tenant-contract",
+    "organization_name": "organization-contract",
+    "status": "COMPLETED",
+    "score": {
+      "hard_score": 0,
+      "night48_rest_soft_score": 0,
+      "night32_rest_soft_score": -30,
+      "undesired_soft_score": -120,
+      "three_consecutive_night_soft_score": 0,
+      "fairness_soft_score": -5409,
+      "desired_soft_score": 240,
+      "burden_fairness_soft_score": -5409,
+      "fair_soft_score": -5409,
+      "legacy_soft_score_total": null
+    },
+    "result": null,
+    "error_message": null,
+    "created_at": null,
+    "started_at": null,
+    "completed_at": null
+  }
+}

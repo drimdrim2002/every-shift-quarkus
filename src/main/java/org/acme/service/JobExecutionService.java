@@ -9,8 +9,9 @@ import org.acme.api.dto.PlanningRequest;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.ExecutionStatus;
 import org.acme.model.JobExecution;
+import org.acme.solver.core.RosterScore;
+import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +152,7 @@ public class JobExecutionService {
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", ExecutionStatus.COMPLETED);
             updates.put("completedAt", now);
-            putScoreFields(updates, solution.getScore());
+            putScoreFields(updates, OptaPlannerScoreAdapter.toRosterScore(solution.getScore()));
             updates.put("resultJson", serializeSolution(solution));
 
             firestore.collection(collectionName)
@@ -174,7 +175,7 @@ public class JobExecutionService {
         try {
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", ExecutionStatus.RUNNING);
-            putScoreFields(updates, solution.getScore());
+            putScoreFields(updates, OptaPlannerScoreAdapter.toRosterScore(solution.getScore()));
             updates.put("resultJson", serializeSolution(solution));
 
             firestore.collection(collectionName)
@@ -228,22 +229,11 @@ public class JobExecutionService {
         }
     }
 
-    static Map<String, Object> extractScoreFields(BendableScore score) {
-        Map<String, Object> scoreFields = new HashMap<>();
-        scoreFields.put("hardScore", score.hardScore(0));
-        scoreFields.put("night48RestSoftScore", score.softScore(0));
-        scoreFields.put("night32RestSoftScore", score.softScore(1));
-        scoreFields.put("undesiredSoftScore", score.softScore(2));
-        scoreFields.put("threeConsecutiveNightSoftScore", score.softScore(3));
-        scoreFields.put("fairnessSoftScore", score.softScore(4));
-        scoreFields.put("desiredSoftScore", score.softScore(5));
-        // 하위 호환을 위해 기존 필드도 병행 저장
-        scoreFields.put("burdenFairnessSoftScore", score.softScore(4));
-        scoreFields.put("fairSoftScore", score.softScore(4));
-        return scoreFields;
+    static Map<String, Object> extractScoreFields(RosterScore score) {
+        return ScoreProjection.toFirestoreFields(score);
     }
 
-    private void putScoreFields(Map<String, Object> updates, BendableScore score) {
+    private void putScoreFields(Map<String, Object> updates, RosterScore score) {
         updates.putAll(extractScoreFields(score));
     }
 

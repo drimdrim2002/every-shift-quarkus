@@ -1,0 +1,127 @@
+{
+  "schema_version" : 1,
+  "profile" : "fixed-evaluations",
+  "cache_scope" : "동일 comparison 실행에서 후보별 OptaPlanner 중복 실행 방지; 다른 환경 재사용 금지",
+  "entries" : {
+    "fixed-evaluations|fairness.json|6cb434d4246d7f865f8f9990683822f0d5bdd889ec1378b8be5c3e0f6c138c51|301" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "fairness.json",
+      "inputSha256" : "6cb434d4246d7f865f8f9990683822f0d5bdd889ec1378b8be5c3e0f6c138c51",
+      "seed" : 301,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -7626, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 59291,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 58875
+    },
+    "fixed-evaluations|fairness.json|6cb434d4246d7f865f8f9990683822f0d5bdd889ec1378b8be5c3e0f6c138c51|302" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "fairness.json",
+      "inputSha256" : "6cb434d4246d7f865f8f9990683822f0d5bdd889ec1378b8be5c3e0f6c138c51",
+      "seed" : 302,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -7628, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 59424,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 9995
+    },
+    "fixed-evaluations|preceptor.json|d00a2c92d09164b8f0e8abea4cac15422fbd005b0cfcda5d15348b9fbbdd61c5|301" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "preceptor.json",
+      "inputSha256" : "d00a2c92d09164b8f0e8abea4cac15422fbd005b0cfcda5d15348b9fbbdd61c5",
+      "seed" : 301,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ -2880, -7680, -5763, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 57445,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 2092013
+    },
+    "fixed-evaluations|preceptor.json|d00a2c92d09164b8f0e8abea4cac15422fbd005b0cfcda5d15348b9fbbdd61c5|302" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "preceptor.json",
+      "inputSha256" : "d00a2c92d09164b8f0e8abea4cac15422fbd005b0cfcda5d15348b9fbbdd61c5",
+      "seed" : 302,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, -960, -5799, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 60194,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 2110428
+    },
+    "fixed-evaluations|request.json|b10dcbbe57f52602ec1bd62a25f884f11a3b1d4e6db35288b410b5f71e495506|301" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "request.json",
+      "inputSha256" : "b10dcbbe57f52602ec1bd62a25f884f11a3b1d4e6db35288b410b5f71e495506",
+      "seed" : 301,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -5279, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 52565,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 86110
+    },
+    "fixed-evaluations|request.json|b10dcbbe57f52602ec1bd62a25f884f11a3b1d4e6db35288b410b5f71e495506|302" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "request.json",
+      "inputSha256" : "b10dcbbe57f52602ec1bd62a25f884f11a3b1d4e6db35288b410b5f71e495506",
+      "seed" : 302,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -5279, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 52313,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 92376
+    },
+    "fixed-evaluations|sample.json|d3513d71973963b86fb80b08f1a2a920f64b8e5d27ce1b3ca0baebca294fce63|301" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "sample.json",
+      "inputSha256" : "d3513d71973963b86fb80b08f1a2a920f64b8e5d27ce1b3ca0baebca294fce63",
+      "seed" : 301,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -5713, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 60268,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 27892
+    },
+    "fixed-evaluations|sample.json|d3513d71973963b86fb80b08f1a2a920f64b8e5d27ce1b3ca0baebca294fce63|302" : {
+      "recordType" : "opta_run",
+      "profile" : "fixed-evaluations",
+      "dataset" : "sample.json",
+      "inputSha256" : "d3513d71973963b86fb80b08f1a2a920f64b8e5d27ce1b3ca0baebca294fce63",
+      "seed" : 302,
+      "score" : {
+        "hardScore" : 0,
+        "softScores" : [ 0, 0, -5713, 0 ]
+      },
+      "feasible" : true,
+      "elapsedMillis" : 56178,
+      "evaluations" : 2296836,
+      "bestEvaluation" : 9430
+    }
+  }
+}

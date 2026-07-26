@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.acme.model.EmployeeSchedule;
-import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
+import org.acme.solver.core.RosterScore;
+import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -117,7 +118,9 @@ public class ScheduleExportCoordinator {
      * 헤더 섹션을 생성합니다.
      */
     private void buildHeaderSection(EmployeeSchedule schedule, StringBuilder sb) {
-        BendableScore score = schedule.getScore();
+        RosterScore score = schedule.getScore() == null
+                ? null
+                : OptaPlannerScoreAdapter.toRosterScore(schedule.getScore());
         int totalEmployees = schedule.getEmployeeList().size();
         int totalShifts = schedule.getShiftList().size();
 
