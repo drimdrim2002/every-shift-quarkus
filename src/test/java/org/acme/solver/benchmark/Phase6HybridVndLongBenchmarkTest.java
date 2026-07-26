@@ -27,6 +27,7 @@ import org.acme.converter.EmployeeScheduleBuilder;
 import org.acme.model.EmployeeSchedule;
 import org.acme.model.Shift;
 import org.acme.solver.adapter.PlanningProblemMapper;
+import org.acme.solver.adapter.EmployeeScheduleProjection;
 import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
 import org.acme.solver.alns.AlnsRunMetrics;
 import org.acme.solver.alns.AlnsSolverEngine;
@@ -41,10 +42,12 @@ import org.acme.solver.initial.InitialSolutionBuilder;
 import org.acme.solver.initial.InitialSolutionResult;
 import org.acme.solver.lahc.AlnsChangeSwapVndHybridMetrics;
 import org.acme.solver.lahc.AlnsChangeSwapVndHybridSolverEngine;
+import org.acme.solver.lahc.ExhaustivePrefixReassignIntensificationMetrics;
 import org.acme.solver.lahc.FairnessRestrictedLocalSearchMetrics;
 import org.acme.solver.lahc.OrderedVndLocalSearchMetrics;
 import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 import org.acme.solver.score.FullScoreCalculator;
+import org.acme.solver.shadow.SolverConfigFingerprint;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -72,6 +75,7 @@ class Phase6HybridVndLongBenchmarkTest {
     private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     private final EmployeeScheduleBuilder scheduleBuilder = new EmployeeScheduleBuilder();
     private final PlanningProblemMapper problemMapper = new PlanningProblemMapper();
+    private final EmployeeScheduleProjection projection = new EmployeeScheduleProjection();
 
     @Test
     void captureHybridVndLongBenchmark() throws Exception {
@@ -89,6 +93,8 @@ class Phase6HybridVndLongBenchmarkTest {
             runCandidate(Candidate.ALNS_ONLY, warmup, config.seeds().getFirst(), config, true);
             runCandidate(Candidate.ALNS_THEN_CHANGE_SWAP, warmup, config.seeds().getFirst(), config, true);
             runCandidate(Candidate.ALNS_THEN_ORDERED_VND_PROTECTED_FAIRNESS, warmup,
+                    config.seeds().getFirst(), config, true);
+            runCandidate(Candidate.ALNS_THEN_ORDERED_VND_PRECEPTOR_PREFIX_REASSIGN, warmup,
                     config.seeds().getFirst(), config, true);
         }
 
@@ -142,8 +148,16 @@ class Phase6HybridVndLongBenchmarkTest {
             if (!complete) {
                 throw new IllegalStateException("OptaPlanner가 incomplete solution을 반환했습니다.");
             }
+            PlanningProblem problem =
+                    problemMapper.toPlanningProblem(scheduleBuilder.build(dataset.request()));
+            RosterSolution roster = projection.toRosterSolution(problem, solution);
+            RosterScore pojoFullScore = new FullScoreCalculator().calculateScore(problem, roster);
+            if (!pojoFullScore.equals(roster.score())) {
+                throw new IllegalStateException("Opta assignment의 POJO full score가 Opta score와 다릅니다.");
+            }
             return Run.opta(dataset, seed, elapsed(started), OptaPlannerScoreAdapter.toRosterScore(score),
-                    defaultSolver.getSolverScope().getScoreCalculationCount(), bestEvaluation.get(), bestMillis.get());
+                    defaultSolver.getSolverScope().getScoreCalculationCount(), bestEvaluation.get(),
+                    bestMillis.get(), roster.employeeIndexByShift(), pinnedChanges(problem, roster));
         } catch (RuntimeException failure) {
             return Run.failure("OPTAPLANNER", dataset, seed, elapsed(started), failure);
         }
@@ -168,9 +182,18 @@ class Phase6HybridVndLongBenchmarkTest {
                     bestMillis.set(elapsed(started));
                 });
             } else {
-                AlnsChangeSwapVndHybridSolverEngine.Mode mode = candidate == Candidate.ALNS_THEN_CHANGE_SWAP
-                        ? AlnsChangeSwapVndHybridSolverEngine.Mode.ALNS_THEN_CHANGE_SWAP
-                        : AlnsChangeSwapVndHybridSolverEngine.Mode.ALNS_THEN_ORDERED_VND_WITH_PROTECTED_FAIRNESS;
+                AlnsChangeSwapVndHybridSolverEngine.Mode mode = switch (candidate) {
+                    case ALNS_THEN_CHANGE_SWAP ->
+                            AlnsChangeSwapVndHybridSolverEngine.Mode.ALNS_THEN_CHANGE_SWAP;
+                    case ALNS_THEN_ORDERED_VND_PROTECTED_FAIRNESS ->
+                            AlnsChangeSwapVndHybridSolverEngine.Mode
+                                    .ALNS_THEN_ORDERED_VND_WITH_PROTECTED_FAIRNESS;
+                    case ALNS_THEN_ORDERED_VND_PRECEPTOR_PREFIX_REASSIGN ->
+                            AlnsChangeSwapVndHybridSolverEngine.Mode
+                                    .ALNS_THEN_ORDERED_VND_WITH_PRECEPTOR_PREFIX_REASSIGN;
+                    case ALNS_ONLY ->
+                            throw new IllegalStateException("ALNS_ONLY는 위에서 처리해야 합니다.");
+                };
                 result = new AlnsChangeSwapVndHybridSolverEngine(mode).solve(problem, options, ignored -> {
                     bestMillis.set(elapsed(started));
                 });
@@ -182,7 +205,8 @@ class Phase6HybridVndLongBenchmarkTest {
             }
             bestEvaluation.set(bestEvaluation(result.metrics(), result.evaluationCount()));
             return Run.candidate(candidate, dataset, seed, elapsed(started), result, bestEvaluation.get(),
-                    bestMillis.get(), initial.score());
+                    bestMillis.get(), initial.score(), best.employeeIndexByShift(),
+                    pinnedChanges(problem, best));
         } catch (RuntimeException failure) {
             return Run.failure(candidate.name(), dataset, seed, elapsed(started), failure);
         }
@@ -224,6 +248,8 @@ class Phase6HybridVndLongBenchmarkTest {
         node.put("lexicographic_order", "hard > soft[0] > soft[1] > soft[2] > soft[3]");
         node.put("fixed_unit_note", "OptaPlanner=score-calculation, POJO=complete candidate evaluation; throughput 직접 비교 금지");
         node.put("stage_budget_contract", "ALNS 80%; Change/Swap은 20%, protected mode는 VND 15% + fairness 5%; 조기 종료 잔여 예산은 다음 단계로 이월");
+        node.put("phase7_candidate_fingerprint_sha256",
+                SolverConfigFingerprint.candidateFingerprint());
         return node;
     }
 
@@ -233,6 +259,8 @@ class Phase6HybridVndLongBenchmarkTest {
         root.put("profile", config.profile().id());
         root.put("partition", config.partition());
         root.put("config_fingerprint_sha256", config.fingerprint());
+        root.put("phase7_candidate_fingerprint_sha256",
+                SolverConfigFingerprint.candidateFingerprint());
         root.put("opta_cache_scope", "input_sha256/seed/profile/opta_budget");
         ArrayNode groups = root.putArray("groups");
         List<String> names = new ArrayList<>(); names.add("ALL"); names.addAll(config.datasets());
@@ -300,6 +328,10 @@ class Phase6HybridVndLongBenchmarkTest {
         node.put("rollback_attempts", pairs.stream().mapToLong(pair -> pair.candidate().rollbackAttempts()).sum());
         node.put("score_mismatches", pairs.stream().mapToLong(pair -> pair.candidate().mismatches()).sum());
         node.put("state_corruptions", pairs.stream().mapToLong(pair -> pair.candidate().corruptions()).sum());
+        node.put("pinned_assignment_changes",
+                pairs.stream().mapToLong(pair -> pair.candidate().pinnedChanges()).sum());
+        node.put("assignment_difference_count",
+                pairs.stream().mapToLong(Pair::assignmentDifferenceCount).sum());
         node.set("decisive_levels", mapper.valueToTree(decisive(comparable)));
         return node;
     }
@@ -309,7 +341,7 @@ class Phase6HybridVndLongBenchmarkTest {
         for (Candidate candidate : Candidate.values()) {
             List<Run> runs = pairs.stream().filter(pair -> pair.candidate().candidate() == candidate).map(Pair::candidate).toList();
             long alnsSelections = 0L, alnsFinal = 0L, vndReassign = 0L, vndSwap = 0L, vndAccepted = 0L;
-            long fairnessAccepted = 0L, fairnessFinal = 0L;
+            long fairnessEvaluated = 0L, fairnessAccepted = 0L, fairnessFinal = 0L;
             for (Run run : runs) {
                 for (SolveMetrics metrics : run.stageMetrics()) {
                     if (metrics instanceof AlnsRunMetrics alns) {
@@ -319,14 +351,20 @@ class Phase6HybridVndLongBenchmarkTest {
                         vndReassign += vnd.evaluatedReassignCandidates(); vndSwap += vnd.evaluatedSwapCandidates();
                         vndAccepted += vnd.acceptedReassignCandidates() + vnd.acceptedSwapCandidates();
                     } else if (metrics instanceof FairnessRestrictedLocalSearchMetrics fairness) {
+                        fairnessEvaluated += fairness.evaluatedCandidates();
                         fairnessAccepted += fairness.acceptedCandidates();
                         if (!fairness.bestImprovements().isEmpty()) fairnessFinal++;
+                    } else if (metrics instanceof ExhaustivePrefixReassignIntensificationMetrics prefix) {
+                        fairnessEvaluated += prefix.evaluatedCandidates();
+                        fairnessAccepted += prefix.acceptedCandidates();
+                        if (!prefix.bestImprovements().isEmpty()) fairnessFinal++;
                     }
                 }
             }
             result.put(candidate.name(), Map.of("alns_destroy_selections", alnsSelections,
                     "alns_final_best_runs", alnsFinal, "vnd_evaluated_reassign", vndReassign,
                     "vnd_evaluated_swap", vndSwap, "vnd_accepted", vndAccepted,
+                    "fairness_evaluated", fairnessEvaluated,
                     "fairness_accepted", fairnessAccepted, "fairness_final_best_runs", fairnessFinal));
         }
         return result;
@@ -451,6 +489,10 @@ class Phase6HybridVndLongBenchmarkTest {
         if (metrics instanceof FairnessRestrictedLocalSearchMetrics fairness) {
             return fairness.bestImprovements().isEmpty() ? fallback : fairness.bestImprovements().getLast().evaluation();
         }
+        if (metrics instanceof ExhaustivePrefixReassignIntensificationMetrics prefix) {
+            return prefix.bestImprovements().isEmpty()
+                    ? fallback : prefix.bestImprovements().getLast().evaluation();
+        }
         return fallback;
     }
 
@@ -470,14 +512,18 @@ class Phase6HybridVndLongBenchmarkTest {
             node.put("rollback_attempts", alns.rollbackAttemptCount());
             node.put("score_mismatches", alns.scoreMismatchFailures());
             node.put("state_corruptions", alns.stateCorruptionFailures());
+            node.put("destroy_failures", alns.destroyFailures());
+            node.put("repair_failures", alns.repairFailures());
+            node.put("operator_exceptions", alns.operatorExceptions());
+            node.put("termination", alns.terminationReason().name());
             node.put("final_best_events", alns.bestImprovements().size());
             ArrayNode destroy = node.putArray("destroy_operators");
             for (OperatorStatistics operator : alns.destroyOperators()) {
-                ObjectNode item = destroy.addObject(); item.put("id", operator.operatorId()); item.put("selected", operator.selectionCount()); item.put("global_best", operator.globalBestCount()); item.put("final_best", !alns.bestImprovements().isEmpty() && alns.bestImprovements().getLast().destroyOperatorId().equals(operator.operatorId()));
+                ObjectNode item = destroy.addObject(); item.put("id", operator.operatorId()); item.put("selected", operator.selectionCount()); item.put("accepted", operator.globalBestCount() + operator.currentImprovementCount() + operator.acceptedWorseningCount()); item.put("rejected", operator.rejectionCount()); item.put("global_best", operator.globalBestCount()); item.put("final_best", !alns.bestImprovements().isEmpty() && alns.bestImprovements().getLast().destroyOperatorId().equals(operator.operatorId()));
             }
             ArrayNode repair = node.putArray("repair_operators");
             for (OperatorStatistics operator : alns.repairOperators()) {
-                ObjectNode item = repair.addObject(); item.put("id", operator.operatorId()); item.put("selected", operator.selectionCount()); item.put("global_best", operator.globalBestCount()); item.put("final_best", !alns.bestImprovements().isEmpty() && alns.bestImprovements().getLast().repairOperatorId().equals(operator.operatorId()));
+                ObjectNode item = repair.addObject(); item.put("id", operator.operatorId()); item.put("selected", operator.selectionCount()); item.put("accepted", operator.globalBestCount() + operator.currentImprovementCount() + operator.acceptedWorseningCount()); item.put("rejected", operator.rejectionCount()); item.put("global_best", operator.globalBestCount()); item.put("final_best", !alns.bestImprovements().isEmpty() && alns.bestImprovements().getLast().repairOperatorId().equals(operator.operatorId()));
             }
         } else if (metrics instanceof OrderedVndLocalSearchMetrics vnd) {
             node.put("generated_reassign", vnd.generatedReassignCandidates()); node.put("generated_swap", vnd.generatedSwapCandidates());
@@ -485,14 +531,33 @@ class Phase6HybridVndLongBenchmarkTest {
             node.put("accepted_reassign", vnd.acceptedReassignCandidates()); node.put("accepted_swap", vnd.acceptedSwapCandidates());
             node.put("rejected", vnd.rejectedCandidates()); node.put("full_verifications", vnd.fullVerificationCount());
             node.put("score_mismatches", vnd.scoreMismatchFailures()); node.put("state_corruptions", vnd.stateCorruptionFailures());
+            node.put("termination", vnd.terminationReason().name());
             node.put("candidate_limit", vnd.candidateLimitPerNeighborhood()); node.put("final_best_events", vnd.bestImprovements().size());
         } else if (metrics instanceof FairnessRestrictedLocalSearchMetrics fairness) {
             node.put("evaluated", fairness.evaluatedCandidates()); node.put("accepted", fairness.acceptedCandidates()); node.put("rejected", fairness.rejectedCandidates());
             node.put("full_verifications", fairness.fullVerificationCount()); node.put("score_mismatches", fairness.scoreMismatchFailures());
             node.put("state_corruptions", fairness.stateCorruptionFailures()); node.put("selector_emitted", fairness.selectorMetrics().emittedCandidates()); node.put("final_best_events", fairness.bestImprovements().size());
+            node.put("termination", fairness.terminationReason().name());
+        } else if (metrics instanceof ExhaustivePrefixReassignIntensificationMetrics prefix) {
+            node.put("generated", prefix.generatedCandidates());
+            node.put("evaluated", prefix.evaluatedCandidates());
+            node.put("accepted", prefix.acceptedCandidates());
+            node.put("rejected", prefix.rejectedCandidates());
+            node.put("full_verifications", prefix.fullVerificationCount());
+            node.put("score_mismatches", prefix.scoreMismatchFailures());
+            node.put("state_corruptions", prefix.stateCorruptionFailures());
+            node.put("selector_ranking_builds", prefix.selectorMetrics().rankingBuilds());
+            node.put("selector_raw_candidates", prefix.selectorMetrics().rawCandidates());
+            node.put("selector_soft0_hotspot_candidates",
+                    prefix.selectorMetrics().soft0HotspotCandidates());
+            node.put("selector_soft1_hotspot_candidates",
+                    prefix.selectorMetrics().soft1HotspotCandidates());
+            node.put("final_best_events", prefix.bestImprovements().size());
+            node.put("termination", prefix.terminationReason().name());
         } else if (metrics instanceof AlnsChangeSwapVndHybridMetrics hybrid) {
             node.put("mode", hybrid.mode()); node.put("total_evaluations", hybrid.totalEvaluationCount());
             node.put("score_mismatches", hybrid.scoreMismatchFailures()); node.put("state_corruptions", hybrid.stateCorruptionFailures());
+            node.put("termination", hybrid.terminationReason().name());
             ArrayNode stages = node.putArray("stages");
             for (AlnsChangeSwapVndHybridMetrics.Stage stage : hybrid.stages()) {
                 ObjectNode item = stages.addObject(); item.put("id", stage.stageId()); item.put("seed", stage.derivedSeed());
@@ -506,29 +571,53 @@ class Phase6HybridVndLongBenchmarkTest {
         catch (Exception failure) { throw new IllegalStateException("SHA-256 계산 실패", failure); }
     }
 
-    private enum Candidate { ALNS_ONLY, ALNS_THEN_CHANGE_SWAP, ALNS_THEN_ORDERED_VND_PROTECTED_FAIRNESS }
+    private enum Candidate {
+        ALNS_ONLY,
+        ALNS_THEN_CHANGE_SWAP,
+        ALNS_THEN_ORDERED_VND_PROTECTED_FAIRNESS,
+        ALNS_THEN_ORDERED_VND_PRECEPTOR_PREFIX_REASSIGN
+    }
     private enum Profile { FIXED("fixed-evaluations"), WALL("wall-clock"); private final String id; Profile(String id) { this.id = id; } String id() { return id; } }
 
     private record Dataset(String name, PlanningRequest request, String hash) { }
 
     private record Pair(String dataset, long seed, int ordinal, boolean optaFirst, Run opta, Run candidate) {
         boolean comparable() { return opta.score() != null && candidate.score() != null; }
+        long assignmentDifferenceCount() {
+            if (opta.assignments() == null || candidate.assignments() == null
+                    || opta.assignments().length != candidate.assignments().length) {
+                return 0L;
+            }
+            long differences = 0L;
+            for (int index = 0; index < opta.assignments().length; index++) {
+                if (opta.assignments()[index] != candidate.assignments()[index]) {
+                    differences++;
+                }
+            }
+            return differences;
+        }
         ObjectNode toJson(ObjectMapper mapper) {
             ObjectNode node = mapper.createObjectNode(); node.put("record_type", "pair"); node.put("dataset", dataset); node.put("seed", seed);
             node.put("ordinal", ordinal); node.put("opta_first", optaFirst); node.put("candidate", candidate.engine()); node.put("comparable", comparable());
-            if (comparable()) { node.put("outcome", candidate.score().compareTo(opta.score()) > 0 ? "WIN" : candidate.score().compareTo(opta.score()) < 0 ? "LOSS" : "TIE"); node.put("decisive_level", decisiveLevel(candidate.score(), opta.score())); }
+            if (comparable()) { node.put("outcome", candidate.score().compareTo(opta.score()) > 0 ? "WIN" : candidate.score().compareTo(opta.score()) < 0 ? "LOSS" : "TIE"); node.put("decisive_level", decisiveLevel(candidate.score(), opta.score())); node.put("assignment_difference_count", assignmentDifferenceCount()); }
             return node;
         }
     }
 
     private record Run(String engine, Candidate candidate, String dataset, String inputHash, long seed, RosterScore score,
+            int[] assignments, long pinnedChanges,
             boolean feasible, long elapsedMillis, long evaluations, long bestEvaluation, long bestMillis,
             long rollbackAttempts, long mismatches, long corruptions, RosterScore initialScore,
             List<SolveMetrics> stageMetrics, SolveMetrics metrics, String error) {
-        static Run opta(Dataset data, long seed, long elapsed, RosterScore score, long eval, long bestEval, long bestMillis) {
-            return new Run("OPTAPLANNER", null, data.name(), data.hash(), seed, score, score.isFeasible(), elapsed, eval, bestEval, bestMillis, 0, 0, 0, null, List.of(), null, null);
+        static Run opta(Dataset data, long seed, long elapsed, RosterScore score, long eval,
+                long bestEval, long bestMillis, int[] assignments, long pinnedChanges) {
+            return new Run("OPTAPLANNER", null, data.name(), data.hash(), seed, score,
+                    assignments, pinnedChanges, score.isFeasible(), elapsed, eval, bestEval, bestMillis,
+                    0, 0, 0, null, List.of(), null, null);
         }
-        static Run candidate(Candidate candidate, Dataset data, long seed, long elapsed, SolveResult<RosterSolution> result, long bestEval, long bestMillis, RosterScore initial) {
+        static Run candidate(Candidate candidate, Dataset data, long seed, long elapsed,
+                SolveResult<RosterSolution> result, long bestEval, long bestMillis,
+                RosterScore initial, int[] assignments, long pinnedChanges) {
             SolveMetrics metrics = result.metrics(); List<SolveMetrics> stages = metrics instanceof AlnsChangeSwapVndHybridMetrics hybrid
                     ? hybrid.stages().stream().map(AlnsChangeSwapVndHybridMetrics.Stage::stageMetrics).toList() : List.of(metrics);
             long rollback = 0L, mismatch = 0L, corruption = 0L;
@@ -537,11 +626,13 @@ class Phase6HybridVndLongBenchmarkTest {
                 mismatch = hybrid.scoreMismatchFailures(); corruption = hybrid.stateCorruptionFailures();
                 rollback = stages.stream().mapToLong(Run::rollbackAttempts).sum();
             }
-            return new Run(candidate.name(), candidate, data.name(), data.hash(), seed, result.score(), result.score().isFeasible(), elapsed,
+            return new Run(candidate.name(), candidate, data.name(), data.hash(), seed, result.score(),
+                    assignments, pinnedChanges, result.score().isFeasible(), elapsed,
                     result.evaluationCount(), bestEval, bestMillis, rollback, mismatch, corruption, initial, stages, metrics, null);
         }
         static Run failure(String engine, Dataset data, long seed, long elapsed, RuntimeException failure) {
-            return new Run(engine, engine.equals("OPTAPLANNER") ? null : Candidate.valueOf(engine), data.name(), data.hash(), seed, null, false,
+            return new Run(engine, engine.equals("OPTAPLANNER") ? null : Candidate.valueOf(engine),
+                    data.name(), data.hash(), seed, null, null, 0L, false,
                     elapsed, 0, 0, 0, 0, 0, 0, null, List.of(), null, failure.getClass().getSimpleName());
         }
         boolean executionFailed() { return error != null; }
@@ -549,14 +640,25 @@ class Phase6HybridVndLongBenchmarkTest {
             if (metrics instanceof AlnsRunMetrics alns) return alns.rollbackAttemptCount();
             if (metrics instanceof OrderedVndLocalSearchMetrics vnd) return vnd.rollbackAttemptCount();
             if (metrics instanceof FairnessRestrictedLocalSearchMetrics fairness) return fairness.rollbackAttemptCount();
+            if (metrics instanceof ExhaustivePrefixReassignIntensificationMetrics prefix) return prefix.rollbackAttemptCount();
             return 0L;
         }
         ObjectNode toJson(ObjectMapper mapper) {
             ObjectNode node = mapper.createObjectNode(); node.put("record_type", "run"); node.put("engine", engine); if (candidate == null) node.putNull("candidate"); else node.put("candidate", candidate.name());
             node.put("dataset", dataset); node.put("input_sha256", inputHash); node.put("seed", seed); node.put("elapsed_ms", elapsedMillis); node.put("evaluation_count", evaluations); node.put("best_evaluation", bestEvaluation); node.put("best_ms", bestMillis);
-            node.put("feasible", feasible); node.put("rollback_attempts", rollbackAttempts); node.put("score_mismatches", mismatches); node.put("state_corruptions", corruptions); if (score == null) node.putNull("score"); else { node.put("score", score.toString()); node.put("hard", score.hardScore()); node.set("soft", mapper.valueToTree(score.softScores())); }
+            node.put("feasible", feasible); node.put("pinned_assignment_changes", pinnedChanges); node.put("rollback_attempts", rollbackAttempts); node.put("rollback_failures", corruptions); node.put("full_score_mismatches", 0); node.put("incremental_score_mismatches", mismatches); node.put("score_mismatches", mismatches); node.put("state_corruptions", corruptions); if (score == null) node.putNull("score"); else { node.put("score", score.toString()); node.put("hard", score.hardScore()); node.set("soft", mapper.valueToTree(score.softScores())); }
             node.set("metrics", metricsToJson(mapper, metrics)); ArrayNode stageNodes = node.putArray("stage_metrics"); for (SolveMetrics stage : this.stageMetrics()) stageNodes.add(metricsToJson(mapper, stage)); if (error == null) node.putNull("error"); else node.put("error", error); return node;
         }
+    }
+
+    private static long pinnedChanges(PlanningProblem problem, RosterSolution solution) {
+        long changes = 0L;
+        for (int shiftIndex : problem.pinnedShiftIndexes()) {
+            if (solution.employeeIndex(shiftIndex) != problem.initialEmployeeIndex(shiftIndex)) {
+                changes++;
+            }
+        }
+        return changes;
     }
 
     private record Config(List<String> datasets, List<Long> seeds, List<Candidate> candidates, Profile profile, long wallSeconds,

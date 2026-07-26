@@ -1,11 +1,10 @@
 package org.acme.solver;
 
-import java.util.Locale;
-
 import org.acme.solver.core.SolverEngine;
-import org.acme.solver.alns.AlnsSolverEngine;
-import org.acme.solver.lahc.LahcSolverEngine;
+import org.acme.solver.lahc.AlnsChangeSwapVndHybridSolverEngine;
 import org.acme.solver.optaplanner.OptaPlannerSolverEngine;
+import org.acme.solver.shadow.ShadowSolverCoordinator;
+import org.acme.solver.shadow.SolverMode;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,24 +19,19 @@ public class SolverEngineProducer {
     @Produces
     @ApplicationScoped
     SolverEngine selectedEngine(
-            @ConfigProperty(name = "solver.engine", defaultValue = "OPTAPLANNER") String engineName,
-            OptaPlannerSolverEngine optaPlannerEngine,
-            LahcSolverEngine lahcEngine,
-            AlnsSolverEngine alnsEngine) {
-        String normalized = engineName.trim().toUpperCase(Locale.ROOT);
-        return switch (normalized) {
-            case "OPTAPLANNER" -> optaPlannerEngine;
-            case "POJO_LAHC" -> lahcEngine;
-            case "POJO_ALNS" -> alnsEngine;
-            default -> throw new IllegalArgumentException("지원하지 않는 solver.engine입니다: " + engineName);
-        };
+            @ConfigProperty(name = "solver.engine", defaultValue = "OPTAPLANNER_ONLY") String engineName,
+            OptaPlannerSolverEngine optaPlannerEngine) {
+        SolverEngine pojoCandidate = new AlnsChangeSwapVndHybridSolverEngine(
+                AlnsChangeSwapVndHybridSolverEngine.Mode
+                        .ALNS_THEN_ORDERED_VND_WITH_PRECEPTOR_PREFIX_REASSIGN);
+        return selectedEngine(engineName, optaPlannerEngine, pojoCandidate);
     }
 
-    /** Phase 2/5 선택 테스트의 기존 호출 계약을 보존합니다. */
     SolverEngine selectedEngine(
             String engineName,
-            OptaPlannerSolverEngine optaPlannerEngine,
-            LahcSolverEngine lahcEngine) {
-        return selectedEngine(engineName, optaPlannerEngine, lahcEngine, new AlnsSolverEngine());
+            SolverEngine optaPlannerEngine,
+            SolverEngine pojoCandidate) {
+        return new ShadowSolverCoordinator(
+                SolverMode.parse(engineName), optaPlannerEngine, pojoCandidate);
     }
 }

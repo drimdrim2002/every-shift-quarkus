@@ -1,12 +1,11 @@
 package org.acme.solver;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.acme.solver.core.SolverEngine;
-import org.acme.solver.alns.AlnsSolverEngine;
-import org.acme.solver.lahc.LahcSolverEngine;
-import org.acme.solver.optaplanner.OptaPlannerSolverEngine;
+import org.acme.solver.shadow.ShadowSolverCoordinator;
+import org.acme.solver.shadow.SolverMode;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.arc.ClientProxy;
@@ -20,30 +19,27 @@ class SolverEngineSelectionTest {
     SolverEngine solverEngine;
 
     @Test
-    void 기본_엔진은_OPTAPLANNER다() {
-        assertInstanceOf(OptaPlannerSolverEngine.class, ClientProxy.unwrap(solverEngine));
+    void 기본_모드는_OPTAPLANNER_ONLY다() {
+        ShadowSolverCoordinator coordinator =
+                (ShadowSolverCoordinator) ClientProxy.unwrap(solverEngine);
+
+        assertEquals(SolverMode.OPTAPLANNER_ONLY, coordinator.mode());
     }
 
     @Test
-    void POJO_LAHC_설정은_LAHC_엔진을_선택한다() {
-        OptaPlannerSolverEngine optaPlanner = new OptaPlannerSolverEngine();
-        LahcSolverEngine lahc = new LahcSolverEngine();
+    void 네_명시적_모드만_선택할_수_있다() {
+        SolverEngine opta = (problem, options, listener) -> null;
+        SolverEngine pojo = (problem, options, listener) -> null;
+        SolverEngineProducer producer = new SolverEngineProducer();
 
-        SolverEngine selected = new SolverEngineProducer().selectedEngine(
-                "pojo_lahc", optaPlanner, lahc);
-
-        assertSame(lahc, selected);
-    }
-
-    @Test
-    void POJO_ALNS_설정은_ALNS_엔진을_선택한다() {
-        OptaPlannerSolverEngine optaPlanner = new OptaPlannerSolverEngine();
-        LahcSolverEngine lahc = new LahcSolverEngine();
-        AlnsSolverEngine alns = new AlnsSolverEngine();
-
-        SolverEngine selected = new SolverEngineProducer().selectedEngine(
-                "pojo_alns", optaPlanner, lahc, alns);
-
-        assertSame(alns, selected);
+        for (SolverMode mode : SolverMode.values()) {
+            ShadowSolverCoordinator selected =
+                    (ShadowSolverCoordinator) producer.selectedEngine(mode.name(), opta, pojo);
+            assertEquals(mode, selected.mode());
+        }
+        assertThrows(IllegalArgumentException.class,
+                () -> producer.selectedEngine("OPTAPLANNER", opta, pojo));
+        assertThrows(IllegalArgumentException.class,
+                () -> producer.selectedEngine("POJO_ALNS", opta, pojo));
     }
 }

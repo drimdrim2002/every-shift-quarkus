@@ -31,7 +31,9 @@ public final class AlnsChangeSwapVndHybridSolverEngine implements SolverEngine {
 
     public enum Mode {
         ALNS_THEN_CHANGE_SWAP,
-        ALNS_THEN_ORDERED_VND_WITH_PROTECTED_FAIRNESS
+        ALNS_THEN_ORDERED_VND_WITH_PROTECTED_FAIRNESS,
+        /** Phase 6에서 고정한 test-only 최종 후보입니다. */
+        ALNS_THEN_ORDERED_VND_WITH_PRECEPTOR_PREFIX_REASSIGN
     }
 
     private static final int ALNS_PERCENT = 80;
@@ -47,8 +49,14 @@ public final class AlnsChangeSwapVndHybridSolverEngine implements SolverEngine {
     private final InitialSolutionBuilder initialSolutionBuilder;
 
     public AlnsChangeSwapVndHybridSolverEngine(Mode mode) {
-        this(mode, new AlnsSolverEngine(), new OrderedVndLocalSearchEngine(),
-                FairnessRestrictedLocalSearchEngine.hotspotGuidedProtectedReassign(), new FullScoreCalculator());
+        this(mode, new AlnsSolverEngine(), new OrderedVndLocalSearchEngine(), finalStage(mode),
+                new FullScoreCalculator());
+    }
+
+    private static SolverEngine finalStage(Mode mode) {
+        return mode == Mode.ALNS_THEN_ORDERED_VND_WITH_PRECEPTOR_PREFIX_REASSIGN
+                ? new ExhaustivePrefixReassignIntensificationEngine()
+                : FairnessRestrictedLocalSearchEngine.hotspotGuidedProtectedReassign();
     }
 
     AlnsChangeSwapVndHybridSolverEngine(
@@ -165,10 +173,12 @@ public final class AlnsChangeSwapVndHybridSolverEngine implements SolverEngine {
             return List.of(new StageSpec("ALNS", alns, ALNS_PERCENT, ALNS_PERCENT),
                     new StageSpec("ORDERED_CHANGE_SWAP_VND", vnd, CHANGE_SWAP_PERCENT, 100));
         }
+        String finalStageId = mode == Mode.ALNS_THEN_ORDERED_VND_WITH_PRECEPTOR_PREFIX_REASSIGN
+                ? "PRECEPTOR_PREFIX_REASSIGN" : "PROTECTED_FAIRNESS_REASSIGN";
         return List.of(new StageSpec("ALNS", alns, ALNS_PERCENT, ALNS_PERCENT),
                 new StageSpec("ORDERED_CHANGE_SWAP_VND", vnd, VND_WITH_FAIRNESS_PERCENT,
                         ALNS_PERCENT + VND_WITH_FAIRNESS_PERCENT),
-                new StageSpec("PROTECTED_FAIRNESS_REASSIGN", fairness, FAIRNESS_PERCENT, 100));
+                new StageSpec(finalStageId, fairness, FAIRNESS_PERCENT, 100));
     }
 
     private RosterSolution rootWarmStart(PlanningProblem problem, SolveOptions options) {
