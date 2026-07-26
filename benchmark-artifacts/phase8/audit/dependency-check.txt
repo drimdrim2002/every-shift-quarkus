@@ -1,0 +1,11 @@
+명령:
+./mvnw dependency:tree '-Dincludes=org.optaplanner:*'
+
+결과:
+BUILD SUCCESS. 일치하는 dependency가 없어 dependency 노드가 출력되지 않음.
+
+전체 dependency tree:
+benchmark-artifacts/phase8/dependency-tree.txt
+
+패키지 확인:
+target/quarkus-app/lib 아래 이름에 optaplanner가 포함된 파일 없음.

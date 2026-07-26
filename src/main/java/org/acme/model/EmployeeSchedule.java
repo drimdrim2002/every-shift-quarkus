@@ -1,35 +1,23 @@
 package org.acme.model;
 
-import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
-import org.optaplanner.core.api.domain.solution.PlanningScore;
-import org.optaplanner.core.api.domain.solution.PlanningSolution;
-import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
-import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
-import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
-import org.optaplanner.core.api.solver.SolverStatus;
-
 import java.util.List;
 
-@PlanningSolution
+import org.acme.solver.core.RosterScore;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class EmployeeSchedule {
-    @ProblemFactCollectionProperty
     List<Availability> availabilityList;
 
-    @ProblemFactCollectionProperty
-    @ValueRangeProvider
     List<Employee> employeeList;
 
-    @PlanningEntityCollectionProperty
     List<Shift> shiftList;
 
-    @PlanningScore(bendableHardLevelsSize = 1, bendableSoftLevelsSize = 4)
-    BendableScore score;
+    RosterScore score;
 
     ScheduleState scheduleState;
 
-    SolverStatus solverStatus;
-
-    // No-arg constructor required for OptaPlanner
     public EmployeeSchedule() {
     }
 
@@ -72,19 +60,19 @@ public class EmployeeSchedule {
         this.shiftList = shiftList;
     }
 
-    public BendableScore getScore() {
+    @JsonIgnore
+    public RosterScore getScore() {
         return score;
     }
 
-    public void setScore(BendableScore score) {
+    @JsonIgnore
+    public void setScore(RosterScore score) {
         this.score = score;
     }
 
-    public SolverStatus getSolverStatus() {
-        return solverStatus;
-    }
-
-    public void setSolverStatus(SolverStatus solverStatus) {
-        this.solverStatus = solverStatus;
+    /** 저장된 result JSON의 기존 문자열 점수 계약을 유지합니다. */
+    @JsonProperty("score")
+    public String getSerializedScore() {
+        return score == null ? null : score.toString();
     }
 }

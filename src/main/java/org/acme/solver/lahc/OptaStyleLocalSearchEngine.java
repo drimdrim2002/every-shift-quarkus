@@ -27,7 +27,7 @@ import org.acme.solver.score.IncrementalScoreCalculator;
 import org.acme.solver.score.ScoreMismatchException;
 
 /**
- * Phase 6 알고리즘 비교를 위한 OptaPlanner-style Change/Swap local search runner입니다.
+ * Phase 6 알고리즘 비교를 위한 Change/Swap local search runner입니다.
  *
  * <p>CDI bean이나 production engine selector에는 등록하지 않는다. 이 runner는 baseline ALNS와
  * 별도 benchmark profile에서만 사용하며, score 의미는 기존 {@link FullScoreCalculator}와

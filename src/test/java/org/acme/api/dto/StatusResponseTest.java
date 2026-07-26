@@ -71,7 +71,7 @@ class StatusResponseTest {
     }
 
     @Test
-    void testFrom_MapsBendableScoreFields() {
+    void testFrom_MapsLegacyScoreFields() {
         JobExecution job = new JobExecution();
         job.setId("test-id");
         job.setStatus(ExecutionStatus.COMPLETED);
@@ -122,7 +122,7 @@ class StatusResponseTest {
     }
 
     @Test
-    void testFrom_TreatsNightRestOnlyScoresAsBendableScoreFields() {
+    void testFrom_TreatsNightRestOnlyScoresAsLegacyScoreFields() {
         JobExecution job = new JobExecution();
         job.setId("test-id");
         job.setStatus(ExecutionStatus.COMPLETED);

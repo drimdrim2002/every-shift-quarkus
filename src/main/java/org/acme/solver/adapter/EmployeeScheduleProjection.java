@@ -13,7 +13,6 @@ import org.acme.model.ScheduleState;
 import org.acme.model.Shift;
 import org.acme.solver.core.PlanningProblem;
 import org.acme.solver.core.RosterSolution;
-import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -73,7 +72,7 @@ public class EmployeeScheduleProjection {
                 employees,
                 shifts);
         if (solution != null) {
-            schedule.setScore(OptaPlannerScoreAdapter.toBendableScore(solution.score()));
+            schedule.setScore(solution.score());
         }
         return schedule;
     }
@@ -116,7 +115,7 @@ public class EmployeeScheduleProjection {
         return new RosterSolution(
                 problem.employeeCount(),
                 assignments,
-                OptaPlannerScoreAdapter.toRosterScore(schedule.getScore()));
+                schedule.getScore());
     }
 
     private static List<Employee> projectEmployees(List<PlanningProblem.EmployeeData> sources) {

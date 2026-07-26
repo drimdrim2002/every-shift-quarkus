@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
 
-/** OptaPlanner 없이 complete solution을 LAHC로 개선하는 첫 POJO 엔진입니다. */
+/** complete solution을 LAHC로 개선하는 POJO 엔진입니다. */
 @ApplicationScoped
 @Typed(LahcSolverEngine.class)
 public class LahcSolverEngine implements SolverEngine {

@@ -1,0 +1,13 @@
+Phase 8 검증 요약
+
+- 집중 계약 테스트: 38 tests, failures 0, errors 0, skipped 0
+- 전체 테스트: 281 tests, failures 0, errors 0, skipped 3, BUILD SUCCESS
+- clean package: BUILD SUCCESS
+- Maven dependency tree: OptaPlanner artifact 0
+- source/test/config rg: 일치 항목 0
+- POJO_ONLY benchmark: 4/4 complete, 4/4 hard=0
+- benchmark integrity: score mismatch 0, state corruption 0, rollback failure 0
+- Jib container build: base image digest 해석 및 이미지 구성 후 docker load 실패
+- Jib 실패 원인: macOS에 /var/run/docker.sock Docker daemon 없음
+- image push/deploy/Cloud Run 변경: 수행하지 않음
+- 잠긴 holdout 및 외부 운영 데이터 쓰기: 수행하지 않음

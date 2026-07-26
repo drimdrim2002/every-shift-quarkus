@@ -1,15 +1,10 @@
 package org.acme.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.optaplanner.core.api.domain.entity.PlanningEntity;
-import org.optaplanner.core.api.domain.lookup.PlanningId;
-import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
 import java.time.LocalDateTime;
 
-@PlanningEntity(pinningFilter = ShiftPinningFilter.class)
 public class Shift {
-    @PlanningId
     Long id;
 
     LocalDateTime start;
@@ -18,7 +13,6 @@ public class Shift {
     String location;
     String requiredSkill;
 
-    @PlanningVariable
     Employee employee;
 
     boolean pinned;

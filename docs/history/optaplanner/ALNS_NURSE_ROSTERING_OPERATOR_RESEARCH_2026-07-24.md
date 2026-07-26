@@ -304,4 +304,3 @@ OUTPUT_DIR=/Users/brown/workspace/every-shift-quarkus/benchmark-artifacts/phase6
 - wall-clock p95 상대/절대 허용 한계
 - rollback failure/score mismatch 허용 건수
 - hard `0` 요구의 적용 범위
-

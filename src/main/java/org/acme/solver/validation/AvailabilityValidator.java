@@ -23,6 +23,6 @@ public class AvailabilityValidator {
      */
     public void validate(EmployeeSchedule schedule, Map<Employee, List<Shift>> shiftsByEmployee, Logger logger) {
         // UNAVAILABLE 타입이 제거되어 별도의 가용성 위반 검증은 불필요합니다.
-        // DESIRED / UNDESIRED는 OptaPlanner 제약조건으로 처리됩니다.
+        // DESIRED / UNDESIRED는 POJO 점수 평가기의 soft 제약으로 처리됩니다.
     }
 }

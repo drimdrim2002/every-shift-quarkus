@@ -27,7 +27,7 @@ public final class ShiftDateMatcher {
     }
 
     /**
-     * OptaPlanner 모델에 의존하지 않는 값 기반 날짜 매칭 정책입니다.
+     * 모델 구현에 의존하지 않는 값 기반 날짜 매칭 정책입니다.
      */
     public static boolean matchesActualOrLogicalDate(
             LocalDateTime start,

@@ -1,12 +1,9 @@
 package org.acme.model;
 
-import org.optaplanner.core.api.domain.lookup.PlanningId;
-
 import java.time.LocalDate;
 
 public class Availability {
 
-    @PlanningId
     Long id;
 
     Employee employee;

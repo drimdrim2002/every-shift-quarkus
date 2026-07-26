@@ -10,9 +10,9 @@ import org.acme.solver.move.SearchState;
 import org.acme.solver.move.SwapMove;
 
 /**
- * OptaPlanner 기본 local search의 Change/Swap union을 POJO transaction move로 옮긴 selector입니다.
+ * Change/Swap union을 POJO transaction move로 구현한 selector입니다.
  *
- * <p>skill, availability, rest, preceptor 관계를 사전 필터하지 않습니다. OptaPlanner의 value range처럼
+ * <p>skill, availability, rest, preceptor 관계를 사전 필터하지 않습니다. 전체 직원 범위처럼
  * 모든 employee value를 후보로 만들고, exact score와 Late Acceptance가 수락 여부를 결정합니다.
  * pinned shift와 명백한 no-op만 여기서 제외합니다.</p>
  */

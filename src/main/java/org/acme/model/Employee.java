@@ -1,12 +1,9 @@
 package org.acme.model;
 
-import org.optaplanner.core.api.domain.lookup.PlanningId;
-
 import java.util.HashSet;
 import java.util.Set;
 
 public class Employee {
-    @PlanningId
     String id;
 
     String name;

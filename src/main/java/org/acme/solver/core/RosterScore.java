@@ -150,7 +150,7 @@ public final class RosterScore implements Comparable<RosterScore> {
     }
 
     /**
-     * 기존 BendableScore export 문자열 형식을 유지합니다.
+     * 외부 계약에 노출된 기존 점수 벡터 문자열 형식을 유지합니다.
      */
     @Override
     public String toString() {

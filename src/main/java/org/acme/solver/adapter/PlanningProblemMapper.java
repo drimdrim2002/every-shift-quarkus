@@ -16,7 +16,7 @@ import org.acme.solver.core.PlanningProblem;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
- * 기존 OptaPlanner 도메인을 엔진 중립 계획 문제로 복사합니다.
+ * 외부 스케줄 모델을 엔진 중립 계획 문제로 복사합니다.
  */
 @ApplicationScoped
 public class PlanningProblemMapper {

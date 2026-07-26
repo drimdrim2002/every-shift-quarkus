@@ -1,0 +1,11 @@
+명령:
+rg -n 'org\.optaplanner|OptaPlanner|BendableScore|ConstraintVerifier' src/main src/test pom.xml scripts
+
+결과:
+일치 항목 없음.
+
+추가 명령:
+rg -n 'OPTAPLANNER|solver\.engine|shadow' src/main src/test pom.xml scripts
+
+결과:
+일치 항목 없음.

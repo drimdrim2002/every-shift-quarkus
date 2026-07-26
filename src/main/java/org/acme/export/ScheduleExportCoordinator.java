@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.acme.model.EmployeeSchedule;
 import org.acme.solver.core.RosterScore;
-import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -34,7 +33,7 @@ public class ScheduleExportCoordinator {
     /**
      * 스케줄을 Markdown 파일로 저장합니다.
      *
-     * @param schedule  OptaPlanner 솔루션
+     * @param schedule  POJO 솔루션
      * @param outputDir 출력 디렉토리 경로
      * @return 생성된 파일의 절대 경로
      * @throws IOException 파일 생성 실패 시
@@ -62,7 +61,7 @@ public class ScheduleExportCoordinator {
     /**
      * 스케줄을 JSON 파일로 저장합니다.
      *
-     * @param schedule  OptaPlanner 솔루션
+     * @param schedule  POJO 솔루션
      * @param outputDir 출력 디렉토리 경로
      * @return 생성된 파일의 절대 경로
      * @throws IOException 파일 생성 실패 시
@@ -90,7 +89,7 @@ public class ScheduleExportCoordinator {
     /**
      * 스케줄을 Markdown 테이블 문자열로 변환합니다.
      *
-     * @param schedule OptaPlanner 솔루션
+     * @param schedule POJO 솔루션
      * @return Markdown 형식 문자열
      */
     public String toMarkdownTable(EmployeeSchedule schedule) {
@@ -120,7 +119,7 @@ public class ScheduleExportCoordinator {
     private void buildHeaderSection(EmployeeSchedule schedule, StringBuilder sb) {
         RosterScore score = schedule.getScore() == null
                 ? null
-                : OptaPlannerScoreAdapter.toRosterScore(schedule.getScore());
+                : schedule.getScore();
         int totalEmployees = schedule.getEmployeeList().size();
         int totalShifts = schedule.getShiftList().size();
 
@@ -134,7 +133,7 @@ public class ScheduleExportCoordinator {
     /**
      * 스케줄을 JSON 문자열로 변환합니다.
      *
-     * @param schedule OptaPlanner 솔루션
+     * @param schedule POJO 솔루션
      * @return JSON 형식 문자열
      */
     public String toJson(EmployeeSchedule schedule) {

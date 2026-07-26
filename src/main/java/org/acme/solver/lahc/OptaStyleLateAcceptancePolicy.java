@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.acme.solver.core.RosterScore;
 
 /**
- * OptaPlanner 10.0.0 기본 Late Acceptance의 step 단위 규칙입니다.
+ * Phase 6에서 고정한 step 단위 Late Acceptance 규칙입니다.
  *
  * <p>후보 평가는 여러 번 일어날 수 있지만, history는 수락된 step이 끝날 때만 한 칸 전진합니다.
  * 수락 score는 기존 history score보다 낮더라도 해당 slot에 그대로 기록합니다.</p>

@@ -19,11 +19,7 @@ import java.util.SplittableRandom;
 
 import org.acme.api.dto.PlanningRequest;
 import org.acme.converter.EmployeeScheduleBuilder;
-import org.acme.model.EmployeeSchedule;
-import org.acme.model.Shift;
-import org.acme.solver.adapter.EmployeeScheduleProjection;
 import org.acme.solver.adapter.PlanningProblemMapper;
-import org.acme.solver.algorithm.EmployeeSchedulingConstraintProvider;
 import org.acme.solver.core.PlanningProblem;
 import org.acme.solver.core.RosterScore;
 import org.acme.solver.core.RosterSolution;
@@ -39,16 +35,11 @@ import org.acme.solver.move.PreceptorRelationIndex;
 import org.acme.solver.move.RelationGroupExchangeMove;
 import org.acme.solver.move.SearchState;
 import org.acme.solver.move.SolutionFingerprint;
-import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 import org.acme.solver.score.FullScoreCalculator;
 import org.acme.solver.score.IncrementalScoreCalculator;
 import org.acme.solver.score.ScoreCacheFingerprint;
 import org.acme.test.JsonLoader;
 import org.junit.jupiter.api.Test;
-import org.optaplanner.core.api.score.buildin.bendable.BendableScore;
-import org.optaplanner.core.api.solver.SolutionManager;
-import org.optaplanner.core.api.solver.SolverFactory;
-import org.optaplanner.core.config.solver.SolverConfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -57,11 +48,6 @@ class SeededMoveSelectorTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().findAndRegisterModules();
     private static final RosterScore PREVIOUS_PRECEPTOR_10K =
             RosterScore.of(0, -960, -3840, -6163, 0);
-    private static final SolutionManager<EmployeeSchedule, BendableScore> SOLUTION_MANAGER =
-            SolutionManager.create(SolverFactory.<EmployeeSchedule>create(new SolverConfig()
-                    .withSolutionClass(EmployeeSchedule.class)
-                    .withEntityClasses(Shift.class)
-                    .withConstraintProviderClass(EmployeeSchedulingConstraintProvider.class)));
 
     @Test
     void selector_10000회는_cross_slot_relation_move를_생성하고_fixed_seed_sequence가_재현된다()
@@ -150,18 +136,16 @@ class SeededMoveSelectorTest {
     }
 
     @Test
-    void preceptor_10k는_feasible하고_relation_slot을_실제로_변경하며_OptaPlanner와_일치한다()
+    void preceptor_10k는_feasible하고_relation_slot을_실제로_변경하며_전체평가와_일치한다()
             throws Exception {
         Fixture fixture = preceptorFixture();
         SolveResult<RosterSolution> result = solvePreceptor(fixture, 10_000L);
 
         assertPreceptorResult(fixture, result);
-        EmployeeSchedule schedule = new EmployeeScheduleProjection()
-                .toEmployeeSchedule(fixture.problem(), result.bestSolution());
         assertEquals(
                 result.score(),
-                OptaPlannerScoreAdapter.toRosterScore(SOLUTION_MANAGER.update(schedule)),
-                "동일 최종 assignment의 POJO/OptaPlanner 점수가 일치해야 합니다.");
+                new FullScoreCalculator().calculateScore(fixture.problem(), result.bestSolution()),
+                "동일 최종 assignment의 탐색/전체 평가 점수가 일치해야 합니다.");
         System.out.printf("PHASE5_PRECEPTOR_RELATION budget=10000 score=%s elapsedMs=%d evaluations=%d%n",
                 result.score(), result.elapsedMillis(), result.evaluationCount());
     }

@@ -10,7 +10,6 @@ import org.acme.model.EmployeeSchedule;
 import org.acme.model.ExecutionStatus;
 import org.acme.model.JobExecution;
 import org.acme.solver.core.RosterScore;
-import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +151,7 @@ public class JobExecutionService {
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", ExecutionStatus.COMPLETED);
             updates.put("completedAt", now);
-            putScoreFields(updates, OptaPlannerScoreAdapter.toRosterScore(solution.getScore()));
+            putScoreFields(updates, solution.getScore());
             updates.put("resultJson", serializeSolution(solution));
 
             firestore.collection(collectionName)
@@ -175,7 +174,7 @@ public class JobExecutionService {
         try {
             Map<String, Object> updates = new HashMap<>();
             updates.put("status", ExecutionStatus.RUNNING);
-            putScoreFields(updates, OptaPlannerScoreAdapter.toRosterScore(solution.getScore()));
+            putScoreFields(updates, solution.getScore());
             updates.put("resultJson", serializeSolution(solution));
 
             firestore.collection(collectionName)

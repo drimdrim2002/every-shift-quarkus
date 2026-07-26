@@ -135,7 +135,7 @@ public class SolverRunnerTest {
 
         assertNotNull(solution.getScore(), "Score should not be null");
         // Verify Hard Score is 0 (all hard constraints satisfied)
-        assertEquals(0, solution.getScore().hardScore(0),
+        assertEquals(0, solution.getScore().hardScore(),
                 "All hard constraints including preceptor matching must be satisfied");
 
         // Verify preceptor matching

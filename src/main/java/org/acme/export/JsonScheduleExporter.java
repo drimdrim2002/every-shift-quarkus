@@ -24,7 +24,6 @@ import org.acme.model.EmployeeSchedule;
 import org.acme.model.ScheduleState;
 import org.acme.model.Shift;
 import org.acme.solver.ShiftDateMatcher;
-import org.acme.solver.optaplanner.OptaPlannerScoreAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,7 +44,7 @@ public class JsonScheduleExporter {
     /**
      * 직원 스케줄을 JSON DTO로 변환합니다.
      *
-     * @param schedule OptaPlanner 솔루션
+     * @param schedule POJO 솔루션
      * @return JSON DTO
      */
     public ScheduleJsonDto toJson(EmployeeSchedule schedule) {
@@ -68,7 +67,7 @@ public class JsonScheduleExporter {
     /**
      * 직원 스케줄을 JSON 문자열로 변환합니다.
      *
-     * @param schedule OptaPlanner 솔루션
+     * @param schedule POJO 솔루션
      * @return JSON 형식 문자열
      */
     public String toJsonString(EmployeeSchedule schedule) {
@@ -92,7 +91,7 @@ public class JsonScheduleExporter {
      */
     private ScheduleMetadataDto buildMetadata(EmployeeSchedule schedule) {
         String score = schedule.getScore() != null
-                ? OptaPlannerScoreAdapter.toRosterScore(schedule.getScore()).toString()
+                ? schedule.getScore().toString()
                 : "unknown";
         LocalDateTime generatedAt = LocalDateTime.now();
         int totalEmployees = schedule.getEmployeeList().size();

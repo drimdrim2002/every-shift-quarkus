@@ -1,0 +1,18 @@
+명령:
+rg -l 'org\.optaplanner|OptaPlanner|BendableScore|ConstraintVerifier' docs | sort
+
+남은 항목의 분류:
+
+1. docs/history/optaplanner/
+   제거 전 설계·제약·탐색 분석을 명시적으로 이동한 역사 자료다.
+
+2. docs/benchmarks/PHASE6_*.md, docs/benchmarks/PHASE7_*.md
+   Phase 6 비교 근거와 Phase 7 PASS/handoff를 보존하는 변경 불가 증거다.
+
+3. docs/plans/*.md, docs/superpowers/plans/*.md
+   단계적 제거 계획과 과거 구현 계획이다.
+
+4. docs/benchmarks/PHASE8_OPTAPLANNER_REMOVAL_2026-07-26.md
+   제거 범위와 잔여 검색 결과를 설명하는 현재 migration report다.
+
+위 문서 외 production source, test source, configuration, pom.xml, 실행 script에는 일치 항목이 없다.
