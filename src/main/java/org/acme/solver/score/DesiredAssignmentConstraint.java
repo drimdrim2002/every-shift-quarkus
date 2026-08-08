@@ -32,7 +32,7 @@ public final class DesiredAssignmentConstraint implements ConstraintEvaluator {
             int matchCount = desiredCounts.get(employeeIndex).getOrDefault(shift.start().toLocalDate(), 0);
             if (matchCount > 0) {
                 long reward = Math.multiplyExact((long) ScoreSupport.durationMinutes(shift), matchCount);
-                collector.reward(ConstraintIds.DESIRED, ScoreLevel.SOFT_3, reward,
+                collector.reward(ConstraintIds.DESIRED, ScoreLevel.SOFT_2, reward,
                         List.of(employeeIndex), List.of(shiftIndex));
             }
         }

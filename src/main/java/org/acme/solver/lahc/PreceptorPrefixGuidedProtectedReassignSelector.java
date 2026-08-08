@@ -16,9 +16,9 @@ import org.acme.solver.score.ScoreLevel;
  * preceptor prefix-loss 진단에서 확인한 soft[0]/soft[1] hotspot을 우선하는 test-only reassign selector입니다.
  *
  * <p>순위는 현재 assignment를 한 번 full-score로 계산한 breakdown의 실제 기여 shift만 사용합니다.
- * soft[0] 기여 shift, soft[1] 기여 shift, 나머지 mutable shift 순이며, 같은 순위에서는 shift/target
- * stable index 오름차순으로 고정합니다. 후보 점수와 수락 여부는 추측하지 않고 engine의 transaction
- * full-score 비교에 맡깁니다.</p>
+ * soft[0](undesired) 기여 shift, soft[1](fairness) 기여 shift, 나머지 mutable shift 순이며,
+ * 같은 순위에서는 shift/target stable index 오름차순으로 고정합니다. 후보 점수와 수락 여부는
+ * 추측하지 않고 engine의 transaction full-score 비교에 맡깁니다.</p>
  */
 public final class PreceptorPrefixGuidedProtectedReassignSelector {
 

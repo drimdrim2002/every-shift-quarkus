@@ -26,7 +26,7 @@ class FairnessHotspotOperatorTest {
                     FairnessOperatorSupport.employeePenalty(
                             fixture.problem(), shiftIndex -> assignments[shiftIndex], employeeIndex));
         }
-        assertEquals(-fixture.initial().score().softScore(2), penalty);
+        assertEquals(-fixture.initial().score().softScore(1), penalty);
         assertEquals(55L, penalty);
 
         DestroyContext context = new DestroyContext(
@@ -97,7 +97,7 @@ class FairnessHotspotOperatorTest {
 
         assertEquals(AlnsIterationStatus.REJECTED, result.status());
         assertEquals(1, result.changedAssignmentCount());
-        assertEquals(20L, result.candidateScore().softDeltaFrom(baselineScore, 2));
+        assertEquals(20L, result.candidateScore().softDeltaFrom(baselineScore, 1));
         assertArrayEquals(baselineAssignments, fixture.state().assignments());
         assertEquals(baselineFingerprint, fixture.state().fingerprint());
         assertEquals(baselineScore, fixture.state().score());

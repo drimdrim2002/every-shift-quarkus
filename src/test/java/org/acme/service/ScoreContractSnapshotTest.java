@@ -22,7 +22,8 @@ class ScoreContractSnapshotTest {
 
     @Test
     void firestoreAndApiScoreProjectionMatchesGoldenSnapshot() throws Exception {
-        RosterScore score = RosterScore.of(0, -30, -120, -5409, 240);
+        // soft: undesired / fairness / desired / reserved
+        RosterScore score = RosterScore.of(0, -120, -5409, 240, 0);
 
         Map<String, Object> firestoreFields = JobExecutionService.extractScoreFields(score);
         JobExecution job = completedJob(firestoreFields);
@@ -42,10 +43,10 @@ class ScoreContractSnapshotTest {
         layout.put("hard_levels", 1);
         layout.put("soft_levels", 4);
         layout.putArray("soft_order")
-                .add("night32_rest")
                 .add("undesired")
                 .add("fairness")
-                .add("desired");
+                .add("desired")
+                .add("reserved");
         return layout;
     }
 

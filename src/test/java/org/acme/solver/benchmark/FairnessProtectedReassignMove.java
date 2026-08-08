@@ -43,12 +43,11 @@ final class FairnessProtectedReassignMove implements Move {
         return List.copyOf(candidates);
     }
 
-    /** hard, soft[0], soft[1]을 보존하고 soft[2]만 엄격히 개선하는 선택 계약입니다. */
+    /** hard·soft[0](undesired)를 보존하고 soft[1](fairness)만 엄격히 개선하는 선택 계약입니다. */
     static boolean isProtectedFairnessWitness(RosterScore before, RosterScore after) {
         return after.hardScore() >= before.hardScore()
                 && after.softScore(0) >= before.softScore(0)
-                && after.softScore(1) >= before.softScore(1)
-                && after.softScore(2) > before.softScore(2);
+                && after.softScore(1) > before.softScore(1);
     }
 
     @Override

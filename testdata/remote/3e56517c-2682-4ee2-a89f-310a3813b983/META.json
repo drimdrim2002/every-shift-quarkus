@@ -1,0 +1,25 @@
+{
+  "executionId": "3e56517c-2682-4ee2-a89f-310a3813b983",
+  "cloudRunExecution": "every-shift-job-wz7cb",
+  "project": "every-shift-api",
+  "region": "asia-northeast3",
+  "jobName": "every-shift-job",
+  "capturedAt": "2026-08-08",
+  "remoteWindowUtc": {
+    "started": "2026-08-08T04:18:11Z",
+    "completed": "2026-08-08T04:19:26Z"
+  },
+  "remoteScore": "[0]hard/[-480/0/-6301/0]soft",
+  "organization": "세브란스병원",
+  "firstDraftDate": "2026-03-01",
+  "draftLength": 31,
+  "employeeCount": 19,
+  "requirementsCount": 93,
+  "inputSha256OriginalBase64Payload": "86da68a7395e25968ca0dd4b9e277dd203c8d5ed03a8ca3b582d9f7b146092f3",
+  "inputSha256PrettyFile": "75595966063b9de4acb98e10cc9e9851325ef2eeb18d3ece8738c5636ab51afc",
+  "notes": [
+    "Captured from Cloud Run Job execution args (--input-data Base64).",
+    "Pretty-printed for local readability; content is equivalent JSON.",
+    "Remote solve wall time ~60s with prod spent-limit."
+  ]
+}

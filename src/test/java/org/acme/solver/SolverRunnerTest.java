@@ -40,8 +40,8 @@ public class SolverRunnerTest {
         assertNotNull(solution.getScore(), "Score should not be null");
 
         int expectedUndesiredSoftScore = calculateUndesiredSoftScore(solution);
-        assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(1),
-                "softScore(1) should match actual undesired penalty minutes from the solved schedule");
+        assertEquals(expectedUndesiredSoftScore, solution.getScore().softScore(0),
+                "softScore(0) should match actual undesired penalty minutes from the solved schedule");
 
 
         int fourConsecutiveNightViolations = countFourConsecutiveNightViolations(solution);

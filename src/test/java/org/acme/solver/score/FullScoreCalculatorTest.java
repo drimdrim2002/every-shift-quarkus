@@ -58,7 +58,8 @@ class FullScoreCalculatorTest {
 
         ScoreCalculationResult result = calculator.calculateWithBreakdown(problem, solution(problem));
 
-        assertEquals(RosterScore.of(-62, 0, 0, -4, 0), result.score());
+        // fairness(day/evening)는 soft[1]
+        assertEquals(RosterScore.of(-62, 0, -4, 0, 0), result.score());
         assertEquals(-1, result.contributionByConstraintId().get(ConstraintIds.REQUIRED_SKILL));
         assertEquals(-60, result.contributionByConstraintId().get(ConstraintIds.OVERLAP));
         assertEquals(-1, result.contributionByConstraintId().get(ConstraintIds.ONE_SHIFT_PER_DAY));
@@ -84,7 +85,7 @@ class FullScoreCalculatorTest {
 
     @ParameterizedTest
     @CsvSource({ "1919,-1", "1920,0", "1921,0" })
-    void 야간후_32시간_경계와_pinned_soft_포함을_평가한다(int restMinutes, int expectedSoft) {
+    void 야간후_32시간_경계와_pinned_hard_포함을_평가한다(int restMinutes, int expectedHard) {
         LocalDateTime nightEnd = BASE_DATE.atTime(8, 0);
         PlanningProblem problem = problem(
                 List.of(employee("E1")),
@@ -97,12 +98,12 @@ class FullScoreCalculatorTest {
 
         ScoreCalculationResult result = calculator.calculateWithBreakdown(problem, solution(problem));
 
-        assertEquals(expectedSoft,
-                result.scoreByConstraintId().getOrDefault(ConstraintIds.NIGHT_TO_DAY_REST, ZERO).softScore(0));
+        assertEquals(expectedHard,
+                result.scoreByConstraintId().getOrDefault(ConstraintIds.NIGHT_TO_DAY_REST, ZERO).hardScore());
     }
 
     @Test
-    void 야간후_32시간은_모든_D가_아니라_가장_이른_다음_D만_평가한다() {
+    void 야간후_32시간은_모든_D가_아니라_가장_이른_다음_D만_hard로_평가한다() {
         LocalDateTime nightEnd = BASE_DATE.atTime(8, 0);
         PlanningProblem problem = problem(
                 List.of(employee("E1")),
@@ -114,9 +115,10 @@ class FullScoreCalculatorTest {
 
         ScoreCalculationResult result = calculator.calculateWithBreakdown(problem, solution(problem));
 
-        assertEquals(-960, result.scoreByConstraintId().get(ConstraintIds.NIGHT_TO_DAY_REST).softScore(0));
+        assertEquals(-960, result.scoreByConstraintId().get(ConstraintIds.NIGHT_TO_DAY_REST).hardScore());
         assertEquals(1, result.contributions(ConstraintIds.NIGHT_TO_DAY_REST).size());
         assertEquals(List.of(0, 1), result.contributions(ConstraintIds.NIGHT_TO_DAY_REST).getFirst().shiftIndexes());
+        assertEquals(ScoreLevel.HARD, result.contributions(ConstraintIds.NIGHT_TO_DAY_REST).getFirst().level());
     }
 
     @ParameterizedTest
@@ -277,7 +279,7 @@ class FullScoreCalculatorTest {
 
         ScoreCalculationResult result = calculator.calculateWithBreakdown(problem, solution(problem));
 
-        assertEquals(-1920, result.scoreByConstraintId().get(ConstraintIds.UNDESIRED).softScore(1));
+        assertEquals(-1920, result.scoreByConstraintId().get(ConstraintIds.UNDESIRED).softScore(0));
         assertEquals(1, result.contributions(ConstraintIds.UNDESIRED).size());
         assertEquals(List.of(0), result.contributions(ConstraintIds.UNDESIRED).getFirst().shiftIndexes());
     }
@@ -297,7 +299,7 @@ class FullScoreCalculatorTest {
         ScoreCalculationResult result = calculator.calculateWithBreakdown(problem, solution(problem));
 
         assertEquals(expectedSoft,
-                result.scoreByConstraintId().getOrDefault(ConstraintIds.UNDESIRED, ZERO).softScore(1));
+                result.scoreByConstraintId().getOrDefault(ConstraintIds.UNDESIRED, ZERO).softScore(0));
     }
 
     @Test
@@ -312,7 +314,7 @@ class FullScoreCalculatorTest {
 
         ScoreCalculationResult result = calculator.calculateWithBreakdown(problem, solution(problem));
 
-        assertEquals(480, result.scoreByConstraintId().get(ConstraintIds.DESIRED).softScore(3));
+        assertEquals(480, result.scoreByConstraintId().get(ConstraintIds.DESIRED).softScore(2));
     }
 
     @Test
@@ -332,10 +334,10 @@ class FullScoreCalculatorTest {
 
         ScoreCalculationResult result = calculator.calculateWithBreakdown(problem, solution(problem));
 
-        assertEquals(-25, result.scoreByConstraintId().get(ConstraintIds.NIGHT_FAIRNESS).softScore(2));
-        assertEquals(-25, result.scoreByConstraintId().get(ConstraintIds.HOLIDAY_FAIRNESS).softScore(2));
-        assertEquals(-24, result.scoreByConstraintId().get(ConstraintIds.DAY_EVENING_FAIRNESS).softScore(2));
-        assertEquals(-74, result.score().softScore(2));
+        assertEquals(-25, result.scoreByConstraintId().get(ConstraintIds.NIGHT_FAIRNESS).softScore(1));
+        assertEquals(-25, result.scoreByConstraintId().get(ConstraintIds.HOLIDAY_FAIRNESS).softScore(1));
+        assertEquals(-24, result.scoreByConstraintId().get(ConstraintIds.DAY_EVENING_FAIRNESS).softScore(1));
+        assertEquals(-74, result.score().softScore(1));
     }
 
     @Test

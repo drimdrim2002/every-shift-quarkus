@@ -51,13 +51,13 @@ class SequentialHybridSolverEngineTest {
                 solution -> callbacks.add(solution.score()));
 
         SequentialHybridMetrics metrics = (SequentialHybridMetrics) result.metrics();
-        assertEquals(-5, result.score().softScore(2));
+        assertEquals(-5, result.score().softScore(1)); // fairness
         assertEquals(result.score(), secondInput.get().score());
         assertEquals(5L, result.evaluationCount());
         assertEquals(3L, metrics.stages().getFirst().evaluationBudget());
         assertEquals(2L, metrics.stages().getLast().evaluationBudget());
         assertEquals(0L, metrics.rollbackFailureCount());
-        assertEquals(List.of(RosterScore.of(0, 0, 0, -9, 0), RosterScore.of(0, 0, 0, -5, 0)), callbacks);
+        assertEquals(List.of(RosterScore.of(0, 0, -9, 0, 0), RosterScore.of(0, 0, -5, 0, 0)), callbacks);
         assertTrue(metrics.stages().getLast().inputScore().compareTo(metrics.stages().getFirst().outputScore()) == 0);
     }
 

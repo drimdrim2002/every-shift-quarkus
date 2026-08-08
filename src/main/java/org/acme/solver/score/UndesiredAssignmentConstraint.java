@@ -47,7 +47,7 @@ public final class UndesiredAssignmentConstraint implements ConstraintEvaluator 
                 long magnitude = Math.multiplyExact(
                         (long) ScoreSupport.durationMinutes(shift),
                         problem.employees().get(employeeIndex).offRequestPenaltyWeight());
-                collector.penalize(ConstraintIds.UNDESIRED, ScoreLevel.SOFT_1, magnitude,
+                collector.penalize(ConstraintIds.UNDESIRED, ScoreLevel.SOFT_0, magnitude,
                         List.of(employeeIndex), List.of(shiftIndex));
             }
         }

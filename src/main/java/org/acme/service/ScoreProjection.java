@@ -21,17 +21,18 @@ public final class ScoreProjection {
         Map<String, Object> fields = new LinkedHashMap<>();
         fields.put("hardScore", score.hardScore());
 
-        // 현재 1h/4s 구조에 존재하지 않는 과거 레벨은 기존 계약대로 0을 저장합니다.
+        // soft 순서: soft[0]=undesired, soft[1]=fairness, soft[2]=desired, soft[3]=예약(0).
+        // Night→Day 32h(NOD)는 hard로 이전되어 night32RestSoftScore는 하위 호환용 0입니다.
         fields.put("night48RestSoftScore", 0);
-        fields.put("night32RestSoftScore", score.softScore(0));
-        fields.put("undesiredSoftScore", score.softScore(1));
+        fields.put("night32RestSoftScore", 0);
+        fields.put("undesiredSoftScore", score.softScore(0));
         fields.put("threeConsecutiveNightSoftScore", 0);
-        fields.put("fairnessSoftScore", score.softScore(2));
-        fields.put("desiredSoftScore", score.softScore(3));
+        fields.put("fairnessSoftScore", score.softScore(1));
+        fields.put("desiredSoftScore", score.softScore(2));
 
         // 하위 호환 alias는 통합 형평성 레벨과 같은 값을 유지합니다.
-        fields.put("burdenFairnessSoftScore", score.softScore(2));
-        fields.put("fairSoftScore", score.softScore(2));
+        fields.put("burdenFairnessSoftScore", score.softScore(1));
+        fields.put("fairSoftScore", score.softScore(1));
         return Collections.unmodifiableMap(fields);
     }
 }

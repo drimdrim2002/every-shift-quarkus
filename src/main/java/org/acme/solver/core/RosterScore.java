@@ -17,6 +17,9 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
  *
  * <p>점수는 1개의 hard 레벨과 4개의 soft 레벨로 고정되며, 앞 레벨이
  * 뒤 레벨보다 항상 우선하는 사전식 순서로 비교합니다.</p>
+ *
+ * <p>soft 의미(현재): soft[0]=undesired, soft[1]=fairness, soft[2]=desired, soft[3]=예약.
+ * Night→Day 32h(NOD) 위반은 hard에 포함됩니다.</p>
  */
 @RegisterForReflection
 public final class RosterScore implements Comparable<RosterScore> {

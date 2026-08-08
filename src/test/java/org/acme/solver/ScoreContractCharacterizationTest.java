@@ -21,13 +21,13 @@ class ScoreContractCharacterizationTest {
         RosterScore infeasibleBestSoft = score(-1, 10_000, 10_000, 10_000, 10_000);
         assertTrue(feasibleWorstSoft.compareTo(infeasibleBestSoft) > 0, "hard[0]이 모든 soft 레벨보다 우선해야 한다");
 
-        assertHigherPriorityWins(0, "soft[0] 야간 후 32시간 휴식");
-        assertHigherPriorityWins(1, "soft[1] 기피일 배정");
-        assertHigherPriorityWins(2, "soft[2] 통합 형평성");
+        assertHigherPriorityWins(0, "soft[0] 기피일 배정");
+        assertHigherPriorityWins(1, "soft[1] 통합 형평성");
+        assertHigherPriorityWins(2, "soft[2] 희망일 배정");
 
-        RosterScore betterDesired = score(0, 0, 0, 0, 1);
+        RosterScore betterDesired = score(0, 0, 0, 1, 0);
         RosterScore worseDesired = score(0, 0, 0, 0, 0);
-        assertTrue(betterDesired.compareTo(worseDesired) > 0, "soft[3] 희망일 배정은 값이 클수록 우수해야 한다");
+        assertTrue(betterDesired.compareTo(worseDesired) > 0, "soft[2] 희망일 배정은 값이 클수록 우수해야 한다");
     }
 
     @Test

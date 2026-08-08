@@ -9,7 +9,7 @@ import java.util.Map;
 import org.acme.solver.core.PlanningProblem;
 
 /**
- * soft[2]의 야간·휴일·주/저녁 세 Constraint Streams를 동일한 제곱 산식으로 평가합니다.
+ * soft[1]의 야간·휴일·주/저녁 세 제약을 동일한 제곱 산식으로 평가합니다.
  */
 public final class FairnessConstraint implements ConstraintEvaluator {
 
@@ -49,7 +49,7 @@ public final class FairnessConstraint implements ConstraintEvaluator {
         for (int shiftIndex : nights) {
             burden = Math.addExact(burden, problem.shifts().get(shiftIndex).nightBurdenScore());
         }
-        collector.penalize(ConstraintIds.NIGHT_FAIRNESS, ScoreLevel.SOFT_2,
+        collector.penalize(ConstraintIds.NIGHT_FAIRNESS, ScoreLevel.SOFT_1,
                 Math.multiplyExact(burden, burden), List.of(employeeIndex), nights);
     }
 
@@ -66,7 +66,7 @@ public final class FairnessConstraint implements ConstraintEvaluator {
             }
         }
         if (!burdenShifts.isEmpty()) {
-            collector.penalize(ConstraintIds.HOLIDAY_FAIRNESS, ScoreLevel.SOFT_2,
+            collector.penalize(ConstraintIds.HOLIDAY_FAIRNESS, ScoreLevel.SOFT_1,
                     Math.multiplyExact(burden, burden), List.of(employeeIndex), burdenShifts);
         }
     }
@@ -85,7 +85,7 @@ public final class FairnessConstraint implements ConstraintEvaluator {
             long count = entry.getValue().size();
             long weight = RosterIndex.SHIFT_TYPE_EVENING.equals(entry.getKey()) ? 5L : 1L;
             long magnitude = Math.multiplyExact(weight, Math.multiplyExact(count, count));
-            collector.penalize(ConstraintIds.DAY_EVENING_FAIRNESS, ScoreLevel.SOFT_2,
+            collector.penalize(ConstraintIds.DAY_EVENING_FAIRNESS, ScoreLevel.SOFT_1,
                     magnitude, List.of(employeeIndex), entry.getValue());
         }
     }

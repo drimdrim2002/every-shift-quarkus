@@ -17,11 +17,14 @@ import org.slf4j.Logger;
  * 야간 하드 제약 검증을 수행합니다.
  * - 4연속 Night 근무 금지
  * - 직원별 실제 시작월 기준 Night 근무 월 15회 이하
+ * - Night 종료 후 다음 Day 시작까지 최소 32시간 휴식 (NOD/짧은 ND 금지)
  */
 public class NightHardConstraintValidator {
 
     private static final int MAX_MONTHLY_NIGHT_SHIFTS = 15;
+    private static final int MINIMUM_NIGHT_TO_DAY_REST_MINUTES = 32 * 60;
     private static final String SHIFT_TYPE_NIGHT = "N";
+    private static final String SHIFT_TYPE_DAY = "D";
 
     /**
      * 야간 관련 하드 제약을 검증합니다.
@@ -39,6 +42,7 @@ public class NightHardConstraintValidator {
 
             validateNoFourConsecutiveNightShifts(employee, shifts);
             validateMonthlyNightShiftLimit(employee, shifts);
+            validateNightToDayRest(employee, shifts);
         }
     }
 
@@ -88,8 +92,45 @@ public class NightHardConstraintValidator {
         }
     }
 
+    /**
+     * Night 종료 후 가장 이른 Day 시작까지 rest &lt; 32시간이면 hard 위반입니다.
+     */
+    private void validateNightToDayRest(Employee employee, List<Shift> shifts) {
+        List<Shift> nights = shifts.stream()
+                .filter(this::isNightShift)
+                .sorted(Comparator.comparing(Shift::getEnd))
+                .collect(Collectors.toList());
+        List<Shift> days = shifts.stream()
+                .filter(this::isDayShift)
+                .sorted(Comparator.comparing(Shift::getStart))
+                .collect(Collectors.toList());
+
+        for (Shift night : nights) {
+            Shift nextDay = null;
+            for (Shift day : days) {
+                if (day.getStart().isAfter(night.getEnd())
+                        && (nextDay == null || day.getStart().isBefore(nextDay.getStart()))) {
+                    nextDay = day;
+                }
+            }
+            if (nextDay == null) {
+                continue;
+            }
+            long restMinutes = java.time.Duration.between(night.getEnd(), nextDay.getStart()).toMinutes();
+            if (restMinutes < MINIMUM_NIGHT_TO_DAY_REST_MINUTES) {
+                throw new ValidationException(
+                        "Employee '%s' violates night-to-day-32h-rest: nightEnd=%s, dayStart=%s, restMinutes=%d",
+                        employee.getName(), night.getEnd(), nextDay.getStart(), restMinutes);
+            }
+        }
+    }
+
     private boolean isNightShift(Shift shift) {
         return SHIFT_TYPE_NIGHT.equals(normalizeShiftCode(shift));
+    }
+
+    private boolean isDayShift(Shift shift) {
+        return SHIFT_TYPE_DAY.equals(normalizeShiftCode(shift));
     }
 
     private String normalizeShiftCode(Shift shift) {

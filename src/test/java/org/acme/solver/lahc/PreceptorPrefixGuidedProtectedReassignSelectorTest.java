@@ -26,10 +26,11 @@ class PreceptorPrefixGuidedProtectedReassignSelectorTest {
         List<PreceptorPrefixGuidedProtectedReassignSelector.Candidate> candidates =
                 selector.candidates(problem, new SearchState(problem, solution));
 
+        // soft[0]=undesired → shift0 priority 0; soft[1]=fairness 기여 가능 → shift1 priority 1
         assertEquals(List.of(
-                new PreceptorPrefixGuidedProtectedReassignSelector.Candidate(0, 1, 1),
-                new PreceptorPrefixGuidedProtectedReassignSelector.Candidate(1, 1, 2)), candidates);
-        assertEquals(new PreceptorPrefixGuidedProtectedReassignSelector.Metrics(1L, 2L, 0L, 1L),
+                new PreceptorPrefixGuidedProtectedReassignSelector.Candidate(0, 1, 0),
+                new PreceptorPrefixGuidedProtectedReassignSelector.Candidate(1, 1, 1)), candidates);
+        assertEquals(new PreceptorPrefixGuidedProtectedReassignSelector.Metrics(1L, 2L, 1L, 1L),
                 selector.metrics());
     }
 

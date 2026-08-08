@@ -49,7 +49,7 @@ class NightHardConstraintValidatorTest {
     }
 
     @Test
-    void validate_allowsDayShiftStartsWithin32HoursAfterNightShiftBecauseItIsSoft() {
+    void validate_rejectsDayShiftStartsWithin32HoursAfterNightShiftAsHard() {
         Employee employee = employee("emp-1", "테스터");
 
         Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
@@ -57,6 +57,20 @@ class NightHardConstraintValidatorTest {
                 List.of(
                         shift(1L, "N", LocalDateTime.of(2026, 2, 1, 0, 0), LocalDateTime.of(2026, 2, 1, 8, 0), employee),
                         shift(2L, "D", LocalDateTime.of(2026, 2, 2, 8, 0), LocalDateTime.of(2026, 2, 2, 16, 0), employee)));
+
+        assertThrows(ValidationException.class,
+                () -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
+    }
+
+    @Test
+    void validate_allowsDayShiftAtLeast32HoursAfterNightShift() {
+        Employee employee = employee("emp-1", "테스터");
+
+        Map<Employee, List<Shift>> shiftsByEmployee = Map.of(
+                employee,
+                List.of(
+                        shift(1L, "N", LocalDateTime.of(2026, 2, 1, 0, 0), LocalDateTime.of(2026, 2, 1, 8, 0), employee),
+                        shift(2L, "D", LocalDateTime.of(2026, 2, 2, 16, 0), LocalDateTime.of(2026, 2, 3, 0, 0), employee)));
 
         assertDoesNotThrow(() -> validator.validate(shiftsByEmployee, LoggerFactory.getLogger(getClass())));
     }

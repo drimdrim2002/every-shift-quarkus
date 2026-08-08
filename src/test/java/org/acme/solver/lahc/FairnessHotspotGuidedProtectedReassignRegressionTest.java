@@ -44,9 +44,8 @@ class FairnessHotspotGuidedProtectedReassignRegressionTest {
         FairnessRestrictedLocalSearchMetrics metrics = (FairnessRestrictedLocalSearchMetrics) result.metrics();
 
         assertEquals(0, result.score().hardScore());
-        assertEquals(incumbent.score().softScore(0), result.score().softScore(0));
-        assertEquals(incumbent.score().softScore(1), result.score().softScore(1));
-        assertTrue(result.score().softScore(2) > incumbent.score().softScore(2), result::toString);
+        assertEquals(incumbent.score().softScore(0), result.score().softScore(0)); // undesired
+        assertTrue(result.score().softScore(1) > incumbent.score().softScore(1), result::toString); // fairness
         assertTrue(metrics.selectorMetrics().emittedCandidates() <= 256L, metrics::toString);
         assertEquals(0L, metrics.scoreMismatchFailures());
         assertEquals(0L, metrics.stateCorruptionFailures());

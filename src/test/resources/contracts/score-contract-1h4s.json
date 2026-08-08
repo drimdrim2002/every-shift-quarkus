@@ -4,16 +4,16 @@
     "hard_levels": 1,
     "soft_levels": 4,
     "soft_order": [
-      "night32_rest",
       "undesired",
       "fairness",
-      "desired"
+      "desired",
+      "reserved"
     ]
   },
   "firestore": {
     "hardScore": 0,
     "night48RestSoftScore": 0,
-    "night32RestSoftScore": -30,
+    "night32RestSoftScore": 0,
     "undesiredSoftScore": -120,
     "threeConsecutiveNightSoftScore": 0,
     "fairnessSoftScore": -5409,
@@ -29,7 +29,7 @@
     "score": {
       "hard_score": 0,
       "night48_rest_soft_score": 0,
-      "night32_rest_soft_score": -30,
+      "night32_rest_soft_score": 0,
       "undesired_soft_score": -120,
       "three_consecutive_night_soft_score": 0,
       "fairness_soft_score": -5409,

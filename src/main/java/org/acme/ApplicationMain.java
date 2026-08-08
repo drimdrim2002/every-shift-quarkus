@@ -12,6 +12,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 
 @QuarkusMain
@@ -44,8 +46,10 @@ public class ApplicationMain implements QuarkusApplication {
             String jsonInput = "{}"; // 기본값
             String executionId = null; // 상태 관리를 위한 execution ID
 
-            // Args 파싱: ["--execution-id", "ID", "--input-data", "BASE64문자열..."]
-            // 또는 이전 버전 호환성: ["--input-data", "BASE64문자열..."]
+            // Args 파싱:
+            //   --execution-id ID
+            //   --input-data BASE64문자열
+            //   --input-file /path/to/request.json  (로컬 재현용)
             for (int i = 0; i < args.length; i++) {
                 if ("--execution-id".equals(args[i]) && i + 1 < args.length) {
                     executionId = args[i + 1];
@@ -61,6 +65,17 @@ public class ApplicationMain implements QuarkusApplication {
                         LOG.info(">>> Data received successfully (length: " + jsonInput.length() + ")");
                     } catch (IllegalArgumentException e) {
                         LOG.error(">>> Base64 decoding failed", e);
+                    }
+                    i++;
+                } else if ("--input-file".equals(args[i]) && i + 1 < args.length) {
+                    Path inputPath = Path.of(args[i + 1]);
+                    try {
+                        jsonInput = Files.readString(inputPath, StandardCharsets.UTF_8);
+                        LOG.info(">>> Data loaded from file: path=" + inputPath.toAbsolutePath()
+                                + ", length=" + jsonInput.length());
+                    } catch (Exception e) {
+                        LOG.error(">>> Failed to read input file: " + inputPath, e);
+                        throw e;
                     }
                     i++;
                 }

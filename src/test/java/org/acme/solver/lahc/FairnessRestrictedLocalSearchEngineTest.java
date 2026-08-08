@@ -50,25 +50,25 @@ class FairnessRestrictedLocalSearchEngineTest {
         FairnessRestrictedLocalSearchMetrics metrics =
                 (FairnessRestrictedLocalSearchMetrics) result.metrics();
         assertEquals(0, result.score().hardScore());
-        assertEquals(0, result.score().softScore(0));
-        assertEquals(0, result.score().softScore(1));
-        assertEquals(-5, result.score().softScore(2));
+        assertEquals(0, result.score().softScore(0)); // undesired
+        assertEquals(-5, result.score().softScore(1)); // fairness
         assertEquals(1L, metrics.acceptedCandidates());
         assertEquals(0L, metrics.stateCorruptionFailures());
         assertEquals(full.calculateScore(problem, result.bestSolution()), result.score());
     }
 
     @Test
-    void higherPriority_악화는_soft2_개선이_있어도_거절한다() {
-        RosterScore current = RosterScore.of(0, 0, 0, -9, 0);
+    void higherPriority_악화는_fairness_개선이_있어도_거절한다() {
+        // soft: undesired / fairness / desired / reserved
+        RosterScore current = RosterScore.of(0, 0, -9, 0, 0);
         assertTrue(FairnessRestrictedLocalSearchEngine.isAllowedFairnessImprovement(
-                current, RosterScore.of(0, 0, 0, -5, -100)));
+                current, RosterScore.of(0, 0, -5, -100, 0)));
         assertFalse(FairnessRestrictedLocalSearchEngine.isAllowedFairnessImprovement(
-                current, RosterScore.of(-1, 0, 0, -1, 0)));
+                current, RosterScore.of(-1, 0, -1, 0, 0)));
         assertFalse(FairnessRestrictedLocalSearchEngine.isAllowedFairnessImprovement(
-                current, RosterScore.of(0, -1, 0, -1, 0)));
+                current, RosterScore.of(0, -1, -1, 0, 0)));
         assertFalse(FairnessRestrictedLocalSearchEngine.isAllowedFairnessImprovement(
-                current, RosterScore.of(0, 0, -1, -1, 0)));
+                current, RosterScore.of(0, 0, -9, 100, 0))); // fairness not improved
     }
 
     @Test

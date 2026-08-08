@@ -2,6 +2,9 @@ package org.acme.solver.score;
 
 /**
  * 1 hard + 4 soft 점수 벡터의 위치입니다.
+ *
+ * <p>soft 의미: SOFT_0=undesired, SOFT_1=fairness, SOFT_2=desired, SOFT_3=예약(미사용).
+ * Night→Day 32h(NOD)는 {@link ScoreLevel#HARD}입니다.</p>
  */
 public enum ScoreLevel {
     HARD(-1),

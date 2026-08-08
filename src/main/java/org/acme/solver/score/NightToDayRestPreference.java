@@ -46,7 +46,8 @@ public final class NightToDayRestPreference implements ConstraintEvaluator {
                 if (nextDayIndex >= 0) {
                     int rest = ScoreSupport.minutesBetween(night.end(), nextDayStart);
                     if (rest < MINIMUM_REST_MINUTES) {
-                        collector.penalize(ConstraintIds.NIGHT_TO_DAY_REST, ScoreLevel.SOFT_0,
+                        // 정책: Night→Day 32시간 미만(NOD/짧은 ND)은 hard 위반
+                        collector.penalize(ConstraintIds.NIGHT_TO_DAY_REST, ScoreLevel.HARD,
                                 MINIMUM_REST_MINUTES - rest,
                                 List.of(employeeIndex), List.of(nightIndex, nextDayIndex));
                     }

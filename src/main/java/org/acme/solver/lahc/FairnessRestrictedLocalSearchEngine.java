@@ -180,12 +180,14 @@ public final class FairnessRestrictedLocalSearchEngine implements SolverEngine {
                 fullVerifications, initialFeasibilityEvaluations, selectorMetrics(), improvements);
     }
 
-    /** hard, soft[0], soft[1] 비열화 없이 soft[2]가 엄격히 좋아질 때만 true입니다. */
+    /**
+     * hard·soft[0](undesired) 비열화 없이 soft[1](fairness)이 엄격히 좋아질 때만 true입니다.
+     * soft[2](desired)는 보호하지 않습니다.
+     */
     static boolean isAllowedFairnessImprovement(RosterScore current, RosterScore candidate) {
         return candidate.hardScore() >= current.hardScore()
                 && candidate.softScore(0) >= current.softScore(0)
-                && candidate.softScore(1) >= current.softScore(1)
-                && candidate.softScore(2) > current.softScore(2);
+                && candidate.softScore(1) > current.softScore(1);
     }
 
     private RosterSolution initial(PlanningProblem problem, SolveOptions options) {

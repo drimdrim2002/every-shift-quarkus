@@ -707,10 +707,9 @@ public final class InitialSolutionBuilder {
 
         private PartialScore scoreEmployee(int employeeIndex, List<Integer> shifts) {
             long hardPenalty = 0L;
-            long soft0Penalty = 0L;
-            long soft1Penalty = 0L;
-            long soft2Penalty = 0L;
-            long soft3Reward = 0L;
+            long soft0Penalty = 0L; // undesired
+            long soft1Penalty = 0L; // fairness
+            long soft2Reward = 0L; // desired
             PlanningProblem.EmployeeData employee = problem.employees().get(employeeIndex);
 
             Map<LocalDate, Integer> nightByLogicalDate = new HashMap<>();
@@ -736,11 +735,13 @@ public final class InitialSolutionBuilder {
                 }
                 if (!shift.explicitlyPinned()
                         && matchesAvailability(shift, undesiredDates.get(employeeIndex))) {
-                    soft1Penalty = Math.addExact(soft1Penalty,
+                    // soft[0] = undesired
+                    soft0Penalty = Math.addExact(soft0Penalty,
                             Math.multiplyExact(durationMinutes(shift), employee.offRequestPenaltyWeight()));
                 }
                 if (desiredDates.get(employeeIndex).contains(shift.start().toLocalDate())) {
-                    soft3Reward = Math.addExact(soft3Reward, durationMinutes(shift));
+                    // soft[2] = desired
+                    soft2Reward = Math.addExact(soft2Reward, durationMinutes(shift));
                 }
             }
 
@@ -794,24 +795,26 @@ public final class InitialSolutionBuilder {
                 if (nextDayStart != null) {
                     long rest = minutesBetween(night.end(), nextDayStart);
                     if (rest < NIGHT_TO_DAY_REST_MINUTES) {
-                        soft0Penalty = Math.addExact(soft0Penalty, NIGHT_TO_DAY_REST_MINUTES - rest);
+                        // Night→Day 32h 미만은 hard (NOD 정책)
+                        hardPenalty = Math.addExact(hardPenalty, NIGHT_TO_DAY_REST_MINUTES - rest);
                     }
                 }
             }
 
-            soft2Penalty = Math.addExact(soft2Penalty, Math.multiplyExact(nightBurden, nightBurden));
-            soft2Penalty = Math.addExact(soft2Penalty, Math.multiplyExact(holidayBurden, holidayBurden));
+            // soft[1] = fairness
+            soft1Penalty = Math.addExact(soft1Penalty, Math.multiplyExact(nightBurden, nightBurden));
+            soft1Penalty = Math.addExact(soft1Penalty, Math.multiplyExact(holidayBurden, holidayBurden));
             for (var entry : nonNightCountByType.entrySet()) {
                 long weight = RosterIndex.SHIFT_TYPE_EVENING.equals(entry.getKey()) ? 5L : 1L;
-                soft2Penalty = Math.addExact(soft2Penalty,
+                soft1Penalty = Math.addExact(soft1Penalty,
                         Math.multiplyExact(weight, Math.multiplyExact(entry.getValue(), entry.getValue())));
             }
             return new PartialScore(
                     Math.negateExact(hardPenalty),
                     Math.negateExact(soft0Penalty),
                     Math.negateExact(soft1Penalty),
-                    Math.negateExact(soft2Penalty),
-                    soft3Reward);
+                    soft2Reward,
+                    0L);
         }
 
         private void sort(List<Integer> shifts) {

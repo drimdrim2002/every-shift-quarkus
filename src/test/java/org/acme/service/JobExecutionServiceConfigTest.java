@@ -42,13 +42,14 @@ class JobExecutionServiceConfigTest {
 
     @Test
     void extractScoreFieldsPreservesCurrentBusinessAndLegacyAliases() {
-        RosterScore score = RosterScore.of(0, -30, -120, -5409, 240);
+        // soft[0]=undesired, soft[1]=fairness, soft[2]=desired, soft[3]=reserved
+        RosterScore score = RosterScore.of(0, -120, -5409, 240, 0);
 
         Map<String, Object> fields = JobExecutionService.extractScoreFields(score);
 
         assertEquals(0, fields.get("hardScore"));
         assertEquals(0, fields.get("night48RestSoftScore"));
-        assertEquals(-30, fields.get("night32RestSoftScore"));
+        assertEquals(0, fields.get("night32RestSoftScore")); // NOD는 hard로 이전
         assertEquals(-120, fields.get("undesiredSoftScore"));
         assertEquals(0, fields.get("threeConsecutiveNightSoftScore"));
         assertEquals(-5409, fields.get("fairnessSoftScore"));

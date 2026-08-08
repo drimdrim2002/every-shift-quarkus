@@ -46,8 +46,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class SeededMoveSelectorTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().findAndRegisterModules();
+    /** soft 순서: undesired / fairness / desired / reserved (NOD는 hard). */
     private static final RosterScore PREVIOUS_PRECEPTOR_10K =
-            RosterScore.of(0, -960, -3840, -6163, 0);
+            RosterScore.of(0, -3840, -6503, 0, 0);
 
     @Test
     void selector_10000회는_cross_slot_relation_move를_생성하고_fixed_seed_sequence가_재현된다()
