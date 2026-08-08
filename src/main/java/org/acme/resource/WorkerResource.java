@@ -60,13 +60,15 @@ public class WorkerResource {
         }
 
         try {
-            // Solver 실행 (Incremental)
+            // Solver 실행 (Incremental multi-pass)
+            // 기본: 회차(패스) 종료 시 전역 best 만 중간 저장 (save-on-pass-end).
+            // 엔진 내부 best 리스너 저장은 solver.incremental.save-on-inner-best=false 로 기본 off.
             EmployeeSchedule bestSolution = solverRunner.solveIncremental(
                     requestDto,
                     executionId,
-                    (intermediateSolution) -> {
+                    (passEndSolution) -> {
                         if (isNewExecution) {
-                            jobExecutionService.saveIntermediateResult(executionId, intermediateSolution);
+                            jobExecutionService.saveIntermediateResult(executionId, passEndSolution);
                         }
                     });
 

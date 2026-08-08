@@ -85,9 +85,14 @@ Location: `src/main/java/org/acme/solver/algorithm/EmployeeSchedulingConstraintP
 
 ### Solver Configuration
 Located in `application.properties` under `solver.*`:
-- **Prod**: 60s spent limit, 4 threads, reproducible with random seed 42
-- **Dev profile**: 10s spent limit
-- **Test profile**: 2s spent limit for quick test execution
+- **Prod one-shot**: `solver.termination.spent-limit=60` (단일 `solve()` 경로)
+- **Prod incremental multi-pass** (`solver.incremental.*`, Job/`WorkerResource` 기본):
+  - 패스당 60초 × 최대 6회, `min-iterations=1` (1회차 hard≥0이면 즉시 종료)
+  - hard&lt;0이면 상한까지 재시도, 비개선∧hard≥0이면 종료
+  - 중간 저장은 회차 종료 시 전역 best 1회 (`save-on-pass-end=true`, `save-on-inner-best=false`)
+  - wall-clock cap: `max-total-minutes=10` (Cloud Run Job `--task-timeout 900s` ≥ 여유)
+- **Dev profile**: short pass (10s × max 3)
+- **Test profile**: incremental off (1-shot 회귀 보호), multi-pass는 전용 단위 테스트
 
 ## Package Structure
 
